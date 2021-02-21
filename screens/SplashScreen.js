@@ -1,32 +1,49 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Button, StyleSheet, Dimensions, Image, TouchableOpacity, StatusBar } from 'react-native';
 import { Colors } from '../styles/Colors';
-import LinearGradient from 'react-native-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { Col } from 'native-base';
+import * as Animatable from 'react-native-animatable';
 
-const SplashScreen = () => {
+const SplashScreen = ({navigation}) => {
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
+            <StatusBar backgroundColor={Colors.lightGreen} barStyle="dark-content"/>
+            <Animatable.View 
+                style={styles.header}
+                animation="bounceIn"
+                duration={1500}
+            >
                 <Image 
                     source={require('../assets/logo.png')} 
                     style={styles.logo}
                     resizeMode="stretch"
                 />
-            </View>
-            <View style={styles.footer}>
+                <Text style={styles.textHeader}>Fuelr</Text>
+            </Animatable.View>
+            <Animatable.View 
+                style={styles.footer}
+                animation="fadeInUpBig"
+            >
                 <Text style={styles.title}>Getting the lowest price fuel for you!</Text>
                 <Text style={styles.text}>Sign in with account</Text>
-                <TouchableOpacity onPress={alert('Click')}>
-                    <LinearGradient
-                        colors={['#08d4c4', '#01ab9d']}
-                        style={styles.signIn}
-                    >
-                        <Text style={styles.textSign}>Get Started</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
-            </View>
+                <View style={styles.button}>
+                    <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
+                        <LinearGradient
+                            colors={[Colors.midGreen, Colors.green]}
+                            style={styles.signIn}
+                        >
+                            <Text style={styles.textSign}>Get Started</Text>
+                            <MaterialIcons
+                                name="navigate-next"
+                                color="#fff"
+                                size={20}
+                            >
+                            </MaterialIcons>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+            </Animatable.View>
         </View>
     );
 };
@@ -46,6 +63,13 @@ const styles = StyleSheet.create({
         flex: 2,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+
+    textHeader: {
+        fontSize: 50,
+        fontWeight: 'bold',
+        color: Colors.green,
+        marginTop: 10
     },
 
     footer: {
@@ -70,7 +94,8 @@ const styles = StyleSheet.create({
 
     text: {
         color: 'grey',
-        marginTop: 5
+        marginTop: 5,
+        fontSize: 20
     },
 
     button: {
@@ -82,8 +107,9 @@ const styles = StyleSheet.create({
         width: 150,
         height: 40,
         justifyContent: 'center',
-        borderRadius: 50,
-        flexDirection: 'row'
+        borderRadius: 20,
+        flexDirection: 'row',
+        alignItems: 'center'
     },
 
     textSign: {
