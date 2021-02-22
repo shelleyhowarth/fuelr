@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "458991083503",
+    "firebase_url": "https://fuelr-22721.firebaseio.com",
+    "project_id": "fuelr-22721",
+    "storage_bucket": "fuelr-22721.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458991083503:android:3abd191991f39b265fa01a",
+        "android_client_info": {
+          "package_name": "com.shelley.fuelr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "458991083503-rr8ejgmg7ofe1reatbodd8npeoapm3sp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBK2vvaKarTd2Hhtqryg8h86eWYU5L70Lo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "458991083503-rr8ejgmg7ofe1reatbodd8npeoapm3sp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "458991083503-mo4oj6lulmu9qo6bafedsh8a941kalhp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.shelley.fuelr"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
