@@ -5,7 +5,7 @@ import { createAppContainer } from "react-navigation";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome } from '@expo/vector-icons';
-import RootStackScreen from './screens/RootStackScreen';
+import AuthStackScreen from './screens/AuthStackScreen';
 import { NavigationContainer } from '@react-navigation/native';
 
 
@@ -19,7 +19,7 @@ export default class App extends React.Component {
   render() {
     return (
       <NavigationContainer>
-        <RootStackScreen></RootStackScreen> 
+        <AuthStackScreen></AuthStackScreen> 
       </NavigationContainer>
     )
   }
