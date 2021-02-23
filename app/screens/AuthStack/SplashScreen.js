@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, Dimensions, Image, TouchableOpacity, StatusBar } from 'react-native';
-import { Colors } from '../styles/Colors';
+import { Colors } from '../../../styles/Colors';
+
 import { LinearGradient } from 'expo-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Animatable from 'react-native-animatable';
@@ -15,7 +16,7 @@ const SplashScreen = ({navigation}) => {
                 duration={1500}
             >
                 <Image 
-                    source={require('../assets/logo.png')} 
+                    source={require('../../../assets/logo.png')} 
                     style={styles.logo}
                     resizeMode="stretch"
                 />
