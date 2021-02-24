@@ -2,7 +2,8 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MapScreen from './MapScreen';
 import AccountScreen from './AccountScreen';
-
+import * as firebase from "firebase";
+import "firebase/firestore";
 const Tab = createBottomTabNavigator();
 
 

@@ -28,16 +28,14 @@ function App() {
     console.log('Connected with Firebase')
     firebase.initializeApp(firebaseConfig);
   }
-
   
   return (
     <NavigationContainer>
-      { firebase.auth().currentUser ? <AppStackScreen/> : <AuthStackScreen/> }
+      <AuthStackScreen/> 
     </NavigationContainer>
   )
   
 }
-
 
 const styles = StyleSheet.create({
   container: {

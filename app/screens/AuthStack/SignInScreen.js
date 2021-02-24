@@ -54,7 +54,7 @@ const SignInScreen = ({navigation}) => {
         () => {
          firebase.auth().onAuthStateChanged((user) => {
            if (user) {
-             navigation.replace('Home');
+             console.log("Auth state changed")
            }
          });
        }

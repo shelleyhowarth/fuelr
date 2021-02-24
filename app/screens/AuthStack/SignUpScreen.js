@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity, Dimensions, TextInput, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity, Dimensions, TextInput, StatusBar, Alert } from 'react-native';
 import { Colors } from '../../../styles/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import * as Animatable from 'react-native-animatable';
-import { registration } from '../../firebase/FirebaseMethods';
+import { registration, checkUsernames } from '../../firebase/FirebaseMethods';
+import { ThemeProvider } from '@react-navigation/native';
 
 
 const SignUpScreen = ({navigation}) => {
@@ -19,7 +20,12 @@ const SignUpScreen = ({navigation}) => {
         handleNameChange: false,
         handleUsernameChange: false,
         secureTextEntry: true,
-        checkSecureTextEntry: true 
+        checkSecureTextEntry: true, 
+        nameError: null,
+        usernameError: null,
+        passwordError: null,
+        confirmPasswordError: null,
+        emailError: null
     });
 
     const emailInputChange = (value) => {
@@ -27,12 +33,13 @@ const SignUpScreen = ({navigation}) => {
             setData({
                 ...data,
                 email: value,
-                handleEmailChange: true
+                handleEmailChange: true,
+                emailError: null
             });
         } else {
             setData({
                 ...data,
-                email: value,
+                emailError: "Email required",
                 handleEmailChange: false
             });
         }
@@ -43,29 +50,43 @@ const SignUpScreen = ({navigation}) => {
             setData({
                 ...data,
                 name: value,
-                handleNameChange: true
+                handleNameChange: true,
+                nameError: null
             });
         } else {
             setData({
                 ...data,
                 name: value,
-                handleNameChange: false
+                handleNameChange: false,
+                nameError: "Name required"
             });
         }
     }
 
     const usernameInputChange = (value) => {
-        if(value.length !== 0 ) {
+
+        if(value.length !== 0 && checkUsernames(value)) {
             setData({
                 ...data,
                 username: value,
-                handleUsernameChange: true
+                handleUsernameChange: true,
+                usernameError: null
             });
-        } else {
+            
+        } else if(value.length == 0) {
             setData({
                 ...data,
                 username: value,
-                handleUsernameChange: false
+                handleUsernameChange: false,
+                usernameError: "Username required"
+            });
+
+        } else if(!checkUsernames(value)) {
+            setData({
+                ...data,
+                username: value,
+                handleUsernameChange: false,
+                usernameError: "Username already taken"
             });
         }
     }
@@ -124,6 +145,11 @@ const SignUpScreen = ({navigation}) => {
                         autoCapitalize="words"
                         onChangeText = {(value) => nameInputChange(value)}
                     />
+
+                    {data.nameError ? 
+                        <Text style={{color: 'red'}}> { nameError } </Text>
+                    : null }
+
                     {data.handleNameChange ? 
                     <Animatable.View
                         animation="bounceIn"
@@ -151,6 +177,11 @@ const SignUpScreen = ({navigation}) => {
                         autoCapitalize="none"
                         onChangeText = {(value) => usernameInputChange(value)}
                     />
+
+                    {data.usernameError ?
+                        <Text style={{color: 'red'}}> {usernameError} </Text>
+                    : null}
+
                     {data.handleUsernameChange ? 
                     <Animatable.View
                         animation="bounceIn"
@@ -178,6 +209,11 @@ const SignUpScreen = ({navigation}) => {
                         autoCapitalize="none"
                         onChangeText = {(value) => emailInputChange(value)}
                     />
+
+                    {data.emailError ? 
+                    <Text style={{color: 'red'}}>Email required</Text>
+                    : null}
+
                     {data.handleEmailChange ? 
                     <Animatable.View
                         animation="bounceIn"
@@ -189,6 +225,7 @@ const SignUpScreen = ({navigation}) => {
                         />
                     </Animatable.View>
                     : null}
+
                 </View>
                 <Text style={[styles.textFooter, {
                     marginTop: 30
@@ -261,8 +298,12 @@ const SignUpScreen = ({navigation}) => {
                 <View style={styles.button}>
                     <TouchableOpacity
                         onPress={() => {
-                            registration(data.email, data.password, data.name, data.username);
-                            console.log(data.password);
+                            if(data.password == data.confirmPassword) {
+                                registration(data.email, data.password, data.name, data.username);
+                                console.log(data.password);
+                            } else {
+                                Alert.alert("Passwords do not match")
+                            }
                         }}
                         style={styles.signUp}
                     >
