@@ -6,7 +6,7 @@ import AccountScreen from './AccountScreen';
 const Tab = createBottomTabNavigator();
 
 
-const AuthStackScreen = () => {
+const AppStackScreen = () => {
 
     return (
         <Tab.Navigator>
@@ -17,4 +17,4 @@ const AuthStackScreen = () => {
 
 }
 
-export default AuthStackScreen;
+export default AppStackScreen;

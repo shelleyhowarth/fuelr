@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import * as Animatable from 'react-native-animatable';
+import { registration } from '../../firebase/FirebaseMethods';
 
 
 const SignUpScreen = ({navigation}) => {
@@ -259,7 +260,10 @@ const SignUpScreen = ({navigation}) => {
                 </View>
                 <View style={styles.button}>
                     <TouchableOpacity
-                        onPress={() => navigation.goBack()}
+                        onPress={() => {
+                            registration(data.email, data.password, data.name, data.username);
+                            console.log(data.password);
+                        }}
                         style={styles.signUp}
                     >
                         <LinearGradient

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Dimensions, TextInput, StatusBar } from 'react-native';
 import { Colors } from '../../../styles/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import * as Animatable from 'react-native-animatable';
+import { signIn } from '../../firebase/FirebaseMethods';
+import * as firebase from 'firebase';
 
 
 
@@ -47,6 +49,16 @@ const SignInScreen = ({navigation}) => {
 
         });
     }
+
+    useEffect(
+        () => {
+         firebase.auth().onAuthStateChanged((user) => {
+           if (user) {
+             navigation.replace('Home');
+           }
+         });
+       }
+     );
 
     return (
         <View style={styles.container}>
@@ -118,12 +130,17 @@ const SignInScreen = ({navigation}) => {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.button}>
-                    <LinearGradient
-                        colors={[Colors.midGreen, Colors.green]}
-                        style={styles.signIn}
+                    <TouchableOpacity
+                        onPress={() => signIn(data.email, data.password)}
+                        style={styles.signUp}
                     >
-                        <Text style={styles.textSign}>Sign in</Text>
-                    </LinearGradient>
+                        <LinearGradient
+                            colors={[Colors.midGreen, Colors.green]}
+                            style={styles.signIn}
+                        >
+                            <Text style={styles.textSign}>Sign in</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
 
                     <TouchableOpacity
                         onPress={() => navigation.navigate('SignUpScreen')}
