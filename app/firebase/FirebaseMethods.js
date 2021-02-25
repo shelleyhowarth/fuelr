@@ -1,13 +1,14 @@
-import * as firebase from "firebase";
+import Firebase from '../firebase/Firebase';
 import "firebase/firestore";
 import {Alert} from "react-native";
 
+const db = Firebase.firestore();
+
 export async function registration(email, password, name, username) {
   try {
-    await firebase.auth().createUserWithEmailAndPassword(email, password);
-    const currentUser = firebase.auth().currentUser;
+    await Firebase.auth().createUserWithEmailAndPassword(email, password);
+    const currentUser = Firebase.auth().currentUser;
 
-    const db = firebase.firestore();
     db.collection("users")
       .doc(currentUser.uid)
       .set({
@@ -22,7 +23,7 @@ export async function registration(email, password, name, username) {
 
 export async function signIn(email, password) {
   try {
-   await firebase
+   await Firebase
       .auth()
       .signInWithEmailAndPassword(email, password);
       Alert.alert("Successful sign in")
@@ -33,8 +34,24 @@ export async function signIn(email, password) {
 
 export async function loggingOut() {
   try {
-    await firebase.auth().signOut();
+    await Firebase.auth().signOut();
   } catch (err) {
     Alert.alert('There is something wrong!', err.message);
+  }
+}
+
+export async function checkUsernames(username, usernameTaken) {
+  try {
+      await db.collection("users").get()
+      .then(querySnapshot => {
+          querySnapshot.docs.forEach(doc => {
+              if(doc.data().username == username) {
+                  Alert.alert("Taken");
+                  usernameTaken = true;
+              }
+          })
+      })
+  } catch(e) {
+      console.log(e);
   }
 }

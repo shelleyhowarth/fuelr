@@ -6,7 +6,6 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import * as Animatable from 'react-native-animatable';
 import { signIn } from '../../firebase/FirebaseMethods';
-import * as firebase from 'firebase';
 
 
 
@@ -49,16 +48,6 @@ const SignInScreen = ({navigation}) => {
 
         });
     }
-
-    useEffect(
-        () => {
-         firebase.auth().onAuthStateChanged((user) => {
-           if (user) {
-             navigation.replace('Home');
-           }
-         });
-       }
-     );
 
     return (
         <View style={styles.container}>

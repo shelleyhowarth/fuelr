@@ -5,21 +5,30 @@ import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import * as Animatable from 'react-native-animatable';
-import { registration } from '../../firebase/FirebaseMethods';
+import { registration, checkUsernames } from '../../firebase/FirebaseMethods';
+import Firebase from '../../firebase/Firebase';
+import "firebase/firestore";
+import { capitalize } from 'validate.js';
 
+const db = Firebase.firestore();
 
 const SignUpScreen = ({navigation}) => {
     const [data, setData] = React.useState({
         name: '',
         username: '',
         email: '',
-        passowrd: '',
+        password: '',
         confirmPassword: '',
         handleEmailChange: false,
         handleNameChange: false,
         handleUsernameChange: false,
         secureTextEntry: true,
-        checkSecureTextEntry: true 
+        checkSecureTextEntry: true,
+        nameError: null,
+        emailError: null,
+        usernameError: null,
+        passwordError: null,
+        confirmPasswordError: null,
     });
 
     const emailInputChange = (value) => {
@@ -27,13 +36,15 @@ const SignUpScreen = ({navigation}) => {
             setData({
                 ...data,
                 email: value,
-                handleEmailChange: true
+                handleEmailChange: true,
+                emailError: null
             });
         } else {
             setData({
                 ...data,
                 email: value,
-                handleEmailChange: false
+                handleEmailChange: false,
+                emailError: "Email required"
             });
         }
     }
@@ -43,45 +54,74 @@ const SignUpScreen = ({navigation}) => {
             setData({
                 ...data,
                 name: value,
-                handleNameChange: true
+                handleNameChange: true,
+                nameError: null
             });
         } else {
             setData({
                 ...data,
                 name: value,
-                handleNameChange: false
+                handleNameChange: false,
+                nameError: "Name required"
             });
         }
     }
 
     const usernameInputChange = (value) => {
-        if(value.length !== 0 ) {
+        if(value.length !== 0) {
             setData({
                 ...data,
                 username: value,
-                handleUsernameChange: true
+                handleUsernameChange: true,
+                usernameError: null
             });
-        } else {
+        } else if(!value.length) {
             setData({
                 ...data,
                 username: value,
-                handleUsernameChange: false
+                handleUsernameChange: false,
+                usernameError: "Username required"
             });
         }
     }
 
     const handlePasswordChange = (value) => {
-        setData({
-            ...data,
-            password: value,
-        });
+        if(value.length == 0) {
+            setData({
+                ...data,
+                password: value,
+                passwordError: "Password required"
+            });
+        } else if(value.length < 6) {
+            setData({
+                ...data,
+                password: value,
+                passwordError: "Password must be 6 characters or more"
+            });
+        } else if(value.length >=6) {
+            setData({
+                ...data,
+                password: value,
+                passwordError: null
+            });
+        }
+
     }
 
     const handleConfirmPasswordChange = (value) => {
-        setData({
-            ...data,
-            confirmPassword: value,
-        });
+        if(value !== data.password) {
+            setData({
+                ...data,
+                confirmPassword: value,
+                confirmPasswordError: "Passwords do not match"
+            });
+        } else {
+            setData({
+                ...data,
+                confirmPassword: value,
+                confirmPasswordError: null
+            });
+        }
     }
 
 
@@ -124,6 +164,11 @@ const SignUpScreen = ({navigation}) => {
                         autoCapitalize="words"
                         onChangeText = {(value) => nameInputChange(value)}
                     />
+
+                    {data.nameError ?
+                        <Text style={{color: 'red'}}>{data.nameError}</Text>
+                    : null}
+
                     {data.handleNameChange ? 
                     <Animatable.View
                         animation="bounceIn"
@@ -151,6 +196,11 @@ const SignUpScreen = ({navigation}) => {
                         autoCapitalize="none"
                         onChangeText = {(value) => usernameInputChange(value)}
                     />
+
+                    {data.usernameError ? 
+                    <Text style={{color: 'red'}}> {data.usernameError} </Text>
+                    : null}
+
                     {data.handleUsernameChange ? 
                     <Animatable.View
                         animation="bounceIn"
@@ -178,6 +228,11 @@ const SignUpScreen = ({navigation}) => {
                         autoCapitalize="none"
                         onChangeText = {(value) => emailInputChange(value)}
                     />
+
+                    {data.emailError ?
+                        <Text style={{color: 'red'}}>{data.emailError}</Text>
+                    : null}
+
                     {data.handleEmailChange ? 
                     <Animatable.View
                         animation="bounceIn"
@@ -206,6 +261,11 @@ const SignUpScreen = ({navigation}) => {
                         autoCapitalize="none"
                         onChangeText = {(value) => handlePasswordChange(value)}
                     />
+
+                    {data.passwordError ?
+                        <Text style={{color: 'red'}}>{data.passwordError}</Text>
+                    : null}
+
                     <TouchableOpacity
                         onPress={updateSecureTextEntry}
                     >
@@ -240,6 +300,11 @@ const SignUpScreen = ({navigation}) => {
                         autoCapitalize="none"
                         onChangeText = {(value) => handleConfirmPasswordChange(value)}
                     />
+
+                    {data.confirmPasswordError ?
+                        <Text style={{color: 'red'}}>{data.confirmPasswordError}</Text>
+                    : null}
+
                     <TouchableOpacity
                         onPress={updateCheckSecureTextEntry}
                     >
