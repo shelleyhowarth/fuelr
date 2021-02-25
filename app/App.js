@@ -5,26 +5,21 @@ import { createAppContainer } from "react-navigation";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome } from '@expo/vector-icons';
-import RootStackScreen from './screens/RootStackScreen';
 import { NavigationContainer } from '@react-navigation/native';
+import AuthStackScreen from './screens/AuthStack/AuthStackScreen';
+import AppStackScreen from './screens/AppStack/AppStackScreen';
+import Firebase from './firebase/Firebase';
 
 
-import AccountTab from './screens/tabs/AccountTab';
-import MapTab from './screens/tabs/MapTab';
-import LeaderboardTab from './screens/tabs/LeaderboardTab';
-import TrendsTab from './screens/tabs/TrendsTab';
-import { Colors } from './styles/Colors';
+function App() {
 
-export default class App extends React.Component {
-  render() {
-    return (
-      <NavigationContainer>
-        <RootStackScreen></RootStackScreen> 
-      </NavigationContainer>
-    )
-  }
+  return (
+    <NavigationContainer>
+      { Firebase.auth().currentUser ? <AppStackScreen/> : <AuthStackScreen/> }
+    </NavigationContainer>
+  )
+  
 }
-
 
 
 const styles = StyleSheet.create({
@@ -35,3 +30,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+export default App;
