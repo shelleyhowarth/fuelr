@@ -1,11 +1,16 @@
 import React from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
+import { signOut } from '../../firebase/FirebaseMethods';
 
 
 const AccountScreen = () => {
     return (
         <View style={styles.container}>
-            <Text>Account</Text>
+            <TouchableOpacity
+                onPress={() => signOut()}
+            >
+                <Text>Sign out</Text>
+            </TouchableOpacity>
         </View>
 
     )

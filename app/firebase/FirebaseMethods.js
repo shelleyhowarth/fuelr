@@ -16,6 +16,7 @@ export async function registration(email, password, name, username) {
         name: name,
         username: username
       });
+      Alert.alert("Account successfully created")
   } catch (err) {
     Alert.alert("An error occured", err.message);
   }
@@ -32,9 +33,13 @@ export async function signIn(email, password) {
   }
 }
 
-export async function loggingOut() {
+export async function signOut() {
   try {
     await Firebase.auth().signOut();
+    if(Firebase.auth().currentUser) {
+      console.log("signed out");
+    }
+    Alert.alert("Signed out")
   } catch (err) {
     Alert.alert('There is something wrong!', err.message);
   }
