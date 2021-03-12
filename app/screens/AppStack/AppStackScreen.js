@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MapScreen from './MapScreen';
 import AccountScreen from './AccountScreen';
+import { Colors } from '../../../styles/Colors';
 
 const Tab = createBottomTabNavigator();
 

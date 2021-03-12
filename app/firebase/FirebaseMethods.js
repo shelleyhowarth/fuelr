@@ -1,6 +1,8 @@
 import Firebase from '../firebase/Firebase';
 import "firebase/firestore";
 import {Alert} from "react-native";
+import Geocoder from 'react-native-geocoding';
+
 
 const db = Firebase.firestore();
 
@@ -14,7 +16,8 @@ export async function registration(email, password, name, username) {
       .set({
         email: currentUser.email,
         name: name,
-        username: username
+        username: username,
+        forecourtOwner: false
       });
       Alert.alert("Account successfully created")
   } catch (err) {
@@ -59,4 +62,24 @@ export async function checkUsernames(username, usernameTaken) {
   } catch(e) {
       console.log(e);
   }
+}
+
+export async function forecourtInputChange(value)  {
+  eircode += "+ire";
+
+  await Geocoder.from(eircode)
+    .then(json => {
+        var lat = json.results[0].geometry.location.lat;
+        var lng = json.results[0].geometry.location.lng;
+
+        db.collection('forecourts').get()
+          .then(querySnapshot => {
+            querySnapshot.docs.forEach(doc => {
+              if(lat === doc.data().latitude && lng === doc.data().longitude) {
+                setForecourtExists(true);
+              }
+            });
+          });
+    })
+    .catch(error => console.warn(error));
 }
