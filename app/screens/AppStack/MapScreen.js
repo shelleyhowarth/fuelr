@@ -52,13 +52,13 @@ const MapScreen = () => {
     const [location, setLocation] = useState(null);
     const [spinner, setSpinner] = useState(true);
     const [region, setRegion] = useState(null);
+    const [mapAnimation, setMapAnimation] = useState(new Animated.Value(0));
 
     const mapRef = useRef(null);
     const scrollRef = useRef(null);
 
 
     let mapIndex = 0;
-    let mapAnimation = new Animated.Value(0);
 
     const interpolations = setForecourts.map((marker, index) => {
         const inputRange = [
@@ -87,38 +87,38 @@ const MapScreen = () => {
         scrollRef.current.scrollTo({x: x, y: 0, animated: true});
     }
 
+    const moveToMarker = (value) => {
+        let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
+        
+        if (index >= setForecourts.length) {
+            index = setForecourts.length - 1;
+        }
+        if (index <= 0) {
+            index = 0;
+        }
+
+        clearTimeout(regionTimeout);
+
+        const regionTimeout = setTimeout( () => {
+            if( mapIndex !== index ) {
+                mapIndex = index;
+                mapRef.current.animateToRegion(
+                    {
+                        longitude: setForecourts[index].coordinate.longitude,
+                        latitude: setForecourts[index].coordinate.latitude,
+                        latitudeDelta: 0.03,
+                        longitudeDelta: 0.04
+
+                    }, 
+                    350
+                );
+            }
+        }, 10);
+    }
+
     useEffect( () => {
 
-            mapAnimation.addListener(({ value }) => {
-            console.log("event!")
-            let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
-            
-            if (index >= setForecourts.length) {
-                index = setForecourts.length - 1;
-            }
-            if (index <= 0) {
-                index = 0;
-            }
-
-            clearTimeout(regionTimeout);
-
-            const regionTimeout = setTimeout( () => {
-                if( mapIndex !== index ) {
-                    mapIndex = index;
-                    mapRef.current.animateToRegion(
-                        {
-                            longitude: setForecourts[index].coordinate.longitude,
-                            latitude: setForecourts[index].coordinate.latitude,
-                            latitudeDelta: 0.03,
-                            longitudeDelta: 0.04
-
-                        }, 
-                        350
-                    );
-                }
-            }, 10);
-        });
-
+        //Getting location permission and setting inital region to user's location
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
             if (status !== 'granted') {
@@ -139,9 +139,10 @@ const MapScreen = () => {
             setRegion(tempRegion);
             setSpinner(false);
           })();
-        
 
-        
+        //Move to current marker when using scrollview
+        mapAnimation.addListener(({ value }) => moveToMarker(value));
+
     }, [])
 
 
