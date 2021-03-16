@@ -10,6 +10,7 @@ import StarRating from '../../components/StarRating';
 import { Platform } from 'react-native';
 import Firebase from '../../firebase/Firebase';
 import { useCollectionDataOnce } from 'react-firebase-hooks/firestore';
+import { updateForecourts } from '../../firebase/FirebaseMethods';
 
 const { width, height } = Dimensions.get("window");
 
@@ -83,6 +84,7 @@ const MapScreen = ({navigation}) => {
         scrollRef.current.scrollTo({x: x, y: 0, animated: true});
     }
 
+    /*
     const moveToMarker = (value) => {
         let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
         
@@ -111,16 +113,15 @@ const MapScreen = ({navigation}) => {
             }
         }, 10);
     }
+    */
 
     useEffect( () => {
-
         if(loading) {
             console.log("loading")
         } else {
-            console.log("not loading")
+            console.log("loading finished")
         }
-        console.log(forecourts);
-
+        
         //Getting location permission and setting inital region to user's location
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
@@ -143,7 +144,11 @@ const MapScreen = ({navigation}) => {
           })();
 
         //Move to current marker when using scrollview
-        mapAnimation.addListener(({ value }) => moveToMarker(value));
+        /*
+        if(!loading && forecourts) {
+            mapAnimation.addListener(({ value }) => moveToMarker(value));
+        }
+        */
     }, [forecourts])
 
 
@@ -178,7 +183,7 @@ const MapScreen = ({navigation}) => {
                             key={index}
                             coordinate={{latitude: marker.latitude, longitude: marker.longitude}}
                             onPress={(e) => {
-                                onMarkerPress(e)
+                                //onMarkerPress(e)
                             }}
                         >
                             <TouchableOpacity
@@ -189,7 +194,10 @@ const MapScreen = ({navigation}) => {
                                     source={require('../../../assets/circlek-logo.png')} 
                                     style={styles.logo}
                                 />
-                                <Text>137.9</Text>
+                                {marker.petrol.length ? 
+                                    <Text> {marker.petrol[marker.petrol.length-1]} </Text>
+                                    : <Text> -- </Text>
+                                }
                             </TouchableOpacity>
                         </Marker>
                     )
@@ -241,20 +249,20 @@ const MapScreen = ({navigation}) => {
                                 >
                                     {marker.name}
                                 </Text>
-                                <StarRating ratings={marker.rating} reviews={marker.reviews}></StarRating>
+                                <StarRating ratings={marker.ratingScore} reviews={marker.reviews.length}></StarRating>
                             </View>
                         </View>
                         <View styles={styles.priceContent}>
                             <Text 
                                 numberOfLines = {1}
                                 style={styles.priceText}>
-                                Petrol: 134.5
+                                Petrol: {marker.petrol[marker.petrol.length-1]}
                             </Text>
                             <Text 
                                 numberOfLines = {1}
                                 style={styles.priceText}
                             >
-                                Diesel: 126.5
+                                Diesel: {marker.diesel[marker.diesel.length-1]}
                             </Text>
                             <View >
                                 <TouchableOpacity

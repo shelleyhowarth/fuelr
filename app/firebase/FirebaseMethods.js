@@ -99,6 +99,7 @@ export async function getForecourt(lng, lat) {
   return obj;
 }
 
+
 export async function getAllForecourts() {
   await db.collection('forecourts').onSnapshot( (snapshot) => {
     let markers = snapshot.docs.map(doc => ({
