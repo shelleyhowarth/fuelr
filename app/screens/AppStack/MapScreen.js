@@ -1,27 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {View, Text, StyleSheet, Dimensions, Image, Animated} from 'react-native';
-import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import MapView from 'react-native-maps';
-import { Marker, Callout } from 'react-native-maps';
+import { Marker } from 'react-native-maps';
 import { Colors } from '../../../styles/Colors';
-import Firebase from '../../firebase/Firebase';
 import * as Location from 'expo-location';
 import Spinner from 'react-native-loading-spinner-overlay';
-import * as Animatable from 'react-native-animatable';
 import StarRating from '../../components/StarRating';
 import { Platform } from 'react-native';
+import Firebase from '../../firebase/Firebase';
+import { useCollectionDataOnce } from 'react-firebase-hooks/firestore';
 
 const { width, height } = Dimensions.get("window");
 
 const CARD_HEIGHT = 220;
 const CARD_WIDTH = width * 0.8;
 const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
+const db = Firebase.firestore();
 
-
-
-const MapScreen = () => {
-
-    
+const MapScreen = ({navigation}) => {
 
     let setForecourts = [
         {
@@ -48,19 +45,17 @@ const MapScreen = () => {
         }
     ];
 
-    //const [forecourts, setForecourts] = useState([]);
-    const [location, setLocation] = useState(null);
     const [spinner, setSpinner] = useState(true);
     const [region, setRegion] = useState(null);
     const [mapAnimation, setMapAnimation] = useState(new Animated.Value(0));
-
+    const [forecourts, loading, error] = useCollectionDataOnce(db.collection('forecourts'));
     const mapRef = useRef(null);
     const scrollRef = useRef(null);
 
-
     let mapIndex = 0;
 
-    const interpolations = setForecourts.map((marker, index) => {
+    /*
+    const interpolations = forecourts.map((marker, index) => {
         const inputRange = [
             (index - 1) * CARD_WIDTH,
             index * CARD_WIDTH,
@@ -75,6 +70,7 @@ const MapScreen = () => {
 
         return { scale };
     })
+    */
 
     const onMarkerPress = (e) => {
         const markerId = e._targetInst.return.key;
@@ -90,8 +86,8 @@ const MapScreen = () => {
     const moveToMarker = (value) => {
         let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
         
-        if (index >= setForecourts.length) {
-            index = setForecourts.length - 1;
+        if (index >= forecourts.length) {
+            index = forecourts.length - 1;
         }
         if (index <= 0) {
             index = 0;
@@ -104,8 +100,8 @@ const MapScreen = () => {
                 mapIndex = index;
                 mapRef.current.animateToRegion(
                     {
-                        longitude: setForecourts[index].coordinate.longitude,
-                        latitude: setForecourts[index].coordinate.latitude,
+                        longitude: forecourts[index].longitude,
+                        latitude: forecourts[index].latitude,
                         latitudeDelta: 0.03,
                         longitudeDelta: 0.04
 
@@ -118,6 +114,13 @@ const MapScreen = () => {
 
     useEffect( () => {
 
+        if(loading) {
+            console.log("loading")
+        } else {
+            console.log("not loading")
+        }
+        console.log(forecourts);
+
         //Getting location permission and setting inital region to user's location
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
@@ -127,7 +130,6 @@ const MapScreen = () => {
             }
 
             let location = await Location.getCurrentPositionAsync({});
-            setLocation(location);
 
             let tempRegion = {
                 longitude: location.coords.longitude,
@@ -142,8 +144,7 @@ const MapScreen = () => {
 
         //Move to current marker when using scrollview
         mapAnimation.addListener(({ value }) => moveToMarker(value));
-
-    }, [])
+    }, [forecourts])
 
 
 
@@ -160,7 +161,9 @@ const MapScreen = () => {
                 ref={mapRef}
                 initialRegion={region ? region : null}
             >
-                {setForecourts.map((marker, index) => {
+                { !loading ? forecourts.map((marker, index) => {
+
+                    /*
                     const scaleStyle = {
                         transform: [
                             {
@@ -168,26 +171,29 @@ const MapScreen = () => {
                             },
                         ],
                     };
-
-                    console.log(interpolations[index].scale);
+                    */
+                    
                     return (
                         <Marker
                             key={index}
-                            coordinate={{latitude: marker.coordinate.latitude, longitude: marker.coordinate.longitude}}
-                            onPress={(e) => onMarkerPress(e)}
+                            coordinate={{latitude: marker.latitude, longitude: marker.longitude}}
+                            onPress={(e) => {
+                                onMarkerPress(e)
+                            }}
                         >
                             <TouchableOpacity
-                                style={[styles.priceContainer, scaleStyle]}
+                                //style={[styles.priceContainer, scaleStyle]}
+                                style={[styles.priceContainer]}
                             >
                                 <Image 
-                                    source={marker.logo} 
+                                    source={require('../../../assets/circlek-logo.png')} 
                                     style={styles.logo}
                                 />
-                                <Text>{marker.price}</Text>
+                                <Text>137.9</Text>
                             </TouchableOpacity>
                         </Marker>
-                )}
-            )}
+                    )
+                }) : null}
 
             </MapView>   
             <Animated.ScrollView 
@@ -221,7 +227,7 @@ const MapScreen = () => {
                     {useNativeDriver: true}
                 )}
             >
-                {setForecourts.map( (marker, index) => (
+                { !loading ? forecourts.map( (marker, index) => (
                     <View style={styles.card} key={index}>
                         <View style={{flex: 1}}>
                             <Image 
@@ -239,33 +245,35 @@ const MapScreen = () => {
                             </View>
                         </View>
                         <View styles={styles.priceContent}>
-                        <Text 
-                            numberOfLines = {1}
-                            style={styles.priceText}>
-                            Petrol: 134.5
-                        </Text>
-                        <Text 
-                            numberOfLines = {1}
-                            style={styles.priceText}
-                        >
-                            Diesel: 126.5
-                        </Text>
-                        <View >
-                            <TouchableOpacity
-                                style={styles.button}
+                            <Text 
+                                numberOfLines = {1}
+                                style={styles.priceText}>
+                                Petrol: 134.5
+                            </Text>
+                            <Text 
+                                numberOfLines = {1}
+                                style={styles.priceText}
                             >
-                                <Text
-                                    style={styles.buttonText}
+                                Diesel: 126.5
+                            </Text>
+                            <View >
+                                <TouchableOpacity
+                                    style={styles.button}
+                                    onPress={() => navigation.navigate('ForecourtScreen', {
+                                        marker: marker.coordinate
+                                    })}
                                 >
-                                    View more
-                                </Text>
-                            </TouchableOpacity>
+                                    <Text
+                                        style={styles.buttonText}
+                                    >
+                                        View more
+                                    </Text>
+                                </TouchableOpacity>
 
-                        </View>
-
+                            </View>
                         </View>
                     </View>
-                ))}
+                )) : null}
 
             </Animated.ScrollView>
         </View>    

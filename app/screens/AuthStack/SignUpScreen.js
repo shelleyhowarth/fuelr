@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import * as Animatable from 'react-native-animatable';
-import { registration, checkUsernames, fetchForecourts } from '../../firebase/FirebaseMethods';
+import { registration } from '../../firebase/FirebaseMethods';
 import Firebase from '../../firebase/Firebase';
 import "firebase/firestore";
 import Geocoder from 'react-native-geocoding';

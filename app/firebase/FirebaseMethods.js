@@ -83,3 +83,28 @@ export async function forecourtInputChange(value)  {
     })
     .catch(error => console.warn(error));
 }
+
+export async function getForecourt(lng, lat) {
+  let obj = {}
+  await db.collection('forecourts').get()
+    .then(querySnapshot => {
+      querySnapshot.docs.forEach(doc => {
+        if(lat === doc.data().latitude && lng === doc.data().longitude) {
+          console.log(doc.data())
+          obj = doc.data();
+        }
+      })
+    })
+  
+  return obj;
+}
+
+export async function getAllForecourts() {
+  await db.collection('forecourts').onSnapshot( (snapshot) => {
+    let markers = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return Promise.all(markers);
+  });
+}

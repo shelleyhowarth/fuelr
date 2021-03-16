@@ -6,7 +6,7 @@ import SignUpScreen from './SignUpScreen';
 
 const AuthStack = createStackNavigator();
 
-const AuthStackScreen = ({navigation}) => (
+const AuthStackScreen = () => (
 
     <AuthStack.Navigator headerMode='none'>
         <AuthStack.Screen name="SplashScreen" component={SplashScreen} />
