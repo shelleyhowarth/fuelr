@@ -99,6 +99,29 @@ export async function getForecourt(lng, lat) {
   return obj;
 }
 
+export async function updateForecourts() {
+  let obj = {}
+  await db.collection('forecourts').get()
+    .then(querySnapshot => {
+      querySnapshot.docs.forEach(doc => {
+          obj = {
+            ...doc.data(),
+            currDiesel: {
+              price: null,
+              timestamp: null,
+              user: null
+            },
+            currPetrol: {
+              price: null,
+              timestamp: null,
+              user: null
+            },
+          }
+          doc.ref.update(obj);
+        })
+      });
+}
+
 
 export async function getAllForecourts() {
   await db.collection('forecourts').onSnapshot( (snapshot) => {

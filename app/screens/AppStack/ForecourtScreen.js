@@ -1,27 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import { signOut } from '../../firebase/FirebaseMethods';
-import { getForecourt } from '../../firebase/FirebaseMethods';
+import { useDocumentDataOnce } from 'react-firebase-hooks/firestore';
+import Firebase from '../../firebase/Firebase';
 
+const db = Firebase.firestore();
 
 const ForecourtScreen = ({route, navigation}) => {
 
-    const [coordinate, setCoordinate] = useState(route.params);
-    const [longitude, setLongitude] = useState(null);
-    const [latitude, setLatitude] = useState(null);
-    const [forecourt, setForecourt] = useState(null);
+    const [geohash, setGeohash] = useState(route.params);
+    const [forecourt, loading, error] = useDocumentDataOnce(db.collection('forecourts').where("geohash", "==", route.params.marker));
 
     useEffect(() => {
-        setLongitude(coordinate.longitude);
-        setLatitude(coordinate.latitude);
-        //handleForecourt(longitude, latitude);
-    })
+            console.log(forecourt);
+            console.log(error);
+            console.log(loading);
+    }, [forecourt])
 
-    const handleForecourt = async(lng, lat) => {
-        await setForecourt(getForecourt(lng, lat));
-        console.log("forecourt" + forecourt);
-    }
-    
     return (
         <View style={styles.container}>
             <TouchableOpacity

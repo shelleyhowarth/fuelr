@@ -116,12 +116,9 @@ const MapScreen = ({navigation}) => {
     */
 
     useEffect( () => {
-        if(loading) {
-            console.log("loading")
-        } else {
-            console.log("loading finished")
+        if(error) {
+            console.log(JSON.stringify(error));
         }
-        
         //Getting location permission and setting inital region to user's location
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
@@ -149,7 +146,7 @@ const MapScreen = ({navigation}) => {
             mapAnimation.addListener(({ value }) => moveToMarker(value));
         }
         */
-    }, [forecourts])
+    }, [forecourts, error])
 
 
 
@@ -194,9 +191,11 @@ const MapScreen = ({navigation}) => {
                                     source={require('../../../assets/circlek-logo.png')} 
                                     style={styles.logo}
                                 />
-                                {marker.petrol.length ? 
-                                    <Text> {marker.petrol[marker.petrol.length-1]} </Text>
+                                {marker.currPetrol.price ? 
+
+                                    <Text> {marker.currPetrol.price} </Text>
                                     : <Text> -- </Text>
+                                
                                 }
                             </TouchableOpacity>
                         </Marker>
@@ -253,22 +252,36 @@ const MapScreen = ({navigation}) => {
                             </View>
                         </View>
                         <View styles={styles.priceContent}>
-                            <Text 
-                                numberOfLines = {1}
-                                style={styles.priceText}>
-                                Petrol: {marker.petrol[marker.petrol.length-1]}
-                            </Text>
-                            <Text 
-                                numberOfLines = {1}
-                                style={styles.priceText}
-                            >
-                                Diesel: {marker.diesel[marker.diesel.length-1]}
-                            </Text>
+                            {marker.currPetrol.price ? 
+                                <Text 
+                                    numberOfLines = {1}
+                                    style={styles.priceText}>
+                                    Petrol: {marker.currPetrol.price}
+                                </Text>
+                            :   <Text 
+                                    numberOfLines = {1}
+                                    style={styles.priceText}>
+                                    Petrol: --
+                                </Text> 
+                            }
+
+                            {marker.currDiesel.price ? 
+                                <Text 
+                                    numberOfLines = {1}
+                                    style={styles.priceText}>
+                                    Petrol: {marker.currDiesel.price}
+                                </Text>
+                            :   <Text 
+                                    numberOfLines = {1}
+                                    style={styles.priceText}>
+                                    Petrol: --
+                                </Text> 
+                            }
                             <View >
                                 <TouchableOpacity
                                     style={styles.button}
                                     onPress={() => navigation.navigate('ForecourtScreen', {
-                                        marker: marker.coordinate
+                                        marker: marker.geohash
                                     })}
                                 >
                                     <Text
