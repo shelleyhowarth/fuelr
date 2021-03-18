@@ -40,7 +40,6 @@ export async function signOut() {
   try {
     await Firebase.auth().signOut();
     if(Firebase.auth().currentUser) {
-      console.log("signed out");
     }
     Alert.alert("Signed out")
   } catch (err) {
@@ -106,16 +105,7 @@ export async function updateForecourts() {
       querySnapshot.docs.forEach(doc => {
           obj = {
             ...doc.data(),
-            currDiesel: {
-              price: null,
-              timestamp: null,
-              user: null
-            },
-            currPetrol: {
-              price: null,
-              timestamp: null,
-              user: null
-            },
+            id: doc.id
           }
           doc.ref.update(obj);
         })

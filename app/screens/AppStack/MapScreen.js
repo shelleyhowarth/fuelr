@@ -21,31 +21,6 @@ const db = Firebase.firestore();
 
 const MapScreen = ({navigation}) => {
 
-    let setForecourts = [
-        {
-            name: 'Circle K Express',
-            coordinate: {
-                latitude: 52.66015190745291, 
-                longitude: -8.634989823795387,
-            },
-            price: '136.7',
-            rating: '4',
-            reviews: '30',
-            logo: require('../../../assets/circlek-logo.png')
-        },
-        {
-            name: 'Inver',
-            coordinate: {
-                latitude: 52.657632043249215, 
-                longitude: -8.607793245976056,
-            },
-            price: '135.4',
-            rating: '3',
-            reviews: '25',
-            logo: require('../../../assets/inver_logo.png')
-        }
-    ];
-
     const [spinner, setSpinner] = useState(true);
     const [region, setRegion] = useState(null);
     const [mapAnimation, setMapAnimation] = useState(new Animated.Value(0));
@@ -71,9 +46,39 @@ const MapScreen = ({navigation}) => {
 
         return { scale };
     })
-    */
+    
 
-    const onMarkerPress = (e) => {
+   const moveToMarker = (value) => {
+    let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
+    
+    if (index >= forecourts.length) {
+        index = forecourts.length - 1;
+    }
+    if (index <= 0) {
+        index = 0;
+    }
+
+    clearTimeout(regionTimeout);
+
+    const regionTimeout = setTimeout( () => {
+        if( mapIndex !== index ) {
+            mapIndex = index;
+            mapRef.current.animateToRegion(
+                {
+                    longitude: forecourts[index].longitude,
+                    latitude: forecourts[index].latitude,
+                    latitudeDelta: 0.03,
+                    longitudeDelta: 0.04
+
+                }, 
+                350
+            );
+        }
+    }, 10);
+    }
+
+
+   const onMarkerPress = (e) => {
         const markerId = e._targetInst.return.key;
         let x = (markerId * CARD_WIDTH) + (markerId * 20);
 
@@ -83,41 +88,15 @@ const MapScreen = ({navigation}) => {
 
         scrollRef.current.scrollTo({x: x, y: 0, animated: true});
     }
-
-    /*
-    const moveToMarker = (value) => {
-        let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
-        
-        if (index >= forecourts.length) {
-            index = forecourts.length - 1;
-        }
-        if (index <= 0) {
-            index = 0;
-        }
-
-        clearTimeout(regionTimeout);
-
-        const regionTimeout = setTimeout( () => {
-            if( mapIndex !== index ) {
-                mapIndex = index;
-                mapRef.current.animateToRegion(
-                    {
-                        longitude: forecourts[index].longitude,
-                        latitude: forecourts[index].latitude,
-                        latitudeDelta: 0.03,
-                        longitudeDelta: 0.04
-
-                    }, 
-                    350
-                );
-            }
-        }, 10);
-    }
     */
 
+
+
+    
     useEffect( () => {
-        if(error) {
-            console.log(JSON.stringify(error));
+        //updateForecourts();
+        if(!loading) {
+            console.log(forecourts.length);
         }
         //Getting location permission and setting inital region to user's location
         (async () => {
@@ -141,11 +120,12 @@ const MapScreen = ({navigation}) => {
           })();
 
         //Move to current marker when using scrollview
-        /*
+        
         if(!loading && forecourts) {
+
             mapAnimation.addListener(({ value }) => moveToMarker(value));
         }
-        */
+        
     }, [forecourts, error])
 
 
@@ -175,6 +155,7 @@ const MapScreen = ({navigation}) => {
                     };
                     */
                     
+                    
                     return (
                         <Marker
                             key={index}
@@ -188,7 +169,7 @@ const MapScreen = ({navigation}) => {
                                 style={[styles.priceContainer]}
                             >
                                 <Image 
-                                    source={require('../../../assets/circlek-logo.png')} 
+                                    source={{uri: marker.logo}} 
                                     style={styles.logo}
                                 />
                                 {marker.currPetrol.price ? 
@@ -238,7 +219,7 @@ const MapScreen = ({navigation}) => {
                     <View style={styles.card} key={index}>
                         <View style={{flex: 1}}>
                             <Image 
-                                source={marker.logo}
+                                source={{uri: marker.logo}}
                                 style={styles.cardImage}
                             />
                             <View style={styles.textContent}>
@@ -281,7 +262,7 @@ const MapScreen = ({navigation}) => {
                                 <TouchableOpacity
                                     style={styles.button}
                                     onPress={() => navigation.navigate('ForecourtScreen', {
-                                        marker: marker.geohash
+                                        id: marker.id
                                     })}
                                 >
                                     <Text

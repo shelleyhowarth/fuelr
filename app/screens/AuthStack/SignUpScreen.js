@@ -433,7 +433,6 @@ const SignUpScreen = ({navigation}) => {
                     <TouchableOpacity
                         onPress={() => {
                             registration(data.email, data.password, data.name, data.username);
-                            console.log(data.password);
                         }}
                         style={styles.signUp}
                     >
