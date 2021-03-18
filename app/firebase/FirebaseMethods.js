@@ -112,6 +112,38 @@ export async function updateForecourts() {
       });
 }
 
+export async function updatePrice(id, priceInput) {
+  let obj = {}
+  await db.collection('forecourts').get()
+    .then(querySnapshot => {
+      querySnapshot.docs.forEach(doc => {
+          if(id === doc.id) {
+            console.log("matched")
+            let time = Date.now();
+            obj = {
+              ...doc.data(),
+              currPetrol: {
+                price: priceInput,
+                timestamp: time,
+                user: 'shelleyhowarth'
+              },
+            }
+
+            doc.ref.update(obj);
+            doc.ref.update({
+              petrol: db.FieldValue.arrayUnion({
+                price: priceInput,
+                timestamp: time,
+                user: 'shelleyhowarth'
+              })
+            });
+
+          }
+        })
+      })
+      .catch(error => console.log(error));
+}
+
 
 export async function getAllForecourts() {
   await db.collection('forecourts').onSnapshot( (snapshot) => {
