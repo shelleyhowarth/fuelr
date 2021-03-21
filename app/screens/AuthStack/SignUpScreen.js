@@ -251,7 +251,7 @@ const SignUpScreen = ({navigation}) => {
                         placeholder="Your username"
                         style={styles.textInput}
                         autoCapitalize="none"
-                        onChangeText = {(value) => usernameInputChange(value)}
+                        onChangeText = {(value) => value !== '' ? usernameInputChange(value) : null}
                     />
 
                     {data.usernameError ? 

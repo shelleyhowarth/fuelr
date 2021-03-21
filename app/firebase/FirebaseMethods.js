@@ -2,6 +2,8 @@ import Firebase from '../firebase/Firebase';
 import "firebase/firestore";
 import {Alert} from "react-native";
 import Geocoder from 'react-native-geocoding';
+import * as firebase from 'firebase'
+import 'firebase/firestore';
 
 
 const db = Firebase.firestore();
@@ -112,38 +114,61 @@ export async function updateForecourts() {
       });
 }
 
-export async function updatePrice(id, priceInput) {
-  let obj = {}
-  await db.collection('forecourts').get()
-    .then(querySnapshot => {
-      querySnapshot.docs.forEach(doc => {
-          if(id === doc.id) {
-            console.log("matched")
-            let time = Date.now();
-            obj = {
-              ...doc.data(),
-              currPetrol: {
-                price: priceInput,
-                timestamp: time,
-                user: 'shelleyhowarth'
-              },
-            }
+export async function updatePetrolPrice(id, priceInput) {
+  await db.collection('forecourts').doc(id).update({
+    currPetrol: {
+      price: priceInput,
+      timestamp: Date.now(),
+      user: 'shelleyhowarth'
+    },
+    petrol: firebase.firestore.FieldValue.arrayUnion({
+      price: priceInput,
+      timestamp: Date.now(),
+      user: 'shelleyhowarth'
+    })
+  });
 
-            doc.ref.update(obj);
-            doc.ref.update({
-              petrol: db.FieldValue.arrayUnion({
-                price: priceInput,
-                timestamp: time,
-                user: 'shelleyhowarth'
-              })
-            });
-
-          }
-        })
-      })
-      .catch(error => console.log(error));
 }
 
+export async function updateDieselPrice(id, priceInput) {
+  await db.collection('forecourts').doc(id).update({
+    currDiesel: {
+      price: priceInput,
+      timestamp: Date.now(),
+      user: 'shelleyhowarth'
+    },
+    diesel: firebase.firestore.FieldValue.arrayUnion({
+      price: priceInput,
+      timestamp: Date.now(),
+      user: 'shelleyhowarth'
+    })
+  });
+}
+
+export async function submitReview(id, score) {
+  /*
+  await db.collection('forecourts').doc(id).update({
+    reviews: firebase.firestore.FieldValue.arrayUnion({
+      rating: score,
+      timestamp: Date.now(),
+      user: 'shelleyhowarth'
+    })
+  });
+  */
+  let totalScore = 0;
+  let count = 0;
+  await db.collection('forecourts').doc(id).get()
+    .then(querySnapshot => {
+      querySnapshot.data().reviews.map((reviews, index) => {
+        totalScore += reviews.rating;
+        count++;
+      });
+      totalScore = totalScore/count;
+      querySnapshot.ref.update({
+        ratingScore: totalScore
+      })
+    });
+}
 
 export async function getAllForecourts() {
   await db.collection('forecourts').onSnapshot( (snapshot) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {View, Text, StyleSheet, Dimensions, Image, Animated} from 'react-native';
+import {View, Text, StyleSheet, Dimensions, Image, Animated, Switch } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
@@ -25,10 +25,27 @@ const MapScreen = ({navigation}) => {
     const [region, setRegion] = useState(null);
     const [mapAnimation, setMapAnimation] = useState(new Animated.Value(0));
     const [forecourts, loading, error] = useCollectionDataOnce(db.collection('forecourts'));
+    const [interpolations, setInterpolations] = useState();
+    const [diesel, setDiesel] = useState(false);
+
     const mapRef = useRef(null);
     const scrollRef = useRef(null);
 
     let mapIndex = 0;
+
+    const toggleSwitch = () => setDiesel(previousState => !previousState);
+
+
+    const onMarkerPress = (e) => {
+        const markerId = e._targetInst.return.key;
+        let x = (markerId * CARD_WIDTH) + (markerId * 20);
+
+        if(Platform.OS === 'ios') {
+            x = x - SPACING_FOR_CARD_INSET;
+        }
+
+        scrollRef.current.scrollTo({x: x, y: 0, animated: true});
+    }
 
     /*
     const interpolations = forecourts.map((marker, index) => {
@@ -76,28 +93,10 @@ const MapScreen = ({navigation}) => {
         }
     }, 10);
     }
-
-
-   const onMarkerPress = (e) => {
-        const markerId = e._targetInst.return.key;
-        let x = (markerId * CARD_WIDTH) + (markerId * 20);
-
-        if(Platform.OS === 'ios') {
-            x = x - SPACING_FOR_CARD_INSET;
-        }
-
-        scrollRef.current.scrollTo({x: x, y: 0, animated: true});
-    }
     */
-
-
-
     
     useEffect( () => {
-        //updateForecourts();
-        if(!loading) {
-            console.log(forecourts.length);
-        }
+
         //Getting location permission and setting inital region to user's location
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
@@ -119,16 +118,68 @@ const MapScreen = ({navigation}) => {
             setSpinner(false);
           })();
 
-        //Move to current marker when using scrollview
-        
-        if(!loading && forecourts) {
 
-            mapAnimation.addListener(({ value }) => moveToMarker(value));
+        //Move to current marker when using scrollview
+        if(!loading && forecourts) {
+            const moveToMarker = (value) => {
+                let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
+                
+                if (index >= forecourts.length) {
+                    index = forecourts.length - 1;
+                }
+
+                if (index <= 0) {
+                    index = 0;
+                }
+            
+                clearTimeout(regionTimeout);
+            
+                const regionTimeout = setTimeout( () => {
+                    if( mapIndex !== index ) {
+                        mapIndex = index;
+                        console.log(index);
+
+                        mapRef.current.animateToRegion(
+                            {
+                                longitude: forecourts[index].longitude,
+                                latitude: forecourts[index].latitude,
+                                latitudeDelta: 0.03,
+                                longitudeDelta: 0.04
+            
+                            }, 
+                            350
+                        );
+                    }
+                }, 10);
+            }
+
+            mapAnimation.addListener(({ value }) => {
+                //moveToMarker(value)
+            });
         }
         
-    }, [forecourts, error])
+    }, [forecourts, interpolations])
 
+    const fuelPriceMarker = (marker) => {
+        if(!diesel) {
+            return (
+                <View>
+                    {marker.currPetrol.price ?
+                        <Text> {marker.currPetrol.price} </Text>
+                    :   <Text> -- </Text> }
+                </View>
+            )
+        } else {
+            return (
+                <View>
+                    {marker.currDiesel.price ?
+                        <Text> {marker.currDiesel.price} </Text>
+                    :   <Text> -- </Text> }
+                </View>
+            )
+        }
 
+    }
 
     return (
         <View style={styles.container}>
@@ -137,6 +188,7 @@ const MapScreen = ({navigation}) => {
                 textContent={'Getting your location...'}
                 textStyle={styles.spinnerTextStyle}
             />
+
             <MapView
                 style={styles.map}
                 showsUserLocation={spinner ? false : true}
@@ -161,7 +213,7 @@ const MapScreen = ({navigation}) => {
                             key={index}
                             coordinate={{latitude: marker.latitude, longitude: marker.longitude}}
                             onPress={(e) => {
-                                //onMarkerPress(e)
+                                onMarkerPress(e)
                             }}
                         >
                             <TouchableOpacity
@@ -172,12 +224,7 @@ const MapScreen = ({navigation}) => {
                                     source={{uri: marker.logo}} 
                                     style={styles.logo}
                                 />
-                                {marker.currPetrol.price ? 
-
-                                    <Text> {marker.currPetrol.price} </Text>
-                                    : <Text> -- </Text>
-                                
-                                }
+                                {fuelPriceMarker(marker)}
                             </TouchableOpacity>
                         </Marker>
                     )
@@ -202,18 +249,6 @@ const MapScreen = ({navigation}) => {
                 contentContainerStyle = {{
                     paddingHorizontal: Platform.OS === 'android' ? SPACING_FOR_CARD_INSET : 0
                 }}
-                onScroll = {Animated.event(
-                    [
-                        {
-                            nativeEvent: {
-                                contentOffset: {
-                                    x: mapAnimation
-                                }
-                            }
-                        }
-                    ], 
-                    {useNativeDriver: true}
-                )}
             >
                 { !loading ? forecourts.map( (marker, index) => (
                     <View style={styles.card} key={index}>
@@ -228,6 +263,12 @@ const MapScreen = ({navigation}) => {
                                     style={styles.cardTitle}
                                 >
                                     {marker.name}
+                                </Text>
+                                <Text 
+                                    numberOfLines = {1}
+                                    style={{fontSize: 10}}
+                                >
+                                    {marker.address}
                                 </Text>
                                 <StarRating ratings={marker.ratingScore} reviews={marker.reviews.length}></StarRating>
                             </View>
@@ -250,12 +291,12 @@ const MapScreen = ({navigation}) => {
                                 <Text 
                                     numberOfLines = {1}
                                     style={styles.priceText}>
-                                    Petrol: {marker.currDiesel.price}
+                                    Diesel: {marker.currDiesel.price}
                                 </Text>
                             :   <Text 
                                     numberOfLines = {1}
                                     style={styles.priceText}>
-                                    Petrol: --
+                                    Diesel: --
                                 </Text> 
                             }
                             <View >
@@ -278,6 +319,14 @@ const MapScreen = ({navigation}) => {
                 )) : null}
 
             </Animated.ScrollView>
+            <Switch
+                trackColor={{ false: '#767577', true: '#81b0ff' }}
+                thumbColor={diesel ? '#f5dd4b' : '#f4f3f4'}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={toggleSwitch}
+                value={diesel}
+                style={styles.switch}
+            />
         </View>    
     )
 }
@@ -336,6 +385,11 @@ const styles = StyleSheet.create({
         right: 0,
         paddingVertical: 10,
         height: CARD_HEIGHT
+    },
+
+    switch: {
+        position: "absolute",
+        top: 40
     },
 
     card: {
