@@ -11,6 +11,7 @@ import { Platform } from 'react-native';
 import Firebase from '../../firebase/Firebase';
 import { useCollectionDataOnce } from 'react-firebase-hooks/firestore';
 import { updateForecourts } from '../../firebase/FirebaseMethods';
+import { useIsFocused } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -27,74 +28,12 @@ const MapScreen = ({navigation}) => {
     const [forecourts, loading, error] = useCollectionDataOnce(db.collection('forecourts'));
     const [interpolations, setInterpolations] = useState();
     const [diesel, setDiesel] = useState(false);
+    const isFocused = useIsFocused();
 
-    const mapRef = useRef(null);
     const scrollRef = useRef(null);
-
-    let mapIndex = 0;
 
     const toggleSwitch = () => setDiesel(previousState => !previousState);
 
-
-    const onMarkerPress = (e) => {
-        const markerId = e._targetInst.return.key;
-        let x = (markerId * CARD_WIDTH) + (markerId * 20);
-
-        if(Platform.OS === 'ios') {
-            x = x - SPACING_FOR_CARD_INSET;
-        }
-
-        scrollRef.current.scrollTo({x: x, y: 0, animated: true});
-    }
-
-    /*
-    const interpolations = forecourts.map((marker, index) => {
-        const inputRange = [
-            (index - 1) * CARD_WIDTH,
-            index * CARD_WIDTH,
-            ((index +1) * CARD_WIDTH),
-        ];
-
-        const scale = mapAnimation.interpolate({
-            inputRange,
-            outputRange: [1, 1.5, 1],
-            extrapolate: "clamp"
-        });
-
-        return { scale };
-    })
-    
-
-   const moveToMarker = (value) => {
-    let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
-    
-    if (index >= forecourts.length) {
-        index = forecourts.length - 1;
-    }
-    if (index <= 0) {
-        index = 0;
-    }
-
-    clearTimeout(regionTimeout);
-
-    const regionTimeout = setTimeout( () => {
-        if( mapIndex !== index ) {
-            mapIndex = index;
-            mapRef.current.animateToRegion(
-                {
-                    longitude: forecourts[index].longitude,
-                    latitude: forecourts[index].latitude,
-                    latitudeDelta: 0.03,
-                    longitudeDelta: 0.04
-
-                }, 
-                350
-            );
-        }
-    }, 10);
-    }
-    */
-    
     useEffect( () => {
 
         //Getting location permission and setting inital region to user's location
@@ -117,48 +56,8 @@ const MapScreen = ({navigation}) => {
             setRegion(tempRegion);
             setSpinner(false);
           })();
-
-
-        //Move to current marker when using scrollview
-        if(!loading && forecourts) {
-            const moveToMarker = (value) => {
-                let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
-                
-                if (index >= forecourts.length) {
-                    index = forecourts.length - 1;
-                }
-
-                if (index <= 0) {
-                    index = 0;
-                }
-            
-                clearTimeout(regionTimeout);
-            
-                const regionTimeout = setTimeout( () => {
-                    if( mapIndex !== index ) {
-                        mapIndex = index;
-                        console.log(index);
-
-                        mapRef.current.animateToRegion(
-                            {
-                                longitude: forecourts[index].longitude,
-                                latitude: forecourts[index].latitude,
-                                latitudeDelta: 0.03,
-                                longitudeDelta: 0.04
-            
-                            }, 
-                            350
-                        );
-                    }
-                }, 10);
-            }
-
-            mapAnimation.addListener(({ value }) => {
-                //moveToMarker(value)
-            });
-        }
         
-    }, [forecourts, interpolations])
+    }, [forecourts, isFocused])
 
     const fuelPriceMarker = (marker) => {
         if(!diesel) {
@@ -181,6 +80,17 @@ const MapScreen = ({navigation}) => {
 
     }
 
+    const onMarkerPress = (e) => {
+        const markerId = e._targetInst.return.key;
+        let x = (markerId * CARD_WIDTH) + (markerId * 20);
+
+        if(Platform.OS === 'ios') {
+            x = x - SPACING_FOR_CARD_INSET;
+        }
+
+        scrollRef.current.scrollTo({x: x, y: 0, animated: true});
+    }
+
     return (
         <View style={styles.container}>
             <Spinner
@@ -192,22 +102,9 @@ const MapScreen = ({navigation}) => {
             <MapView
                 style={styles.map}
                 showsUserLocation={spinner ? false : true}
-                ref={mapRef}
                 initialRegion={region ? region : null}
             >
                 { !loading ? forecourts.map((marker, index) => {
-
-                    /*
-                    const scaleStyle = {
-                        transform: [
-                            {
-                                scale: interpolations[index].scale,
-                            },
-                        ],
-                    };
-                    */
-                    
-                    
                     return (
                         <Marker
                             key={index}
@@ -217,7 +114,6 @@ const MapScreen = ({navigation}) => {
                             }}
                         >
                             <TouchableOpacity
-                                //style={[styles.priceContainer, scaleStyle]}
                                 style={[styles.priceContainer]}
                             >
                                 <Image 
