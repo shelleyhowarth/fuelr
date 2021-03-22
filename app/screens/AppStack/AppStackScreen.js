@@ -5,6 +5,7 @@ import MapScreen from './MapScreen';
 import AccountScreen from './AccountScreen';
 import ForecourtScreen from './ForecourtScreen';
 import TrendsScreen from './TrendsScreen';
+import LeaderboardScreen from './LeaderboardScreen';
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-ionicons';
 
@@ -18,7 +19,7 @@ const Home = () => {
         name="Home" 
         component={ MapScreen } 
       />
-      <Tab.Screen name="Leaderboard" component={ TrendsScreen } />
+      <Tab.Screen name="Leaderboard" component={ LeaderboardScreen } />
       <Tab.Screen name="Trends" component={ TrendsScreen } />
       <Tab.Screen name="Account" component={ AccountScreen } />
     </Tab.Navigator>

@@ -19,7 +19,8 @@ export async function registration(email, password, name, username) {
         email: currentUser.email,
         name: name,
         username: username,
-        forecourtOwner: false
+        forecourtOwner: false,
+        points: 0
       });
       Alert.alert("Account successfully created")
   } catch (err) {
@@ -146,7 +147,6 @@ export async function updateDieselPrice(id, priceInput) {
 }
 
 export async function submitReview(id, score) {
-  /*
   await db.collection('forecourts').doc(id).update({
     reviews: firebase.firestore.FieldValue.arrayUnion({
       rating: score,
@@ -154,7 +154,7 @@ export async function submitReview(id, score) {
       user: 'shelleyhowarth'
     })
   });
-  */
+  
   let totalScore = 0;
   let count = 0;
   await db.collection('forecourts').doc(id).get()
@@ -168,14 +168,4 @@ export async function submitReview(id, score) {
         ratingScore: totalScore
       })
     });
-}
-
-export async function getAllForecourts() {
-  await db.collection('forecourts').onSnapshot( (snapshot) => {
-    let markers = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    return Promise.all(markers);
-  });
 }
