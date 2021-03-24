@@ -20,20 +20,29 @@ const LeaderboardScreen = () => {
     //States
     const [users, loadingUsers, errorUsers] = useCollectionDataOnce(db.collection('users'));
     const [forecourts, loadingForecourts, errorForecourts] = useCollectionDataOnce(db.collection('forecourts'));
-
     const [forecourtView, setForecourtView] = useState(false);
     const [result, setResult] = useState();
     const [points, setPoints] = useState();
-    const toggleSwitch = () => {
-        setForecourtView(previousState => !previousState)
-        console.log("pressed");
-    };
+
+    const toggleSwitch = () => setForecourtView(previousState => !previousState);
 
     useEffect ( () => {
         if(!loadingUsers) {
             users.sort((a, b) => (a.points < b.points) ? 1 : -1);
             setResult(getPos());
             setPoints(getPoints());
+        }
+
+        if(!loadingForecourts) {
+            forecourts.forEach( obj => {
+                    obj.petrolPrice = obj.currPetrol.price;
+                    if(!obj.name.length) {
+                        obj.name += "N/A " +  obj.address.split(" ").pop();
+                    } else {
+                        obj.name += " " + obj.address.split(" ").pop();
+                    }
+            });
+            console.log(forecourts);
         }
 
     }, [users, forecourts])
@@ -80,7 +89,6 @@ const LeaderboardScreen = () => {
 
             { forecourtView ?
             <View>
-                {! loadingForecourts ? 
                     <Animatable.View style={styles.topView} animation="bounceIn">
                             <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: '5%'}}>
                                 <View style={styles.textView}>
@@ -99,13 +107,13 @@ const LeaderboardScreen = () => {
                                 </View>
                             </View>
                     </Animatable.View>
-                : null}
 
-                {!loadingForecourts ? 
+                {!loadingForecourts ?
                     <Animatable.View style={{flex: 5}} animation="bounceInUp">
                         <Leaderboard 
                             data={forecourts} 
-                            sortBy={forecourts.currPetrol}
+                            sortBy="petrolPrice"
+                            sort={ () => forecourts.sort((a, b) => (a.petrolPrice > b.petrolPrice) ? 1 : -1)}
                             labelBy='name'
                             oddRowColor={'white'}
                             evenRowColor={'#97dba6'}
