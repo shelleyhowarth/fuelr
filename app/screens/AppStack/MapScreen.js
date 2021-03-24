@@ -22,7 +22,7 @@ const db = Firebase.firestore();
 
 const MapScreen = ({navigation}) => {
 
-    const [spinner, setSpinner] = useState(true);
+    const [spinner, setSpinner] = useState(false);
     const [region, setRegion] = useState(null);
     const [mapAnimation, setMapAnimation] = useState(new Animated.Value(0));
     const [forecourts, loading, error] = useCollectionDataOnce(db.collection('forecourts'));

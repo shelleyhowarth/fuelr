@@ -1,28 +1,163 @@
-import React, { useEffect } from 'react';
-import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {View, StyleSheet, RefreshControl, Text, Dimensions, StatusBar, Switch} from 'react-native';
 import { signOut } from '../../firebase/FirebaseMethods';
 import Leaderboard from 'react-native-leaderboard';
 import { useCollectionDataOnce } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
+import { Colors } from '../../../styles/Colors';
+import * as firebase from 'firebase';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import * as Animatable from 'react-native-animatable';
+
 
 const db = Firebase.firestore();
+const { width, height } = Dimensions.get("window");
+
 
 const LeaderboardScreen = () => {
-    const [users, loading, error] = useCollectionDataOnce(db.collection('users'));
+    const currentUser = firebase.auth().currentUser.uid;
+
+    //States
+    const [users, loadingUsers, errorUsers] = useCollectionDataOnce(db.collection('users'));
+    const [forecourts, loadingForecourts, errorForecourts] = useCollectionDataOnce(db.collection('forecourts'));
+
+    const [forecourtView, setForecourtView] = useState(false);
+    const [result, setResult] = useState();
+    const [points, setPoints] = useState();
+    const toggleSwitch = () => {
+        setForecourtView(previousState => !previousState)
+        console.log("pressed");
+    };
 
     useEffect ( () => {
-        if(!loading) {
-            console.log(users);
+        if(!loadingUsers) {
+            users.sort((a, b) => (a.points < b.points) ? 1 : -1);
+            setResult(getPos());
+            setPoints(getPoints());
         }
-    })
+
+    }, [users, forecourts])
+
+    const getPos = () => {
+        let result;
+        let place = users.findIndex(obj => obj.id === currentUser)+1;
+        let first = "st";
+        let second = "nd";
+        let third = "rd";
+        let fourth = "th";
+
+        switch(place%10) {
+            case 1:
+                result = place+first;
+                break;
+            case 2:
+                result = place+second;
+                break;
+            case 3:
+                result=place+third;
+                break;
+            default:
+                result = place+fourth;
+                break;
+        }
+
+        return result;
+    }
+
+    const getPoints = () => {
+        let obj = users.filter(obj => {
+            return obj.id === currentUser;
+        })
+        obj = obj[0];
+        obj = obj.points + " pts";
+
+        return obj;
+    }
 
     return (
         <View style={styles.container}>
-            <Leaderboard 
-                data={users} 
-                sortBy='points' 
-                labelBy='username'
+            <StatusBar backgroundColor={'white'} barStyle="dark-content"/>
+
+            { forecourtView ?
+            <View>
+                {! loadingForecourts ? 
+                    <Animatable.View style={styles.topView} animation="bounceIn">
+                            <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: '5%'}}>
+                                <View style={styles.textView}>
+                                    <Text style={styles.titleText}>Forecourt</Text>
+                                </View>
+                                <View style={styles.textView}>
+                                    <FontAwesome
+                                        name="trophy"
+                                        color={Colors.green}
+                                        size={80}
+                                        style={styles.icon}
+                                    />
+                                </View>
+                                <View style={styles.textView}>
+                                    <Text style={styles.titleText}>Leaderboard</Text>
+                                </View>
+                            </View>
+                    </Animatable.View>
+                : null}
+
+                {!loadingForecourts ? 
+                    <Animatable.View style={{flex: 5}} animation="bounceInUp">
+                        <Leaderboard 
+                            data={forecourts} 
+                            sortBy={forecourts.currPetrol}
+                            labelBy='name'
+                            oddRowColor={'white'}
+                            evenRowColor={'#97dba6'}
+                        />
+                    </Animatable.View>
+                : null}
+
+            </View>
+            : 
+            <View>
+                {! loadingUsers ? 
+                    <Animatable.View style={styles.topView} animation="bounceIn">
+                            <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: '10%'}}>
+                                <View style={styles.textView}>
+                                    <Text style={styles.placeText}>{result}</Text>
+                                </View>
+                                <View style={styles.textView}>
+                                    <FontAwesome
+                                        name="trophy"
+                                        color={Colors.green}
+                                        size={100}
+                                        style={styles.icon}
+                                    />
+                                </View>
+                                <View style={styles.textView}>
+                                    <Text style={styles.placeText}>{points}</Text>
+                                </View>
+                            </View>
+                    </Animatable.View>
+                : null}
+                {!loadingUsers ? 
+                    <Animatable.View style={{flex: 5}} animation="bounceInUp">
+                        <Leaderboard 
+                            data={users} 
+                            sortBy='points' 
+                            labelBy='username'
+                            oddRowColor={'white'}
+                            evenRowColor={'#97dba6'}
+                        />
+                    </Animatable.View>
+                : null}
+            </View>}
+
+            <Switch
+                trackColor={{ false: '#767577', true: '#81b0ff' }}
+                thumbColor={forecourtView ? '#f5dd4b' : '#f4f3f4'}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={toggleSwitch}
+                value={forecourtView}
+                style={styles.switch}
             />
+
         </View>
 
     )
@@ -31,10 +166,44 @@ const LeaderboardScreen = () => {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
+      backgroundColor: Colors.lightGreen,
       alignItems: 'center',
       justifyContent: 'center',
       paddingTop: 20
+    },
+    placeText: {
+        fontSize: 40,
+        fontWeight: 'bold',
+        color: Colors.green,
+        textAlign: 'center',
+        
+    },
+    titleText: {
+        fontSize: 30,
+        fontWeight: 'bold',
+        color: Colors.green,
+        textAlign: 'center',
+    },
+    textView: {
+        justifyContent: 'center', 
+        alignItems: 'center'
+    },
+    icon: {
+        shadowColor: Colors.lightGreen,
+        shadowOffset: {
+            width: 0,
+            height: 1
+        },
+        shadowRadius: 10
+    },
+    topView: {
+        flex: 2, 
+        backgroundColor: 'white', 
+        justifyContent: 'center', 
+        width: width
+    },
+    switch: {
+        bottom: 50
     }
 });
 

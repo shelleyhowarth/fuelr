@@ -10,8 +10,8 @@ const db = Firebase.firestore();
 
 export async function registration(email, password, name, username) {
   try {
-    await Firebase.auth().createUserWithEmailAndPassword(email, password);
     const currentUser = Firebase.auth().currentUser;
+    await Firebase.auth().createUserWithEmailAndPassword(email, password);
 
     db.collection("users")
       .doc(currentUser.uid)
@@ -20,7 +20,8 @@ export async function registration(email, password, name, username) {
         name: name,
         username: username,
         forecourtOwner: false,
-        points: 0
+        points: 0,
+        id: currentUser.uid
       });
       Alert.alert("Account successfully created")
   } catch (err) {
@@ -116,32 +117,47 @@ export async function updateForecourts() {
 }
 
 export async function updatePetrolPrice(id, priceInput) {
+  const currentUser = Firebase.auth().currentUser;
+  let username;
+  await db.collection('users').doc(currentUser.uid).get()
+    .then(querySnapshot => {
+      username = querySnapshot.data().username;
+    })
+
   await db.collection('forecourts').doc(id).update({
     currPetrol: {
       price: priceInput,
       timestamp: Date.now(),
-      user: 'shelleyhowarth'
+      user: username
     },
     petrol: firebase.firestore.FieldValue.arrayUnion({
       price: priceInput,
       timestamp: Date.now(),
-      user: 'shelleyhowarth'
+      user: username
     })
   });
 
 }
 
 export async function updateDieselPrice(id, priceInput) {
+  const currentUser = Firebase.auth().currentUser;
+  let username;
+
+  await db.collection('users').doc(currentUser.uid).get()
+    .then(querySnapshot => {
+      username = querySnapshot.data().username;
+  });
+
   await db.collection('forecourts').doc(id).update({
     currDiesel: {
       price: priceInput,
       timestamp: Date.now(),
-      user: 'shelleyhowarth'
+      user: username
     },
     diesel: firebase.firestore.FieldValue.arrayUnion({
       price: priceInput,
       timestamp: Date.now(),
-      user: 'shelleyhowarth'
+      user: username
     })
   });
 }
@@ -168,4 +184,17 @@ export async function submitReview(id, score) {
         ratingScore: totalScore
       })
     });
+}
+
+export async function addPoints(points, id) {
+  let currentPoints;
+  await db.collection('users').doc(id).get()
+    .then(querySnapshot => {
+      currentPoints = querySnapshot.data().points
+      currentPoints += points;
+    });
+
+  await db.collection('users').doc(id).update({
+    points: currentPoints
+  });
 }

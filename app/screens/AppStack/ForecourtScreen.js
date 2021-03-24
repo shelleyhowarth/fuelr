@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar} from 'react-native';
-import { submitReview, updatePetrolPrice, updateDieselPrice } from '../../firebase/FirebaseMethods';
+import { submitReview, updatePetrolPrice, updateDieselPrice, addPoints } from '../../firebase/FirebaseMethods';
 import { useDocumentDataOnce } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
 import { TextInput } from 'react-native-gesture-handler';
@@ -13,6 +13,7 @@ import { LineChart } from "react-native-chart-kit";
 const ForecourtScreen = ({route, navigation}) => {
     const db = Firebase.firestore();
     const [forecourt, loading, error] = useDocumentDataOnce(db.collection('forecourts').doc(route.params.id));
+    const currentUser = Firebase.auth().currentUser;
 
     //States
     const [petrolPrice, setPetrolPrice] = useState();
@@ -45,21 +46,21 @@ const ForecourtScreen = ({route, navigation}) => {
         if(!loading) {
             setElapsedTime(moment.utc(forecourt.currPetrol.timestamp).local().startOf('seconds').fromNow());
             forecourt.petrol.map((val, index) => {
-                //console.log(val);
                 petrolData.push(val.price);
                 petrolTimes.push(moment(val.timestamp).format('MMM Do'));
             });
 
-            setData({
-                labels: petrolTimes,
-                datasets: [
-                  {
-                    data: petrolData,
-                    strokeWidth: 2 // optional
-                  }
-                ],
-              });
-
+            if(forecourt.petrol.length > 1) {
+                setData({
+                    labels: petrolTimes,
+                    datasets: [
+                      {
+                        data: petrolData,
+                        strokeWidth: 2 // optional
+                      }
+                    ],
+                  });
+            }
         }
     }, [forecourt])
 
@@ -77,9 +78,14 @@ const ForecourtScreen = ({route, navigation}) => {
                   { text: "Yes", onPress: () => {
                     setPetrolPrice(petrolInput);
                     updatePetrolPrice(forecourt.id, petrolInput);
+                    addPoints(10, currentUser.uid);
                   }}
                 ]
               );
+        } else {
+            setPetrolPrice(petrolInput);
+            updatePetrolPrice(forecourt.id, petrolInput);
+            addPoints(10, currentUser.uid);
         }
     }
 
@@ -95,12 +101,61 @@ const ForecourtScreen = ({route, navigation}) => {
                     style: "cancel"
                   },
                   { text: "Yes", onPress: () => {
-                    setPetrolPrice(dieselInput);
-                    updatePetrolPrice(forecourt.id, dieselInput);
+                    setDieselPrice(dieselInput);
+                    updateDieselPrice(forecourt.id, dieselInput);
                   }}
                 ]
               );
+        } else {
+            setDieselPrice(dieselInput);
+            updateDieselPrice(forecourt.id, dieselInput);
         }
+    }
+
+    const topPetrolReporters = () => {
+        let reporters = ['--', '--', '--'];
+        let first = '--', second = '--', third = '--';
+
+        if(forecourt && forecourt.petrol.length > 0) {
+            let copy = forecourt.petrol;
+            console.log(forecourt.petrol.length);
+
+            first = mostCommon(copy);
+            copy = copy.filter( val =>  val.user !== first);
+            reporters[0] = first;
+    
+            if(copy.length) {
+                second = mostCommon(copy);
+                reporters[1] = second;
+                copy = copy.filter( val =>  val.user !== second);
+                if(copy.length) {
+                    third = mostCommon(copy);
+                    reporters[2] = third;
+                }
+            }    
+        }
+        return reporters;
+    }
+
+    const mostCommon = (arr) => {
+        var maxEl = arr[0].user
+        var maxCount = 1;
+        var modeMap = {};
+
+        for(var i = 0; i < arr.length; i++) {
+            var el = arr[i].user;
+
+            if(modeMap[el] == null)
+                modeMap[el] = 1;
+            else
+                modeMap[el]++;  
+            if(modeMap[el] > maxCount)
+            {
+                maxEl = el;
+                maxCount = modeMap[el];
+            }
+        }
+        return maxEl;
     }
 
     const FirstRoute = () => (
@@ -146,6 +201,14 @@ const ForecourtScreen = ({route, navigation}) => {
                     style={styles.title}
                 >Update diesel price</Text>
             </TouchableOpacity>
+            <Text style={styles.title}>Top Reporters</Text>
+
+            {topPetrolReporters().map((val, index) => {
+                index = index+1;
+                return(
+                    <Text>{index}. {val}</Text>
+                )
+            })}
         </View>
     );
 
