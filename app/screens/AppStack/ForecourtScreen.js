@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard} from 'react-native';
-import { useDocumentDataOnce } from 'react-firebase-hooks/firestore';
+import { useDocumentData } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
 import { TextInput } from 'react-native-gesture-handler';
 import { TabView, SceneMap } from 'react-native-tab-view';
@@ -16,14 +16,19 @@ import { ThirdRoute } from './Tabs/ThirdRoute';
 
 
 const ForecourtScreen = ({route, navigation}) => {
+    //Consts
     const db = Firebase.firestore();
-    const [forecourt, loading, error] = useDocumentDataOnce(db.collection('forecourts').doc(route.params.id));
+    const [forecourt, loading, error] = useDocumentData(
+        db.collection('forecourts').doc(route.params.id),
+        {
+            snapshotListenOptions: { includeMetadataChanges: true},
+        }
+    );
     const currentUser = Firebase.auth().currentUser;
+    const layout = useWindowDimensions();
 
 
     //States
-
-
     const [spinner, setSpinner] = useState(true);
     const [rating, setRating] = useState(null);
     const [index, setIndex] = useState(0);
@@ -35,9 +40,6 @@ const ForecourtScreen = ({route, navigation}) => {
     const [data, setData] = useState();
 
     //Other variables
-    const layout = useWindowDimensions();
-    let petrolInput;
-    let dieselInput;
     let petrolData = [];
     let petrolTimes = [];
     let dieselData = [];
@@ -56,7 +58,6 @@ const ForecourtScreen = ({route, navigation}) => {
                 petrolData.push(val.price);
                 petrolTimes.push(moment(val.timestamp).format('MMM Do'));
             });
-
 
             forecourt.diesel.map((val, index) => {
                 dieselData.push(val.price);

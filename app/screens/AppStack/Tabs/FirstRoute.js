@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard} from 'react-native';
-import { submitReview, updatePetrolPrice, updateDieselPrice, addPoints } from '../../../firebase/FirebaseMethods';
+import { updatePetrolPrice, updateDieselPrice, addPoints } from '../../../firebase/FirebaseMethods';
 import Firebase from '../../../firebase/Firebase';
 import { TextInput } from 'react-native-gesture-handler';
 import moment from 'moment';
@@ -10,8 +10,10 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import StarRating from '../../../components/StarRating';
 import Modal from 'react-native-modal';
 import { LinearGradient } from 'expo-linear-gradient';
+import { TextInputMask } from 'react-native-masked-text'
 
-export const FirstRoute = ({forecourt}) => {
+
+export const FirstRoute = ({forecourt, navigation}) => {
     //States
     const [petrolModalVisible, setPetrolModalVisible] = useState(false);
     const [dieselModalVisible, setDieselModalVisible] = useState(false);
@@ -22,16 +24,19 @@ export const FirstRoute = ({forecourt}) => {
     const [dieselPrice, setDieselPrice] = useState();
     
     //Vars
-    const currentUser = Firebase.auth().currentUser;
-    const layout = useWindowDimensions();
     let petrolInput, dieselInput;
 
     //UseEffect
     useEffect(() => {
-        setPetrolElapsedTime(moment.utc(forecourt.currPetrol.timestamp).local().startOf('seconds').fromNow());
-        setDieselElapsedTime(moment.utc(forecourt.currDiesel.timestamp).local().startOf('seconds').fromNow());
+        if(forecourt.currPetrol.timestamp) {
+            setPetrolElapsedTime(moment.utc(forecourt.currPetrol.timestamp).local().startOf('seconds').fromNow());
+        }
+
+        if(forecourt.currDiesel.timestamp) {
+            setDieselElapsedTime(moment.utc(forecourt.currDiesel.timestamp).local().startOf('seconds').fromNow());
+        }
         setSpinner(false);
-    }, [dieselPrice])
+    }, [forecourt])
 
     //Methods
     const topPetrolReporters = () => {
@@ -157,7 +162,7 @@ export const FirstRoute = ({forecourt}) => {
                         </Text>
                         <View style={{flexDirection: 'row'}}>
                             <View style={{flex: 2, justifyContent: 'center'}}>
-                                <Text style={styles.priceModal}>{forecourt.currPetrol.price}</Text>
+                                <Text style={styles.priceModal}>{forecourt.currPetrol.price ? forecourt.currPetrol.price : '--.-' }</Text>
                             </View>
                             <View style={{flex:1}}/>
 
@@ -171,7 +176,14 @@ export const FirstRoute = ({forecourt}) => {
                             </TouchableOpacity>
                             <View style={{flex:1}}/>
                             <View style={{flex: 2, justifyContent: 'center'}}>
-                                <TextInput
+                                <TextInputMask
+                                    type={'money'}
+                                    options={{
+                                        precision: 1,
+                                        separator: '.',
+                                        unit: '',
+
+                                    }}
                                     style={styles.input}
                                     onChangeText={val => {
                                         petrolInput = val; 
@@ -179,6 +191,7 @@ export const FirstRoute = ({forecourt}) => {
                                     }}
                                     keyboardType='numeric'
                                     value={petrolPrice}
+                                    maxLength={5}
                                 />
                             </View>
                         </View>
@@ -209,7 +222,7 @@ export const FirstRoute = ({forecourt}) => {
                         </Text>
                         <View style={{flexDirection: 'row'}}>
                             <View style={{flex: 2, justifyContent: 'center'}}>
-                                <Text style={styles.priceModal}>{forecourt.currDiesel.price}</Text>
+                                <Text style={styles.priceModal}>{forecourt.currDiesel.price ? forecourt.currDiesel.price : '--.-' }</Text>
                             </View>
                             <View style={{flex:1}}/>
 
@@ -223,7 +236,14 @@ export const FirstRoute = ({forecourt}) => {
                             </TouchableOpacity>
                             <View style={{flex:1}}/>
                             <View style={{flex: 2, justifyContent: 'center'}}>
-                                <TextInput
+                                <TextInputMask
+                                    type={'money'}
+                                    options={{
+                                        precision: 1,
+                                        separator: '.',
+                                        unit: '',
+
+                                    }}
                                     style={styles.input}
                                     onChangeText={val => {
                                         dieselInput = val; 
@@ -231,6 +251,7 @@ export const FirstRoute = ({forecourt}) => {
                                     }}
                                     keyboardType='numeric'
                                     value={dieselPrice}
+                                    maxLength={5}
                                 />
                             </View>
                         </View>
@@ -263,7 +284,7 @@ export const FirstRoute = ({forecourt}) => {
                     >Petrol
                     </Text>
                     <View style={{flex: 3}}>
-                        <Text style={styles.price}>{forecourt.currPetrol.price}</Text>
+                        <Text style={styles.price}>{forecourt.currPetrol.price ? forecourt.currPetrol.price : '--.-' }</Text>
                     </View>
                     <View style={{flex: 3}}>
                         <Text style={styles.updated}>{petrolElapsedTime}</Text>
@@ -287,7 +308,7 @@ export const FirstRoute = ({forecourt}) => {
                     >Diesel
                     </Text>
                     <View style={{flex: 3}}>
-                        <Text style={styles.price}>{forecourt.currDiesel.price}</Text>
+                        <Text style={styles.price}>{forecourt.currDiesel.price ? forecourt.currDiesel.price : '--.-' }</Text>
                     </View>
                     <View style={{flex: 3}}>
                         <Text style={styles.updated}>{dieselElapsedTime}</Text>

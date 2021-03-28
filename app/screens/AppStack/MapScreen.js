@@ -9,8 +9,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import StarRating from '../../components/StarRating';
 import { Platform } from 'react-native';
 import Firebase from '../../firebase/Firebase';
-import { useCollectionDataOnce } from 'react-firebase-hooks/firestore';
-import { updateForecourts } from '../../firebase/FirebaseMethods';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { useIsFocused } from "@react-navigation/native";
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -23,9 +22,14 @@ const db = Firebase.firestore();
 
 const MapScreen = ({navigation}) => {
 
-    const [spinner, setSpinner] = useState(false);
+    const [spinner, setSpinner] = useState(true);
     const [region, setRegion] = useState(null);
-    const [forecourts, loading, error] = useCollectionDataOnce(db.collection('forecourts'));
+    const [forecourts, loading, error] = useCollectionData(
+        db.collection('forecourts'),
+        {
+            snapshotListenOptions: {includeMetadataChanges: true}
+        }
+    );
     const [diesel, setDiesel] = useState(false);
     const isFocused = useIsFocused();
 

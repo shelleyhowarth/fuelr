@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {View, StyleSheet, RefreshControl, Text, Dimensions, StatusBar, Switch} from 'react-native';
 import { signOut } from '../../firebase/FirebaseMethods';
 import Leaderboard from 'react-native-leaderboard';
-import { useCollectionDataOnce } from 'react-firebase-hooks/firestore';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
 import { Colors } from '../../../styles/Colors';
 import * as firebase from 'firebase';
@@ -19,8 +19,18 @@ const LeaderboardScreen = () => {
     const currentUser = firebase.auth().currentUser.uid;
 
     //States
-    const [users, loadingUsers, errorUsers] = useCollectionDataOnce(db.collection('users'));
-    const [forecourts, loadingForecourts, errorForecourts] = useCollectionDataOnce(db.collection('forecourts'));
+    const [users, loadingUsers, errorUsers] = useCollectionData(
+        db.collection('users'),
+        {
+            snapshotListenOptions: { includeMetadataChanges: true},
+        }
+    );
+    const [forecourts, loadingForecourts, errorForecourts] = useCollectionData(
+        db.collection('forecourts'),
+        {
+            snapshotListenOptions: { includeMetadataChanges: true},
+        }
+    );
     const [forecourtView, setForecourtView] = useState(false);
     const [result, setResult] = useState();
     const [points, setPoints] = useState();
