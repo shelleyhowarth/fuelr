@@ -12,6 +12,7 @@ import Firebase from '../../firebase/Firebase';
 import { useCollectionDataOnce } from 'react-firebase-hooks/firestore';
 import { updateForecourts } from '../../firebase/FirebaseMethods';
 import { useIsFocused } from "@react-navigation/native";
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get("window");
 
@@ -24,11 +25,10 @@ const MapScreen = ({navigation}) => {
 
     const [spinner, setSpinner] = useState(false);
     const [region, setRegion] = useState(null);
-    const [mapAnimation, setMapAnimation] = useState(new Animated.Value(0));
     const [forecourts, loading, error] = useCollectionDataOnce(db.collection('forecourts'));
-    const [interpolations, setInterpolations] = useState();
     const [diesel, setDiesel] = useState(false);
     const isFocused = useIsFocused();
+
 
     const scrollRef = useRef(null);
 
@@ -195,18 +195,18 @@ const MapScreen = ({navigation}) => {
                                     Diesel: --
                                 </Text> 
                             }
-                            <View >
+                            <View>
                                 <TouchableOpacity
-                                    style={styles.button}
                                     onPress={() => navigation.navigate('ForecourtScreen', {
                                         id: marker.id
                                     })}
                                 >
-                                    <Text
-                                        style={styles.buttonText}
-                                    >
-                                        View more
-                                    </Text>
+                                        <LinearGradient
+                                            colors={[Colors.midGreen, Colors.green]}
+                                            style={styles.signIn}
+                                        >
+                                            <Text style={styles.buttonText}>View more</Text>
+                                        </LinearGradient>
                                 </TouchableOpacity>
 
                             </View>
@@ -303,46 +303,54 @@ const styles = StyleSheet.create({
         width: CARD_WIDTH,
         overflow: "hidden",
         flexDirection: 'row',
-      },
+    },
 
-      cardImage: {
+    cardImage: {
         flex: 6,
         width: '40%',
         height: '100%'
-      },
+    },
 
-      textContent: {
+    textContent: {
         flex: 2,
         padding: 10,
-      },
+    },
 
-      priceText: {
-          fontSize: 20
-      },
+    priceText: {
+        fontSize: 20
+    },
 
-      priceContent: {
-          alignItems: 'center',
-          justifyContent: 'center',
-          alignContent: 'center',
-          margin: 5,
-          textAlignVertical: 'center',
-          flex: 2
-      },
+    priceContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        alignContent: 'center',
+        margin: 5,
+        textAlignVertical: 'center',
+        flex: 2
+    },
 
-      button: {
+    button: {
         alignItems: 'center',
         marginTop: 5,
         borderWidth: 1,
         borderColor: Colors.green,
         borderRadius: 4
-      },
+    },
 
-      buttonText: {
-          fontSize: 20,
-          fontWeight: 'bold',
-          color: Colors.midGreen,
+    buttonText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'white'
+    },
 
-      }
+    signIn: {
+        width: '70%',
+        height: '65%',
+        justifyContent: 'center',
+        borderRadius:  10,
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
 });
 
 export default MapScreen;

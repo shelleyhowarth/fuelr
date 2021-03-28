@@ -93,7 +93,6 @@ export async function getForecourt(lng, lat) {
     .then(querySnapshot => {
       querySnapshot.docs.forEach(doc => {
         if(lat === doc.data().latitude && lng === doc.data().longitude) {
-          console.log(doc.data())
           obj = doc.data();
         }
       })
@@ -117,73 +116,91 @@ export async function updateForecourts() {
 }
 
 export async function updatePetrolPrice(id, priceInput) {
-  const currentUser = Firebase.auth().currentUser;
+  const currentUser = Firebase.auth().currentUser.uid;
   let username;
-  await db.collection('users').doc(currentUser.uid).get()
+
+  await db.collection('users').doc(currentUser).get()
     .then(querySnapshot => {
       username = querySnapshot.data().username;
     })
-
-  await db.collection('forecourts').doc(id).update({
-    currPetrol: {
-      price: priceInput,
-      timestamp: Date.now(),
-      user: username
-    },
-    petrol: firebase.firestore.FieldValue.arrayUnion({
-      price: priceInput,
-      timestamp: Date.now(),
-      user: username
-    })
-  });
-
+    .then( async() =>   
+      await db.collection('forecourts').doc(id).update({
+        currPetrol: {
+          price: priceInput,
+          timestamp: Date.now(),
+          user: username
+        },
+        petrol: firebase.firestore.FieldValue.arrayUnion({
+          price: priceInput,
+          timestamp: Date.now(),
+          user: username
+        })
+      })
+    )
+    .then(addPoints(10, currentUser))
 }
 
 export async function updateDieselPrice(id, priceInput) {
-  const currentUser = Firebase.auth().currentUser;
+  const currentUser = Firebase.auth().currentUser.uid;
   let username;
 
-  await db.collection('users').doc(currentUser.uid).get()
+  await db.collection('users').doc(currentUser).get()
     .then(querySnapshot => {
       username = querySnapshot.data().username;
-  });
-
-  await db.collection('forecourts').doc(id).update({
-    currDiesel: {
-      price: priceInput,
-      timestamp: Date.now(),
-      user: username
-    },
-    diesel: firebase.firestore.FieldValue.arrayUnion({
-      price: priceInput,
-      timestamp: Date.now(),
-      user: username
     })
-  });
+    .then( async() => 
+      await db.collection('forecourts').doc(id).update({
+        currDiesel: {
+          price: priceInput,
+          timestamp: Date.now(),
+          user: username
+        },
+        diesel: firebase.firestore.FieldValue.arrayUnion({
+          price: priceInput,
+          timestamp: Date.now(),
+          user: username
+        })
+      })
+    )
+    .then(addPoints(10, currentUser))
 }
 
 export async function submitReview(id, score) {
-  await db.collection('forecourts').doc(id).update({
-    reviews: firebase.firestore.FieldValue.arrayUnion({
-      rating: score,
-      timestamp: Date.now(),
-      user: 'shelleyhowarth'
-    })
-  });
-  
+  const currentUser = Firebase.auth().currentUser.uid;
   let totalScore = 0;
   let count = 0;
-  await db.collection('forecourts').doc(id).get()
+  let username;
+  
+  await db.collection('users').doc(currentUser).get()
     .then(querySnapshot => {
-      querySnapshot.data().reviews.map((reviews, index) => {
-        totalScore += reviews.rating;
-        count++;
-      });
-      totalScore = totalScore/count;
-      querySnapshot.ref.update({
-        ratingScore: totalScore
+      username = querySnapshot.data().username;
+      console.log(Date.now());
+    })
+ 
+  await db.collection('forecourts').doc(id).update({
+        reviews: firebase.firestore.FieldValue.arrayUnion({
+          rating: score,
+          timestamp: Date.now(),
+          user: username
+        })
       })
-    });
+    .catch(e => console.log(e))
+    .then(
+      await db.collection('forecourts').doc(id).get()
+        .then( querySnapshot => {
+          querySnapshot.data().reviews.map((reviews, index) => {
+            totalScore += reviews.rating;
+            count++;
+          });
+
+          totalScore = totalScore/count;
+
+          querySnapshot.ref.update({
+            ratingScore: totalScore
+          })
+        })
+    )
+    .then(addPoints(15, currentUser))
 }
 
 export async function addPoints(points, id) {
@@ -196,5 +213,6 @@ export async function addPoints(points, id) {
 
   await db.collection('users').doc(id).update({
     points: currentPoints
-  });
+  })
+    .then(Alert.alert(`Congratulations! You gained ${points} points.`));
 }

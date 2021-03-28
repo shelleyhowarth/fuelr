@@ -8,6 +8,7 @@ import { Colors } from '../../../styles/Colors';
 import * as firebase from 'firebase';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 
 const db = Firebase.firestore();
@@ -23,6 +24,7 @@ const LeaderboardScreen = () => {
     const [forecourtView, setForecourtView] = useState(false);
     const [result, setResult] = useState();
     const [points, setPoints] = useState();
+    const [spinner, setSpinner] = useState(true);
 
     const toggleSwitch = () => setForecourtView(previousState => !previousState);
 
@@ -31,6 +33,8 @@ const LeaderboardScreen = () => {
             users.sort((a, b) => (a.points < b.points) ? 1 : -1);
             setResult(getPos());
             setPoints(getPoints());
+            setSpinner(false);
+
         }
 
         if(!loadingForecourts) {
@@ -42,7 +46,8 @@ const LeaderboardScreen = () => {
                         obj.name += " " + obj.address.split(" ").pop();
                     }
             });
-            console.log(forecourts);
+            setSpinner(false);
+
         }
 
     }, [users, forecourts])
@@ -86,6 +91,11 @@ const LeaderboardScreen = () => {
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={'white'} barStyle="dark-content"/>
+            <Spinner
+                visible={spinner}
+                textContent={'Getting leaderboard data...'}
+                textStyle={styles.spinnerTextStyle}
+            />
 
             { forecourtView ?
             <View>
@@ -212,7 +222,10 @@ const styles = StyleSheet.create({
     },
     switch: {
         bottom: 50
-    }
+    },
+    spinnerTextStyle: {
+        color: '#FFF'
+    },
 });
 
 export default LeaderboardScreen;
