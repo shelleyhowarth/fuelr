@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {View, Text, StyleSheet, Dimensions, Image, Animated, Switch } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import {View, Text, StyleSheet, Dimensions, Image, Animated, Switch, TouchableOpacity } from 'react-native';
 import MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import { Colors } from '../../../styles/Colors';
@@ -15,7 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get("window");
 
-const CARD_HEIGHT = 220;
+const CARD_HEIGHT = 200;
 const CARD_WIDTH = width * 0.8;
 const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
 const db = Firebase.firestore();
@@ -69,7 +68,7 @@ const MapScreen = ({navigation}) => {
                 <View>
                     {marker.currPetrol.price ?
                         <Text> {marker.currPetrol.price} </Text>
-                    :   <Text> -- </Text> }
+                    :   <Text> --.- </Text> }
                 </View>
             )
         } else {
@@ -77,11 +76,15 @@ const MapScreen = ({navigation}) => {
                 <View>
                     {marker.currDiesel.price ?
                         <Text> {marker.currDiesel.price} </Text>
-                    :   <Text> -- </Text> }
+                    :   <Text> --.- </Text> }
                 </View>
             )
         }
 
+    }
+
+    const shortenAddress = (marker) => {
+        return marker.address.replace(marker.name, '');
     }
 
     const onMarkerPress = (e) => {
@@ -151,55 +154,68 @@ const MapScreen = ({navigation}) => {
                 }}
             >
                 { !loading ? forecourts.map( (marker, index) => (
+                    //flex:1, flexDirection: 'row'
                     <View style={styles.card} key={index}>
-                        <View style={{flex: 1}}>
+                        <View style={{flex: 2}}>
                             <Image 
                                 source={{uri: marker.logo}}
                                 style={styles.cardImage}
                             />
+                        </View>
+                        <View style={{flex: 1}}/>
+
+                        <View style={{flex: 3, flexDirection: 'column'}}>
+
                             <View style={styles.textContent}>
                                 <Text 
-                                    numberOfLines = {1}
+                                    numberOfLines = {2}
+
                                     style={styles.cardTitle}
                                 >
-                                    {marker.name}
+                                    {marker.name ? marker.name : 'FUEL STATION'}
                                 </Text>
                                 <Text 
                                     numberOfLines = {1}
                                     style={{fontSize: 10}}
                                 >
-                                    {marker.address}
+                                    {shortenAddress(marker)}
                                 </Text>
                                 <StarRating ratings={marker.ratingScore} reviews={marker.reviews.length}></StarRating>
                             </View>
-                        </View>
-                        <View styles={styles.priceContent}>
-                            {marker.currPetrol.price ? 
-                                <Text 
-                                    numberOfLines = {1}
-                                    style={styles.priceText}>
-                                    Petrol: {marker.currPetrol.price}
-                                </Text>
-                            :   <Text 
-                                    numberOfLines = {1}
-                                    style={styles.priceText}>
-                                    Petrol: --
-                                </Text> 
-                            }
 
-                            {marker.currDiesel.price ? 
-                                <Text 
-                                    numberOfLines = {1}
-                                    style={styles.priceText}>
-                                    Diesel: {marker.currDiesel.price}
-                                </Text>
-                            :   <Text 
-                                    numberOfLines = {1}
-                                    style={styles.priceText}>
-                                    Diesel: --
-                                </Text> 
-                            }
-                            <View>
+                            <View style={{flex: 1}}/>
+
+                            <View style={{flex: 3}}>
+                                <View styles={styles.priceContent}>
+                                    {marker.currPetrol.price ? 
+                                        <Text 
+                                            numberOfLines = {1}
+                                            style={styles.priceText}>
+                                            Petrol: {marker.currPetrol.price}
+                                        </Text>
+                                    :   <Text 
+                                            numberOfLines = {1}
+                                            style={styles.priceText}>
+                                            Petrol: --.-
+                                        </Text> 
+                                    }
+
+                                    {marker.currDiesel.price ? 
+                                        <Text 
+                                            numberOfLines = {1}
+                                            style={styles.priceText}>
+                                            Diesel: {marker.currDiesel.price}
+                                        </Text>
+                                    :   <Text 
+                                            numberOfLines = {1}
+                                            style={styles.priceText}>
+                                            Diesel: --.-
+                                        </Text> 
+                                    }
+                                </View>
+                            </View>
+
+                            <View style={{flex: 3}}>
                                 <TouchableOpacity
                                     onPress={() => navigation.navigate('ForecourtScreen', {
                                         id: marker.id
@@ -212,7 +228,6 @@ const MapScreen = ({navigation}) => {
                                             <Text style={styles.buttonText}>View more</Text>
                                         </LinearGradient>
                                 </TouchableOpacity>
-
                             </View>
                         </View>
                     </View>
@@ -295,7 +310,7 @@ const styles = StyleSheet.create({
     card: {
         padding: 5,
         elevation: 2,
-        backgroundColor: "#FFF",
+        backgroundColor: Colors.lightGreen,
         borderTopLeftRadius: 5,
         borderTopRightRadius: 5,
         marginHorizontal: 10,
@@ -303,34 +318,34 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         shadowOpacity: 0.3,
         shadowOffset: { x: 2, y: -2 },
-        height: CARD_HEIGHT,
+        height: CARD_HEIGHT-10,
         width: CARD_WIDTH,
-        overflow: "hidden",
+        overflow: 'visible',
         flexDirection: 'row',
+        borderWidth: 2,
+        borderColor: Colors.green,
+        flex: 1,
+        flexDirection: 'row'
+
     },
 
     cardImage: {
-        flex: 6,
-        width: '40%',
-        height: '100%'
+        width: 150,
+        height: 180
     },
 
     textContent: {
-        flex: 2,
-        padding: 10,
     },
 
     priceText: {
-        fontSize: 20
+        fontSize: 23
     },
 
     priceContent: {
         alignItems: 'center',
         justifyContent: 'center',
         alignContent: 'center',
-        margin: 5,
         textAlignVertical: 'center',
-        flex: 2
     },
 
     button: {
@@ -348,8 +363,8 @@ const styles = StyleSheet.create({
     },
 
     signIn: {
-        width: '70%',
-        height: '65%',
+        width: '100%',
+        height: '80%',
         justifyContent: 'center',
         borderRadius:  10,
         flexDirection: 'row',

@@ -39,6 +39,9 @@ export const FirstRoute = ({forecourt, navigation}) => {
     }, [forecourt])
 
     //Methods
+    const shortenAddress = (marker) => {
+        return marker.address.replace(marker.name, '');
+    }
     const topPetrolReporters = () => {
         let reporters = ['--', '--', '--'];
         let first = '--', second = '--', third = '--';
@@ -166,10 +169,10 @@ export const FirstRoute = ({forecourt, navigation}) => {
                             </View>
                             <View style={{flex:1}}/>
 
-                            <TouchableOpacity onPress={ () => onConfirmCurrent('petrol')} style={{flex: 3, justifyContent: 'center'}}>
+                            <TouchableOpacity onPress={ () => onConfirmCurrent('petrol')} style={{flex: 3, justifyContent: 'center'}} disabled={!forecourt.currPetrol.price}>
                                 <LinearGradient
                                     colors={[Colors.midGreen, Colors.green]}
-                                    style={styles.confirm}
+                                    style={forecourt.currPetrol.price ? styles.confirm : styles.confirmDisabled}
                                 >
                                     <Text style={styles.reportPrice}>Same Price</Text>
                                 </LinearGradient>
@@ -268,7 +271,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                 </Modal>
                 <View style={styles.header}>
                     <Text style={styles.stationTitle}>{forecourt.name ? forecourt.name : 'FUEL STATION'}</Text>
-                    <Text>{forecourt.address}</Text>
+                    <Text>{shortenAddress(forecourt)}</Text>
                     <StarRating 
                         ratings={forecourt.ratingScore} 
                         reviews={forecourt.reviews.length}
@@ -434,6 +437,16 @@ const styles = StyleSheet.create({
         borderColor: Colors.green,
         fontSize: 30,
         justifyContent: 'center'
+    },
+    confirmDisabled: {
+        width: '100%',
+        height: '55%',
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: Colors.green,
+        fontSize: 30,
+        justifyContent: 'center',
+        opacity: 0.1
     },
     confirmModal: {
         width: '100%',
