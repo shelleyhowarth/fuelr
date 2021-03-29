@@ -1,18 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Dimensions, TextInput, StatusBar } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { CheckBox } from 'react-native-elements'
 import { Colors } from '../../../styles/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import * as Animatable from 'react-native-animatable';
-import { registration, checkUsernames } from '../../firebase/FirebaseMethods';
+import { registration } from '../../firebase/FirebaseMethods';
 import Firebase from '../../firebase/Firebase';
 import "firebase/firestore";
-import { capitalize } from 'validate.js';
+import Geocoder from 'react-native-geocoding';
 
-const db = Firebase.firestore();
+
 
 const SignUpScreen = ({navigation}) => {
+    const db = Firebase.firestore();
+    Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
+
+    const [isSelected, setSelection] = useState(false);
+    const [usernameTaken, setUsernameTaken] = useState(false);
+    const [forecourtExists, setForecourtExists] = useState(false);
+
     const [data, setData] = React.useState({
         name: '',
         username: '',
@@ -68,7 +77,17 @@ const SignUpScreen = ({navigation}) => {
     }
 
     const usernameInputChange = (value) => {
-        if(value.length !== 0) {
+        setUsernameTaken(false);
+        checkUsernames(value);
+
+        if(usernameTaken === true) {
+            setData({
+                ...data,
+                username: value,
+                handleUsernameChange: false,
+                usernameError: "Username taken"
+            });
+        } else if(value.length !== 0) {
             setData({
                 ...data,
                 username: value,
@@ -141,12 +160,49 @@ const SignUpScreen = ({navigation}) => {
         });
     }
 
+    const forecourtInputChange = async(eircode) => {
+        Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
+        eircode += "+ire";
+
+        await Geocoder.from(eircode)
+          .then(json => {
+              var lat = json.results[0].geometry.location.lat;
+              var lng = json.results[0].geometry.location.lng;
+      
+              db.collection('forecourts').get()
+                .then(querySnapshot => {
+                  querySnapshot.docs.forEach(doc => {
+                    if(lat === doc.data().latitude && lng === doc.data().longitude) {
+                      setForecourtExists(true);
+                    }
+                  });
+                });
+          })
+          .catch(error => console.warn(error));
+    }
+
+    const checkUsernames = async (username) => {
+        try {
+            await db.collection("users").get()
+            .then(querySnapshot => {
+                querySnapshot.docs.forEach(doc => {
+                    if(doc.data().username == username) {
+                        setUsernameTaken(true);
+                    }
+                })
+            })
+        } catch(e) {
+            console.log(e);
+        }
+      }
+
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={Colors.green} barStyle="light-content"/>
             <View style={styles.header}>
                 <Text style={styles.textHeader}>Create an account</Text>
             </View>
+            <KeyboardAwareScrollView>
             <Animatable.View 
                 style={styles.footer}
                 animation="fadeInUpBig"
@@ -170,15 +226,15 @@ const SignUpScreen = ({navigation}) => {
                     : null}
 
                     {data.handleNameChange ? 
-                    <Animatable.View
-                        animation="bounceIn"
-                    >
-                        <Feather
-                            name="check-circle"
-                            color="green"
-                            size={20}
-                        />
-                    </Animatable.View>
+                        <Animatable.View
+                            animation="bounceIn"
+                        >
+                            <Feather
+                                name="check-circle"
+                                color="green"
+                                size={20}
+                            />
+                        </Animatable.View>
                     : null}
                 </View>
                 <Text style={[styles.textFooter, {
@@ -194,28 +250,30 @@ const SignUpScreen = ({navigation}) => {
                         placeholder="Your username"
                         style={styles.textInput}
                         autoCapitalize="none"
-                        onChangeText = {(value) => usernameInputChange(value)}
+                        onChangeText = {(value) => value !== '' ? usernameInputChange(value) : null}
                     />
 
                     {data.usernameError ? 
-                    <Text style={{color: 'red'}}> {data.usernameError} </Text>
+                        <Text style={{color: 'red'}}> {data.usernameError} </Text>
                     : null}
 
                     {data.handleUsernameChange ? 
-                    <Animatable.View
-                        animation="bounceIn"
-                    >
-                        <Feather
-                            name="check-circle"
-                            color="green"
-                            size={20}
-                        />
-                    </Animatable.View>
+                        <Animatable.View
+                            animation="bounceIn"
+                        >
+                            <Feather
+                                name="check-circle"
+                                color="green"
+                                size={20}
+                            />
+                        </Animatable.View>
                     : null}
                 </View>
                 <Text style={[styles.textFooter, {
                     marginTop: 30
-                }]}>Email</Text>
+                }]}>
+                    Email
+                </Text>
                 <View style={styles.action}>
                     <Feather
                         name="mail"
@@ -234,20 +292,22 @@ const SignUpScreen = ({navigation}) => {
                     : null}
 
                     {data.handleEmailChange ? 
-                    <Animatable.View
-                        animation="bounceIn"
-                    >
-                        <Feather
-                            name="check-circle"
-                            color="green"
-                            size={20}
-                        />
-                    </Animatable.View>
+                        <Animatable.View
+                            animation="bounceIn"
+                        >
+                            <Feather
+                                name="check-circle"
+                                color="green"
+                                size={20}
+                            />
+                        </Animatable.View>
                     : null}
                 </View>
                 <Text style={[styles.textFooter, {
                     marginTop: 30
-                }]}>Password</Text>
+                }]}>
+                    Password
+                </Text>
                 <View style={styles.action}>
                     <Feather
                         name="lock"
@@ -270,23 +330,25 @@ const SignUpScreen = ({navigation}) => {
                         onPress={updateSecureTextEntry}
                     >
                         {data.secureTextEntry ?
-                        <Feather
-                            name="eye-off"
-                            color="grey"
-                            size={20}
-                        />
-                        :
-                        <Feather
-                            name="eye"
-                            color="grey"
-                            size={20}
-                        />                      
+                            <Feather
+                                name="eye-off"
+                                color="grey"
+                                size={20}
+                            />
+                            :
+                            <Feather
+                                name="eye"
+                                color="grey"
+                                size={20}
+                            />                      
                         }
                     </TouchableOpacity>
                 </View>
                 <Text style={[styles.textFooter, {
                     marginTop: 30
-                    }]}>Confirm Password</Text>
+                    }]}>
+                        Confirm Password
+                    </Text>
                 <View style={styles.action}>
                     <Feather
                         name="lock"
@@ -309,25 +371,74 @@ const SignUpScreen = ({navigation}) => {
                         onPress={updateCheckSecureTextEntry}
                     >
                         {data.checkSecureTextEntry ?
-                        <Feather
-                            name="eye-off"
-                            color="grey"
-                            size={20}
-                        />
-                        :
-                        <Feather
-                            name="eye"
-                            color="grey"
-                            size={20}
-                        />                      
+                            <Feather
+                                name="eye-off"
+                                color="grey"
+                                size={20}
+                            />
+                            :
+                            <Feather
+                                name="eye"
+                                color="grey"
+                                size={20}
+                            />                      
                         }
                     </TouchableOpacity>
                 </View>
+                <View style={styles.checkbox}>
+                    <Text style={styles.textFooter}>
+                        Are you a forecourt owner?
+                    </Text>
+                    <CheckBox
+                        checked={isSelected}
+                        onPress={ () => setSelection(!isSelected) }
+                        checkedColor= {Colors.green}
+                    />
+                </View>
+                { isSelected ?
+                    <View>
+                        <Text style={[styles.textFooter, {
+                            marginTop: 30
+                        }]}>
+                            Forecourt Eircode
+                        </Text>
+                        <View style={styles.action}>
+                            <FontAwesome
+                                name="user-o"
+                                color={Colors.green}
+                                size={20}
+                            />
+                            <TextInput
+                                placeholder="Forecourt Eircode"
+                                style={styles.textInput}
+                                autoCapitalize="none"
+                                onChangeText = {(value) => forecourtInputChange(value)}
+                            />
+        
+                            {data.usernameError ? 
+                                <Text style={{color: 'red'}}> {data.usernameError} </Text>
+                            : null}
+        
+                            {data.handleUsernameChange ? 
+                                <Animatable.View
+                                    animation="bounceIn"
+                                >
+                                    <Feather
+                                        name="check-circle"
+                                        color="green"
+                                        size={20}
+                                    />
+                                </Animatable.View>
+                            : null}
+                        </View>
+                    </View>
+
+                : null}
+
                 <View style={styles.button}>
                     <TouchableOpacity
                         onPress={() => {
                             registration(data.email, data.password, data.name, data.username);
-                            console.log(data.password);
                         }}
                         style={styles.signUp}
                     >
@@ -335,11 +446,12 @@ const SignUpScreen = ({navigation}) => {
                             colors={[Colors.midGreen, Colors.green]}
                             style={styles.signIn}
                         >
-                            <Text style={styles.textSign}>Sign in</Text>
+                            <Text style={styles.textSign}>Sign up</Text>
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>
             </Animatable.View>
+            </KeyboardAwareScrollView>
         </View>
     );
 };
@@ -364,6 +476,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
         paddingVertical: 20,
         paddingHorizontal: 30
     },
@@ -424,5 +538,10 @@ const styles = StyleSheet.create({
         borderColor: Colors.green,
         borderWidth: 1,
         marginTop: 15
+    },
+
+    checkbox: {
+        flexDirection: 'row',
+        alignItems: 'center'
     }
 });
