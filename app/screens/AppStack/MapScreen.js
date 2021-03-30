@@ -38,7 +38,6 @@ const MapScreen = ({navigation}) => {
     const toggleSwitch = () => setDiesel(previousState => !previousState);
 
     useEffect( () => {
-
         //Getting location permission and setting inital region to user's location
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
@@ -58,7 +57,7 @@ const MapScreen = ({navigation}) => {
 
             setRegion(tempRegion);
             setSpinner(false);
-          })();
+        })();
         
     }, [forecourts, isFocused])
 

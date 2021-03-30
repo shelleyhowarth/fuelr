@@ -108,12 +108,26 @@ export async function updateForecourts() {
       querySnapshot.docs.forEach(doc => {
           obj = {
             ...doc.data(),
-            id: doc.id
+            amenities: {
+              atm: false,
+              deli: false,
+              bathroom: false,
+              electricCharging: false,
+              payAtPump: false,
+              acceptsCard: false,
+              convenienceStore: false,
+              carWash: false,
+              airAndWater: false,
+              vacuum: false,
+              wifi: false,
+              alcohol: false
+            }
           }
-          doc.ref.update(obj);
-        })
-      });
-}
+          db.collection('forecourts').doc(doc.data().id).update(obj).then(console.log('success')).catch(e => console.log(e));
+      })
+    })
+    .catch(e => console.log(e));
+  }
 
 export async function updatePetrolPrice(id, priceInput) {
   const currentUser = Firebase.auth().currentUser.uid;

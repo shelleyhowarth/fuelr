@@ -16,6 +16,7 @@ const { width, height } = Dimensions.get("window");
 
 
 const LeaderboardScreen = () => {
+    //Consts
     const currentUser = firebase.auth().currentUser.uid;
 
     //States
@@ -35,8 +36,10 @@ const LeaderboardScreen = () => {
     const [result, setResult] = useState();
     const [points, setPoints] = useState();
     const [spinner, setSpinner] = useState(true);
+    const [forecourtsFiltered, setForecourtsFiltered] = useState([]);
 
-    const toggleSwitch = () => setForecourtView(previousState => !previousState);
+    //Vars
+    let temp = [];
 
     useEffect ( () => {
         if(!loadingUsers) {
@@ -48,19 +51,28 @@ const LeaderboardScreen = () => {
         }
 
         if(!loadingForecourts) {
-            forecourts.forEach( obj => {
-                    obj.petrolPrice = obj.currPetrol.price;
-                    if(!obj.name.length) {
-                        obj.name += "N/A " +  obj.address.split(" ").pop();
-                    } else {
-                        obj.name += " " + obj.address.split(" ").pop();
-                    }
-            });
-            setSpinner(false);
+            temp = forecourts;
+            temp = temp.filter((forecourt) => forecourt.currPetrol.price);
 
+            for(let i = 0; i < temp.length; i++) {
+                temp[i].petrolPrice = temp[i].currPetrol.price;
+                if(!temp[i].name.length) {
+                    temp[i].name = "FUEL STATION " + temp[i].address.split(" ").pop()
+                } else if(temp[i].name.includes(temp[i].address.split(" ").pop())) {
+                    break;
+                }
+                else {
+                    temp[i].name += " " + temp[i].address.split(" ").pop();
+                }
+            }
+            setSpinner(false);
+            setForecourtsFiltered(temp);
         }
 
     }, [users, forecourts])
+
+    //Methods
+    const toggleSwitch = () => setForecourtView(previousState => !previousState);
 
     const getPos = () => {
         let result;
@@ -128,12 +140,12 @@ const LeaderboardScreen = () => {
                             </View>
                     </Animatable.View>
 
-                {!loadingForecourts ?
+                {!loadingForecourts && forecourtsFiltered ?
                     <Animatable.View style={{flex: 5}} animation="bounceInUp">
                         <Leaderboard 
-                            data={forecourts} 
+                            data={forecourtsFiltered} 
                             sortBy="petrolPrice"
-                            sort={ () => forecourts.sort((a, b) => (a.petrolPrice > b.petrolPrice) ? 1 : -1)}
+                            sort={ () => forecourtsFiltered.sort((a, b) => (a.petrolPrice > b.petrolPrice) ? 1 : -1)}
                             labelBy='name'
                             oddRowColor={'white'}
                             evenRowColor={'#97dba6'}
@@ -144,7 +156,7 @@ const LeaderboardScreen = () => {
             </View>
             : 
             <View>
-                {! loadingUsers ? 
+                {!loadingUsers ? 
                     <Animatable.View style={styles.topView} animation="bounceIn">
                             <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: '10%'}}>
                                 <View style={styles.textView}>

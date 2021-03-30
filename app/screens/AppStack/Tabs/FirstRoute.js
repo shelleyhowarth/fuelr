@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard} from 'react-native';
-import { updatePetrolPrice, updateDieselPrice, addPoints } from '../../../firebase/FirebaseMethods';
-import Firebase from '../../../firebase/Firebase';
-import { TextInput } from 'react-native-gesture-handler';
+import {View, TouchableOpacity, Text, StyleSheet, Alert, Image, Keyboard} from 'react-native';
+import { updatePetrolPrice, updateDieselPrice } from '../../../firebase/FirebaseMethods';
 import moment from 'moment';
 import { Colors } from '../../../../styles/Colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Spinner from 'react-native-loading-spinner-overlay';
 import StarRating from '../../../components/StarRating';
 import Modal from 'react-native-modal';
@@ -98,8 +97,6 @@ export const FirstRoute = ({forecourt, navigation}) => {
     }
 
     const onPetrolSubmit = () => {
-        console.log("input: " + petrolInput);
-        console.log("state: " + petrolPrice);
         if(Math.abs(forecourt.currPetrol.price - petrolPrice) >= 5) {
             Alert.alert(
                 "Warning",
@@ -194,6 +191,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                                     }}
                                     keyboardType='numeric'
                                     value={petrolPrice}
+                                    placeholder='120.1'
                                     maxLength={5}
                                 />
                             </View>
@@ -254,6 +252,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                                     }}
                                     keyboardType='numeric'
                                     value={dieselPrice}
+                                    placeholder='120.1'
                                     maxLength={5}
                                 />
                             </View>
@@ -270,13 +269,24 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     </View>
                 </Modal>
                 <View style={styles.header}>
-                    <Text style={styles.stationTitle}>{forecourt.name ? forecourt.name : 'FUEL STATION'}</Text>
-                    <Text>{shortenAddress(forecourt)}</Text>
-                    <StarRating 
-                        ratings={forecourt.ratingScore} 
-                        reviews={forecourt.reviews.length}
-                        style={{height: '20%'}}
-                    />
+                    <View style={{flex:2}}>
+                        <Image 
+                            source={{uri: forecourt.logo}} 
+                            style={styles.logo}
+                        />
+                    </View>
+                    <View style={styles.space}></View>
+
+                    <View style={{flex:2}}>
+                        <Text style={styles.stationTitle}>{forecourt.name ? forecourt.name : 'FUEL STATION'}</Text>
+                        <Text>{shortenAddress(forecourt)}</Text>
+                        <StarRating 
+                            ratings={forecourt.ratingScore} 
+                            reviews={forecourt.reviews.length}
+                            style={{height: '20%'}}
+                        />
+                    </View>
+
                 </View>
 
                 <View style={styles.space}></View>
@@ -334,31 +344,39 @@ export const FirstRoute = ({forecourt, navigation}) => {
                             name="star"
                             color={Colors.shadeGreen}
                             size={40}
-                            style={styles.icon}
                         />
-                        <Text style={styles.petrolTitle}>Top Reporters</Text>
+                        <Text style={styles.reportersTitle}>Top Reporters</Text>
                         <FontAwesome
                             name="star"
                             color={Colors.shadeGreen}
                             size={40}
-                            style={styles.icon}
                         />
                     </View>
-
                     {topPetrolReporters().map((val, index) => {
                         return(
-                            <Text style={styles.reportersText}>{index+1}. {val}</Text>
+                            <View style={{flexDirection: 'row', flex:1}}>
+                                <View style={{flex:1}}>
+                                    <FontAwesome5
+                                        name="medal"
+                                        color={index==0 ? 'gold' : index==1 ? 'silver' : '#C9AE5D'}
+                                        size={30}
+                                    />
+                                </View>
+                                <View style={{flex:8}}>
+                                    <Text style={styles.reportersText}>{val}</Text>
+                                </View>
+                                
+                            </View>
                         )
                     })}
                 </View>
                 <TouchableOpacity
-                        onPress={() => navigation.navigate('Home')}
+                    onPress={() => navigation.navigate('Home')}
                 >
                     <FontAwesome
                         name="arrow-left"
                         color={Colors.green}
                         size={60}
-                        style={styles.icon}
                     />
                 </TouchableOpacity>
             </View>
@@ -393,13 +411,15 @@ const styles = StyleSheet.create({
         padding: 10
     },
     header: {
-        height: '10%',
+        height: '25%',
         width: '100%',
         backgroundColor: '#fff',
-        padding: 5,
+        padding: 10,
         shadowColor: 'black',
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
+        flexDirection:'row',
+        justifyContent: 'center'
     },
     middle: {
         height: '10%',
@@ -413,7 +433,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     footer: {
-        height: '20%',
+        height: '25%',
         width: '100%',
         backgroundColor: '#fff',
         padding: 5,
@@ -479,6 +499,14 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         flex: 4
     },
+    reportersTitle: {
+        fontSize: 30,
+        fontWeight: 'bold',
+        color: Colors.green,
+        alignSelf: 'center',
+        padding: 5,
+        paddingBottom: 10
+    },
     petrolModalTitle: {
         fontSize: 30,
         fontWeight: 'bold',
@@ -487,7 +515,7 @@ const styles = StyleSheet.create({
         flex: 3
     },
     reportersText: {
-        fontSize: 20
+        fontSize: 25
     },
     spinnerTextStyle: {
         color: '#FFF'
@@ -513,5 +541,10 @@ const styles = StyleSheet.create({
         color: 'white',
         alignSelf: 'center',
         fontSize: 17,
+    },
+    logo: {
+        width: '100%',
+        height: '100%',
+        alignSelf: 'center',
     }
 });

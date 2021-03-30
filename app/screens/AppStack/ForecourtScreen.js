@@ -13,6 +13,7 @@ import StarRating from '../../components/StarRating';
 import { FirstRoute } from './Tabs/FirstRoute';
 import { SecondRoute } from './Tabs/SecondRoute';
 import { ThirdRoute } from './Tabs/ThirdRoute';
+import { FourthRoute } from './Tabs/FourthRoute';
 
 
 const ForecourtScreen = ({route, navigation}) => {
@@ -35,7 +36,8 @@ const ForecourtScreen = ({route, navigation}) => {
     const [routes] = useState([
       { key: 'price', title: 'price' },
       { key: 'review', title: 'review' },
-      { key: 'trends', title: 'trends'}
+      { key: 'trends', title: 'trends'},
+      { key: 'amenities', title: 'amenities'}
     ]);
     const [data, setData] = useState();
 
@@ -114,6 +116,10 @@ const ForecourtScreen = ({route, navigation}) => {
                                 textContent={'Loading...'}
                                 textStyle={styles.spinnerTextStyle}
                             />
+                }
+            case 'amenities':
+                if(forecourt) {
+                    return <FourthRoute forecourt={forecourt} />
                 }
             default:
                 return null;
