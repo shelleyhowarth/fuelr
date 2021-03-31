@@ -8,25 +8,32 @@ import 'firebase/firestore';
 
 const db = Firebase.firestore();
 
-export async function registration(email, password, name, username) {
-  try {
-    const currentUser = Firebase.auth().currentUser;
-    await Firebase.auth().createUserWithEmailAndPassword(email, password);
+export async function registration(email, password, name, username, uri) {
+  await Firebase.auth().createUserWithEmailAndPassword(email, password);
+  const currentUser = Firebase.auth().currentUser;
 
-    db.collection("users")
-      .doc(currentUser.uid)
-      .set({
-        email: currentUser.email,
-        name: name,
-        username: username,
-        forecourtOwner: false,
-        points: 0,
-        id: currentUser.uid
-      });
-      Alert.alert("Account successfully created")
-  } catch (err) {
-    Alert.alert("An error occured", err.message);
-  }
+  await db.collection("users")
+    .doc(currentUser.uid)
+    .set({
+      email: currentUser.email,
+      name: name,
+      username: username,
+      forecourtOwner: false,
+      points: 0,
+      id: currentUser.uid
+    });
+
+    if(uri) {
+      const ref = firebase.storage().ref()
+      const response = await fetch(uri).then(console.log(response));
+      const blob = await response.blob();
+      let uploadTask = ref.child(`/ownerEvidence/${currentUser.uid}`).put(blob);
+      uploadTask.on('state_changed',
+        (snapshot) => {},
+        (error) => { Alert.alert(error) },
+        () => {Alert.alert("Upload complete!")}
+      );
+    }
 }
 
 export async function signIn(email, password) {
@@ -59,6 +66,22 @@ export async function checkUsernames(username, usernameTaken) {
               if(doc.data().username == username) {
                   Alert.alert("Taken");
                   usernameTaken = true;
+              }
+          })
+      })
+  } catch(e) {
+      console.log(e);
+  }
+}
+
+export async function checkEmails(email, emailTaken) {
+  try {
+      await db.collection("users").get()
+      .then(querySnapshot => {
+          querySnapshot.docs.forEach(doc => {
+              if(doc.data().email == email) {
+                Alert.alert("Taken");
+                emailTaken = true;
               }
           })
       })

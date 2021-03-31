@@ -7,26 +7,30 @@ import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import * as Animatable from 'react-native-animatable';
-import { registration } from '../../firebase/FirebaseMethods';
+import { registration, checkEmails } from '../../firebase/FirebaseMethods';
 import Firebase from '../../firebase/Firebase';
 import "firebase/firestore";
 import Geocoder from 'react-native-geocoding';
-
-
+import * as DocumentPicker from 'expo-document-picker';
 
 const SignUpScreen = ({navigation}) => {
+    //Consts
     const db = Firebase.firestore();
     Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
+    let result;
 
+    //States
     const [isSelected, setSelection] = useState(false);
     const [usernameTaken, setUsernameTaken] = useState(false);
+    const [emailTaken, setEmailTaken] = useState(false);
+    //let emailTaken = false;
     const [forecourtExists, setForecourtExists] = useState(false);
-
-    const [data, setData] = React.useState({
+    const [data, setData] = useState({
         name: '',
         username: '',
         email: '',
         password: '',
+        uri: '',
         confirmPassword: '',
         handleEmailChange: false,
         handleNameChange: false,
@@ -39,21 +43,33 @@ const SignUpScreen = ({navigation}) => {
         passwordError: null,
         confirmPasswordError: null,
     });
+    const [fileChosen, setFileChosen]= useState();
 
+    //Methods
     const emailInputChange = (value) => {
-        if(value.length !== 0 ) {
+        setEmailTaken(false);
+        checkEmails(value, emailTaken);
+
+        if(emailTaken === true) {
+            setData({
+                ...data,
+                email: value,
+                handleEmailChange: false,
+                emailError: "Email taken"
+            });
+        } else if(value.length !== 0) {
             setData({
                 ...data,
                 email: value,
                 handleEmailChange: true,
                 emailError: null
             });
-        } else {
+        } else if(!value.length) {
             setData({
                 ...data,
                 email: value,
                 handleEmailChange: false,
-                emailError: "Email required"
+                emailError: "Username required"
             });
         }
     }
@@ -78,7 +94,7 @@ const SignUpScreen = ({navigation}) => {
 
     const usernameInputChange = (value) => {
         setUsernameTaken(false);
-        checkUsernames(value);
+        checkUsernames(value, usernameTaken);
 
         if(usernameTaken === true) {
             setData({
@@ -194,8 +210,18 @@ const SignUpScreen = ({navigation}) => {
         } catch(e) {
             console.log(e);
         }
-      }
+    }
 
+    const pickDoc = async() => {
+        result = await DocumentPicker.getDocumentAsync({});
+        setData({
+            ...data,
+            uri: result.uri
+        });
+        setFileChosen("File: " + result.name);
+    }
+
+    //Return
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={Colors.green} barStyle="light-content"/>
@@ -414,23 +440,21 @@ const SignUpScreen = ({navigation}) => {
                                 autoCapitalize="none"
                                 onChangeText = {(value) => forecourtInputChange(value)}
                             />
-        
-                            {data.usernameError ? 
-                                <Text style={{color: 'red'}}> {data.usernameError} </Text>
-                            : null}
-        
-                            {data.handleUsernameChange ? 
-                                <Animatable.View
-                                    animation="bounceIn"
-                                >
-                                    <Feather
-                                        name="check-circle"
-                                        color="green"
-                                        size={20}
-                                    />
-                                </Animatable.View>
-                            : null}
                         </View>
+                        <View style={styles.button}>
+                            <TouchableOpacity
+                                onPress={() => pickDoc()}
+                                style={styles.signUp}
+                            >
+                                <LinearGradient
+                                    colors={[Colors.midGreen, Colors.green]}
+                                    style={styles.signIn}
+                                >
+                                    <Text style={styles.textSign}>Choose file</Text>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                        <Text>{fileChosen ? fileChosen : null}</Text>
                     </View>
 
                 : null}
@@ -438,7 +462,7 @@ const SignUpScreen = ({navigation}) => {
                 <View style={styles.button}>
                     <TouchableOpacity
                         onPress={() => {
-                            registration(data.email, data.password, data.name, data.username);
+                            registration(data.email, data.password, data.name, data.username, data.uri);
                         }}
                         style={styles.signUp}
                     >
@@ -510,7 +534,6 @@ const styles = StyleSheet.create({
 
     button: {
         alignItems: 'center',
-        marginTop: 50
     },
 
     signIn: {

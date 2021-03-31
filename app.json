@@ -19,7 +19,8 @@
     "ios": {
       "bundleIdentifier": "com.shelley.fuelr",
       "googleServicesFile": "./GoogleService-Info.plist",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "usesIcloudStorage": true
     },
     "android": {
       "package": "com.shelley.fuelr",
@@ -32,5 +33,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     }
+
   }
 }

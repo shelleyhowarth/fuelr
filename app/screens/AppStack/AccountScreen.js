@@ -1,9 +1,13 @@
-import React from 'react';
-import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
-import { signOut } from '../../firebase/FirebaseMethods';
-
+import React, { useEffect } from 'react';
+import {View, TouchableOpacity, Text, StyleSheet, WebView} from 'react-native';
+import { signOut, listFiles } from '../../firebase/FirebaseMethods';
 
 const AccountScreen = () => {
+
+    useEffect( () => {
+        
+    }, [])
+
     return (
         <View style={styles.container}>
             <TouchableOpacity
