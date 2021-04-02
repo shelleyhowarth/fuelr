@@ -3,13 +3,14 @@ import "firebase/firestore";
 import {Alert} from "react-native";
 import Geocoder from 'react-native-geocoding';
 import * as firebase from 'firebase'
-import 'firebase/firestore';
 
 
 const db = Firebase.firestore();
 
 export async function registration(email, password, name, username, uri) {
-  await Firebase.auth().createUserWithEmailAndPassword(email, password);
+  await Firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(Alert.alert("Account successfully created!"))
+    .catch(e => Alert.alert(e.message));
   const currentUser = Firebase.auth().currentUser;
 
   await db.collection("users")
@@ -30,7 +31,7 @@ export async function registration(email, password, name, username, uri) {
       let uploadTask = ref.child(`/ownerEvidence/${currentUser.uid}`).put(blob);
       uploadTask.on('state_changed',
         (snapshot) => {},
-        (error) => { Alert.alert(error) },
+        (error) => { Alert.alert(error.message) },
         () => {Alert.alert("Upload complete!")}
       );
     }
@@ -58,6 +59,12 @@ export async function signOut() {
   }
 }
 
+export async function resetPassword(email) {
+  Firebase.auth().sendPasswordResetEmail(email)
+    .then(() => Alert.alert("Password reset email has been sent!"))
+    .catch((error) => Alert.alert(error.message))
+}
+
 export async function checkUsernames(username, usernameTaken) {
   try {
       await db.collection("users").get()
@@ -70,7 +77,7 @@ export async function checkUsernames(username, usernameTaken) {
           })
       })
   } catch(e) {
-      console.log(e);
+      console.log(e.message);
   }
 }
 
@@ -86,7 +93,7 @@ export async function checkEmails(email, emailTaken) {
           })
       })
   } catch(e) {
-      console.log(e);
+      console.log(e.message);
   }
 }
 
@@ -107,7 +114,7 @@ export async function forecourtInputChange(value)  {
             });
           });
     })
-    .catch(error => console.warn(error));
+    .catch(error => Alert.alert(error.message));
 }
 
 export async function getForecourt(lng, lat) {
@@ -125,31 +132,14 @@ export async function getForecourt(lng, lat) {
 }
 
 export async function updateForecourts() {
-  let obj = {}
   await db.collection('forecourts').get()
     .then(querySnapshot => {
       querySnapshot.docs.forEach(doc => {
-          obj = {
-            ...doc.data(),
-            amenities: {
-              atm: false,
-              deli: false,
-              bathroom: false,
-              electricCharging: false,
-              payAtPump: false,
-              acceptsCard: false,
-              convenienceStore: false,
-              carWash: false,
-              airAndWater: false,
-              vacuum: false,
-              wifi: false,
-              alcohol: false
-            }
-          }
-          db.collection('forecourts').doc(doc.data().id).update(obj).then(console.log('success')).catch(e => console.log(e));
+          //db.collection('forecourts').doc(doc.ref.id).update({id: doc.ref.id});
+          doc.ref.update({id: doc.ref.id}).then(console.log(doc.ref.id));
       })
     })
-    .catch(e => console.log(e));
+    .catch(e => console.log(e.message));
   }
 
 export async function updatePetrolPrice(id, priceInput) {
@@ -221,7 +211,7 @@ export async function submitReview(id, score) {
           user: username
         })
       })
-    .catch(e => console.log(e))
+    .catch(e => Alert.alert(e.message))
     .then(
       await db.collection('forecourts').doc(id).get()
         .then( querySnapshot => {

@@ -36,8 +36,8 @@ const ForecourtScreen = ({route, navigation}) => {
     const [routes] = useState([
       { key: 'price', title: 'price' },
       { key: 'review', title: 'review' },
-      { key: 'trends', title: 'trends'},
-      { key: 'amenities', title: 'amenities'}
+      //{ key: 'trends', title: 'trends'},
+      //{ key: 'amenities', title: 'amenities'}
     ]);
     const [data, setData] = useState();
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Dimensions, TextInput, StatusBar } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { CheckBox } from 'react-native-elements'
@@ -12,6 +12,7 @@ import Firebase from '../../firebase/Firebase';
 import "firebase/firestore";
 import Geocoder from 'react-native-geocoding';
 import * as DocumentPicker from 'expo-document-picker';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
 
 const SignUpScreen = ({navigation}) => {
     //Consts
@@ -20,10 +21,13 @@ const SignUpScreen = ({navigation}) => {
     let result;
 
     //States
+    const [users, loadingUsers, errorUsers] = useCollectionData(
+        db.collection('users'),
+        {
+            snapshotListenOptions: { includeMetadataChanges: true},
+        }
+    );
     const [isSelected, setSelection] = useState(false);
-    const [usernameTaken, setUsernameTaken] = useState(false);
-    const [emailTaken, setEmailTaken] = useState(false);
-    //let emailTaken = false;
     const [forecourtExists, setForecourtExists] = useState(false);
     const [data, setData] = useState({
         name: '',
@@ -44,18 +48,101 @@ const SignUpScreen = ({navigation}) => {
         confirmPasswordError: null,
     });
     const [fileChosen, setFileChosen]= useState();
+    const [formValid, setFormValid] = useState(false);
 
+    //Lets
+    let emailTaken;
+    let usernameTaken;
+    let emailCorrect;
+    let emailSpace;
+    let usernameSpace;
+    //UseEffect
+    useEffect( () => {
+
+    }, [users])
     //Methods
-    const emailInputChange = (value) => {
-        setEmailTaken(false);
-        checkEmails(value, emailTaken);
 
-        if(emailTaken === true) {
+    const signUp = () => {
+        registration(data.email, data.password, data.name, data.username, data.uri)
+    }
+
+    const checkValid = () => {
+        if(data.emailError === null && data.email) {
+            if(data.usernameError === null && data.username) {
+                if(data.nameError === null && data.name) {
+                    if(data.passwordError === null && data.password) {
+                        if(data.confirmPasswordError === null && data.confirmPassword) {
+                            setFormValid(true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    const checkEmail = (email) => {
+        users.map((user, index) => {
+            if(user.email.toLowerCase() === email.toLowerCase()) {
+                emailTaken = true
+            }
+        })
+    }
+    
+    const emailPattern = (email) => {
+        let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        if(reg.test(email) === true) {
+            if(/\s/g.test(email) === false) {
+                emailCorrect = true;
+            } else {
+                emailSpace = true;
+            }
+        } else {
+            emailCorrect = false;
+        }
+    }
+
+    const checkUsername = (username) => {
+        users.map((user, index) => {
+            if(user.username.toLowerCase() === username.toLowerCase()) {
+                usernameTaken = true
+            }
+        })
+    }
+
+    const usernamePattern = (username) => {
+        if(/\s/g.test(username) === true) {
+            usernameSpace = true;
+        }
+    }
+
+    const emailInputChange = (value) => {
+        setFormValid(false);
+        emailCorrect = false;
+        emailSpace = false;
+        emailPattern(value);
+        if(users) {
+            checkEmail(value);
+        }
+        if(emailTaken) {
             setData({
                 ...data,
                 email: value,
                 handleEmailChange: false,
                 emailError: "Email taken"
+            });
+        } else if(emailSpace) {
+            setData({
+                ...data,
+                email: value,
+                handleEmailChange: true,
+                emailError: "Email badly formatted"
+            });
+        } else if(!emailCorrect) {
+            setData({
+                ...data,
+                email: value,
+                handleEmailChange: true,
+                emailError: "Email badly formatted"
             });
         } else if(value.length !== 0) {
             setData({
@@ -69,12 +156,14 @@ const SignUpScreen = ({navigation}) => {
                 ...data,
                 email: value,
                 handleEmailChange: false,
-                emailError: "Username required"
+                emailError: "Email required"
             });
         }
+        checkValid();
     }
 
     const nameInputChange = (value) => {
+        setFormValid(false);
         if(value.length !== 0 ) {
             setData({
                 ...data,
@@ -90,18 +179,30 @@ const SignUpScreen = ({navigation}) => {
                 nameError: "Name required"
             });
         }
+        checkValid();
     }
 
     const usernameInputChange = (value) => {
-        setUsernameTaken(false);
-        checkUsernames(value, usernameTaken);
-
-        if(usernameTaken === true) {
+        setFormValid(false);
+        usernameTaken = false;
+        usernameSpace = false;
+        usernamePattern(value);
+        checkUsername(value);
+        
+        if(usernameTaken) {
             setData({
                 ...data,
                 username: value,
                 handleUsernameChange: false,
                 usernameError: "Username taken"
+            });
+
+        } else if(usernameSpace) {
+            setData({
+                ...data,
+                username: value,
+                handleUsernameChange: true,
+                usernameError: "Username cannot contain spaces"
             });
         } else if(value.length !== 0) {
             setData({
@@ -117,10 +218,12 @@ const SignUpScreen = ({navigation}) => {
                 handleUsernameChange: false,
                 usernameError: "Username required"
             });
-        }
+        }         
+        checkValid();
     }
 
     const handlePasswordChange = (value) => {
+        setFormValid(false);
         if(value.length == 0) {
             setData({
                 ...data,
@@ -140,10 +243,11 @@ const SignUpScreen = ({navigation}) => {
                 passwordError: null
             });
         }
-
+        checkValid();
     }
 
     const handleConfirmPasswordChange = (value) => {
+        setFormValid(false);
         if(value !== data.password) {
             setData({
                 ...data,
@@ -157,6 +261,7 @@ const SignUpScreen = ({navigation}) => {
                 confirmPasswordError: null
             });
         }
+        checkValid();
     }
 
 
@@ -195,21 +300,6 @@ const SignUpScreen = ({navigation}) => {
                 });
           })
           .catch(error => console.warn(error));
-    }
-
-    const checkUsernames = async (username) => {
-        try {
-            await db.collection("users").get()
-            .then(querySnapshot => {
-                querySnapshot.docs.forEach(doc => {
-                    if(doc.data().username == username) {
-                        setUsernameTaken(true);
-                    }
-                })
-            })
-        } catch(e) {
-            console.log(e);
-        }
     }
 
     const pickDoc = async() => {
@@ -411,6 +501,7 @@ const SignUpScreen = ({navigation}) => {
                         }
                     </TouchableOpacity>
                 </View>
+                {/*
                 <View style={styles.checkbox}>
                     <Text style={styles.textFooter}>
                         Are you a forecourt owner?
@@ -458,17 +549,19 @@ const SignUpScreen = ({navigation}) => {
                     </View>
 
                 : null}
+                    */}
 
                 <View style={styles.button}>
                     <TouchableOpacity
                         onPress={() => {
-                            registration(data.email, data.password, data.name, data.username, data.uri);
+                           signUp();
                         }}
                         style={styles.signUp}
+                        disabled={!formValid}
                     >
                         <LinearGradient
                             colors={[Colors.midGreen, Colors.green]}
-                            style={styles.signIn}
+                            style={formValid ? styles.signIn : styles.signInDisabled} 
                         >
                             <Text style={styles.textSign}>Sign up</Text>
                         </LinearGradient>
@@ -543,6 +636,15 @@ const styles = StyleSheet.create({
         borderRadius:  10,
         flexDirection: 'row',
         alignItems: 'center'
+    },
+    signInDisabled: {
+        width: '100%',
+        height: 50,
+        justifyContent: 'center',
+        borderRadius:  10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        opacity: 0.1
     },
 
     textSign: {

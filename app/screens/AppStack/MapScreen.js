@@ -11,17 +11,20 @@ import Firebase from '../../firebase/Firebase';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { useIsFocused } from "@react-navigation/native";
 import { LinearGradient } from 'expo-linear-gradient';
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp
+  } from 'react-native-responsive-screen';
 
 const { width, height } = Dimensions.get("window");
 
-const CARD_HEIGHT = 200;
+const CARD_HEIGHT = hp('26.0%');
 const CARD_WIDTH = width * 0.8;
 const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
 const db = Firebase.firestore();
 
 const MapScreen = ({navigation}) => {
 
-    const [spinner, setSpinner] = useState(false);
     const [region, setRegion] = useState(null);
     const [forecourts, loading, error] = useCollectionData(
         db.collection('forecourts'),
@@ -56,7 +59,6 @@ const MapScreen = ({navigation}) => {
             }
 
             setRegion(tempRegion);
-            setSpinner(false);
         })();
         
     }, [forecourts, isFocused])
@@ -100,14 +102,14 @@ const MapScreen = ({navigation}) => {
     return (
         <View style={styles.container}>
             <Spinner
-                visible={spinner}
-                textContent={'Getting your location...'}
+                visible={loading}
+                textContent={'Loading...'}
                 textStyle={styles.spinnerTextStyle}
             />
 
             <MapView
                 style={styles.map}
-                showsUserLocation={spinner ? false : true}
+                showsUserLocation={loading ? false : true}
                 initialRegion={region ? region : null}
             >
                 { !loading ? forecourts.map((marker, index) => {
@@ -121,12 +123,12 @@ const MapScreen = ({navigation}) => {
                         >
                             <TouchableOpacity
                                 style={[styles.priceContainer]}
-                            >
-                                <Image 
-                                    source={{uri: marker.logo}} 
-                                    style={styles.logo}
-                                />
-                                {fuelPriceMarker(marker)}
+                            >   
+                                        <Image 
+                                            source={{uri: marker.logo}} 
+                                            style={styles.logo}
+                                        />
+                                    {fuelPriceMarker(marker)}
                             </TouchableOpacity>
                         </Marker>
                     )
@@ -167,7 +169,7 @@ const MapScreen = ({navigation}) => {
 
                             <View style={styles.textContent}>
                                 <Text 
-                                    numberOfLines = {2}
+                                    numberOfLines = {1}
 
                                     style={styles.cardTitle}
                                 >
@@ -175,7 +177,7 @@ const MapScreen = ({navigation}) => {
                                 </Text>
                                 <Text 
                                     numberOfLines = {1}
-                                    style={{fontSize: 10}}
+                                    style={{fontSize: wp('2.0%')}}
                                 >
                                     {shortenAddress(marker)}
                                 </Text>
@@ -213,7 +215,7 @@ const MapScreen = ({navigation}) => {
                                     }
                                 </View>
                             </View>
-
+                            <View style={{flex:1}}/>
                             <View style={{flex: 3}}>
                                 <TouchableOpacity
                                     onPress={() => navigation.navigate('ForecourtScreen', {
@@ -254,19 +256,19 @@ const styles = StyleSheet.create({
     },
 
     cardTitle: {
-        fontSize: 20,
+        fontSize: wp('5.3%'),
         fontWeight: "bold",
     },
 
     logo: {
-        width: '10%',
+        width: wp('3.5%'),
         height: '100%'
     },
 
     priceContainer : {
         flexDirection: 'row',
         justifyContent:'space-between',
-        padding: 5,
+        padding: wp('1.3%'),
         backgroundColor: Colors.lightGreen,
         borderRadius: 8,
         borderWidth: 1,
@@ -329,15 +331,15 @@ const styles = StyleSheet.create({
     },
 
     cardImage: {
-        width: 150,
-        height: 180
+        width: wp('33.0%'),
+        height: hp('20.0%')
     },
 
     textContent: {
     },
 
     priceText: {
-        fontSize: 23
+        fontSize: wp('5.0%')
     },
 
     priceContent: {
@@ -356,7 +358,7 @@ const styles = StyleSheet.create({
     },
 
     buttonText: {
-        fontSize: 20,
+        fontSize: wp('5.3%'),
         fontWeight: 'bold',
         color: 'white'
     },

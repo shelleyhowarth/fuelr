@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {View, StyleSheet, RefreshControl, Text, Dimensions, StatusBar, Switch} from 'react-native';
-import { signOut } from '../../firebase/FirebaseMethods';
+import { signOut, updateForecourts } from '../../firebase/FirebaseMethods';
 import Leaderboard from 'react-native-leaderboard';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
@@ -35,22 +35,20 @@ const LeaderboardScreen = () => {
     const [forecourtView, setForecourtView] = useState(false);
     const [result, setResult] = useState();
     const [points, setPoints] = useState();
-    const [spinner, setSpinner] = useState(true);
     const [forecourtsFiltered, setForecourtsFiltered] = useState([]);
 
     //Vars
     let temp = [];
 
     useEffect ( () => {
+
         if(!loadingUsers) {
             users.sort((a, b) => (a.points < b.points) ? 1 : -1);
             setResult(getPos());
             setPoints(getPoints());
-            setSpinner(false);
-
         }
 
-        if(!loadingForecourts) {
+        if(!loadingForecourts && forecourts.length > 0) {
             temp = forecourts;
             temp = temp.filter((forecourt) => forecourt.currPetrol.price);
 
@@ -65,7 +63,6 @@ const LeaderboardScreen = () => {
                     temp[i].name += " " + temp[i].address.split(" ").pop();
                 }
             }
-            setSpinner(false);
             setForecourtsFiltered(temp);
         }
 
@@ -114,7 +111,7 @@ const LeaderboardScreen = () => {
         <View style={styles.container}>
             <StatusBar backgroundColor={'white'} barStyle="dark-content"/>
             <Spinner
-                visible={spinner}
+                visible={loadingUsers}
                 textContent={'Getting leaderboard data...'}
                 textStyle={styles.spinnerTextStyle}
             />
@@ -150,6 +147,7 @@ const LeaderboardScreen = () => {
                             oddRowColor={'white'}
                             evenRowColor={'#97dba6'}
                         />
+                        <Text style={styles.noPrices}>{forecourtsFiltered.length == 0 ? "No fuel prices have been reported yet!" : null}</Text>
                     </Animatable.View>
                 : null}
 
@@ -248,6 +246,12 @@ const styles = StyleSheet.create({
     spinnerTextStyle: {
         color: '#FFF'
     },
+    noPrices: {
+        fontSize: 25,
+        position: 'absolute',
+        alignSelf: 'center',
+        paddingTop: 10
+    }
 });
 
 export default LeaderboardScreen;

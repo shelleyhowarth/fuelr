@@ -10,7 +10,10 @@ import StarRating from '../../../components/StarRating';
 import Modal from 'react-native-modal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TextInputMask } from 'react-native-masked-text'
-
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp
+  } from 'react-native-responsive-screen';
 
 export const FirstRoute = ({forecourt, navigation}) => {
     //States
@@ -225,9 +228,9 @@ export const FirstRoute = ({forecourt, navigation}) => {
                             <View style={{flex: 2, justifyContent: 'center'}}>
                                 <Text style={styles.priceModal}>{forecourt.currDiesel.price ? forecourt.currDiesel.price : '--.-' }</Text>
                             </View>
-                            <View style={{flex:1}}/>
+                            <View style={styles.space}/>
 
-                            <TouchableOpacity onPress={ () => onConfirmCurrent('diesel')} style={{flex: 3, justifyContent: 'center'}}>
+                            <TouchableOpacity onPress={ () => onConfirmCurrent('diesel')} style={{flex: 2, justifyContent: 'center'}}>
                                 <LinearGradient
                                     colors={[Colors.midGreen, Colors.green]}
                                     style={styles.confirm}
@@ -235,7 +238,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                                     <Text style={styles.reportPrice}>Same Price</Text>
                                 </LinearGradient>
                             </TouchableOpacity>
-                            <View style={{flex:1}}/>
+                            <View style={styles.space}/>
                             <View style={{flex: 2, justifyContent: 'center'}}>
                                 <TextInputMask
                                     type={'money'}
@@ -283,7 +286,6 @@ export const FirstRoute = ({forecourt, navigation}) => {
                         <StarRating 
                             ratings={forecourt.ratingScore} 
                             reviews={forecourt.reviews.length}
-                            style={{height: '20%'}}
                         />
                     </View>
 
@@ -402,8 +404,8 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     modal: {
-        marginTop: '40%',
-        marginBottom: '100%',
+        marginTop: hp('10%'),
+        marginBottom: hp('40%'),
         width: '80%', 
         backgroundColor: 'white', 
         borderRadius: 5,
@@ -411,7 +413,7 @@ const styles = StyleSheet.create({
         padding: 10
     },
     header: {
-        height: '25%',
+        height: hp('25%'),
         width: '100%',
         backgroundColor: '#fff',
         padding: 10,
@@ -422,7 +424,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     middle: {
-        height: '10%',
+        height: hp('10%'),
         width: '100%',
         backgroundColor: '#fff',
         padding: 5,
@@ -433,7 +435,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     footer: {
-        height: '25%',
+        height: hp('25%'),
         width: '100%',
         backgroundColor: '#fff',
         padding: 5,
@@ -488,19 +490,19 @@ const styles = StyleSheet.create({
         opacity: 0.1
     },
     stationTitle: {
-        fontSize: 26,
+        fontSize: wp('7.0%'),
         fontWeight: 'bold',
         color: Colors.green
     },
     petrolTitle: {
-        fontSize: 30,
+        fontSize: wp('8.0%'),
         fontWeight: 'bold',
         color: Colors.green,
         alignSelf: 'center',
         flex: 4
     },
     reportersTitle: {
-        fontSize: 30,
+        fontSize: wp('8.0%'),
         fontWeight: 'bold',
         color: Colors.green,
         alignSelf: 'center',
@@ -508,39 +510,40 @@ const styles = StyleSheet.create({
         paddingBottom: 10
     },
     petrolModalTitle: {
-        fontSize: 30,
+        fontSize: wp('8.0%'),
         fontWeight: 'bold',
         color: Colors.green,
         alignSelf: 'center',
         flex: 3
     },
     reportersText: {
-        fontSize: 25
+        fontSize: wp('5.5%')
     },
     spinnerTextStyle: {
         color: '#FFF'
     },
     space: {
-        padding: 5
+        padding: wp('1.0%')    
     },
     price: {
-        fontSize: 30,
+        fontSize: wp('5.5%'),
         fontWeight: 'bold',
         alignSelf: 'center'
     },
     priceModal: {
-        fontSize: 30,
+        fontSize: wp('6.0%'),
         fontWeight: 'bold',
         alignSelf: 'center'
     },
     updated: {
-        color: 'grey'
+        color: 'grey',
+        fontSize: wp('2.5%')
     },
     reportPrice: {
         fontWeight: 'bold',
         color: 'white',
         alignSelf: 'center',
-        fontSize: 17,
+        fontSize: wp('3.5%'),
     },
     logo: {
         width: '100%',

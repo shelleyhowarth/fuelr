@@ -15,6 +15,7 @@ export const SecondRoute = ({forecourt}) => {
                 {rating ? 
                     <Text>Submitted</Text>
                 : 
+                <View style={styles.middle}>
                     <AirbnbRating
                         count={5}
                         reviews={["Terrible", "Bad", "OK", "Good", "Excellent"]}
@@ -27,9 +28,30 @@ export const SecondRoute = ({forecourt}) => {
                             
                         }}
                     />
+                </View>
                 }
                 <StatusBar backgroundColor={Colors.green} barStyle="dark-content"/>
             </View>
         );
     };
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    middle: {
+        height: '10%',
+        width: '100%',
+        backgroundColor: '#fff',
+        padding: 5,
+        shadowColor: 'black',
+        shadowOffset: {width: 1, height: 4},
+        shadowOpacity: 0.2,
+        alignItems: 'center'
+    },
+})

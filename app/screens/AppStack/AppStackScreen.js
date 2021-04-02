@@ -41,6 +41,7 @@ const Home = () => {
           )
         }}
       />
+      {/*}
       <Tab.Screen 
         name="Trends" 
         component={ TrendsScreen } 
@@ -53,6 +54,8 @@ const Home = () => {
           )
         }}
       />
+      */}
+      
       <Tab.Screen 
         name="Account" 
         component={ AccountScreen } 
