@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {View, Text, StyleSheet, Dimensions, Image, Animated, Switch, TouchableOpacity } from 'react-native';
+import {View, Text, StyleSheet, Dimensions, Image, Animated, Switch, TouchableOpacity, Platform } from 'react-native';
 import MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import { Colors } from '../../../styles/Colors';
 import * as Location from 'expo-location';
 import Spinner from 'react-native-loading-spinner-overlay';
 import StarRating from '../../components/StarRating';
-import { Platform } from 'react-native';
 import Firebase from '../../firebase/Firebase';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { useIsFocused } from "@react-navigation/native";
@@ -15,16 +14,18 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp
   } from 'react-native-responsive-screen';
+  import { LogBox } from 'react-native';
 
 const { width, height } = Dimensions.get("window");
 
-const CARD_HEIGHT = hp('26.0%');
+const CARD_HEIGHT = hp('26.5%')
+
 const CARD_WIDTH = width * 0.8;
 const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
 const db = Firebase.firestore();
 
 const MapScreen = ({navigation}) => {
-
+    //States
     const [region, setRegion] = useState(null);
     const [forecourts, loading, error] = useCollectionData(
         db.collection('forecourts'),
@@ -33,8 +34,6 @@ const MapScreen = ({navigation}) => {
         }
     );
     const [diesel, setDiesel] = useState(false);
-    const isFocused = useIsFocused();
-
 
     const scrollRef = useRef(null);
 
@@ -61,8 +60,9 @@ const MapScreen = ({navigation}) => {
             setRegion(tempRegion);
         })();
         
-    }, [forecourts, isFocused])
+    }, [forecourts])
 
+    //Methods
     const fuelPriceMarker = (marker) => {
         if(!diesel) {
             return (
@@ -99,10 +99,12 @@ const MapScreen = ({navigation}) => {
         scrollRef.current.scrollTo({x: x, y: 0, animated: true});
     }
 
+    //Return
     return (
         <View style={styles.container}>
+
             <Spinner
-                visible={loading}
+                visible={!forecourts}
                 textContent={'Loading...'}
                 textStyle={styles.spinnerTextStyle}
             />
@@ -112,7 +114,7 @@ const MapScreen = ({navigation}) => {
                 showsUserLocation={loading ? false : true}
                 initialRegion={region ? region : null}
             >
-                { !loading ? forecourts.map((marker, index) => {
+                { forecourts ? forecourts.map((marker, index) => {
                     return (
                         <Marker
                             key={index}
@@ -140,7 +142,7 @@ const MapScreen = ({navigation}) => {
                 horizontal
                 scrollEventThrottle = {1}
                 showsHorizontalScrollIndicator = {false}
-                height = {50}
+                height = {10}
                 style={styles.scrollView}
                 snapToInterval = {CARD_WIDTH + 20}
                 snapToAlignment = 'center'
@@ -154,7 +156,7 @@ const MapScreen = ({navigation}) => {
                     paddingHorizontal: Platform.OS === 'android' ? SPACING_FOR_CARD_INSET : 0
                 }}
             >
-                { !loading ? forecourts.map( (marker, index) => (
+                { forecourts ? forecourts.map( (marker, index) => (
                     //flex:1, flexDirection: 'row'
                     <View style={styles.card} key={index}>
                         <View style={{flex: 2}}>
@@ -167,9 +169,9 @@ const MapScreen = ({navigation}) => {
 
                         <View style={{flex: 3, flexDirection: 'column'}}>
 
-                            <View style={styles.textContent}>
+                            <View>
                                 <Text 
-                                    numberOfLines = {1}
+                                    numberOfLines = {2}
 
                                     style={styles.cardTitle}
                                 >
@@ -256,7 +258,7 @@ const styles = StyleSheet.create({
     },
 
     cardTitle: {
-        fontSize: wp('5.3%'),
+        fontSize: wp('4.0%'),
         fontWeight: "bold",
     },
 
@@ -296,7 +298,7 @@ const styles = StyleSheet.create({
 
     scrollView: {
         position: "absolute",
-        bottom: 5,
+        bottom: hp('1.0%'),
         left: 0,
         right: 0,
         paddingVertical: 10,
@@ -309,7 +311,7 @@ const styles = StyleSheet.create({
     },
 
     card: {
-        padding: 5,
+        padding: wp('0.5%'),
         elevation: 2,
         backgroundColor: Colors.lightGreen,
         borderTopLeftRadius: 5,
@@ -319,7 +321,7 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         shadowOpacity: 0.3,
         shadowOffset: { x: 2, y: -2 },
-        height: CARD_HEIGHT-10,
+        height: CARD_HEIGHT - hp('1.0%'),
         width: CARD_WIDTH,
         overflow: 'visible',
         flexDirection: 'row',
@@ -327,7 +329,6 @@ const styles = StyleSheet.create({
         borderColor: Colors.green,
         flex: 1,
         flexDirection: 'row'
-
     },
 
     cardImage: {
@@ -335,11 +336,8 @@ const styles = StyleSheet.create({
         height: hp('20.0%')
     },
 
-    textContent: {
-    },
-
     priceText: {
-        fontSize: wp('5.0%')
+        fontSize: wp('3.5%')
     },
 
     priceContent: {
@@ -358,7 +356,7 @@ const styles = StyleSheet.create({
     },
 
     buttonText: {
-        fontSize: wp('5.3%'),
+        fontSize: wp('4.0%'),
         fontWeight: 'bold',
         color: 'white'
     },

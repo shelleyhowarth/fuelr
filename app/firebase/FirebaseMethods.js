@@ -37,12 +37,21 @@ export async function registration(email, password, name, username, uri) {
     }
 }
 
+export async function submitFeedback(feedback) {
+  try { 
+    await db.collection('feedback').add({
+    message: feedback
+  })
+  } catch (e) {
+    Alert.alert(e.message)
+  }
+}
+
 export async function signIn(email, password) {
   try {
    await Firebase
       .auth()
       .signInWithEmailAndPassword(email, password);
-      Alert.alert("Successful sign in")
   } catch (err) {
     Alert.alert("There is something wrong!", err.message);
   }

@@ -226,12 +226,12 @@ const styles = StyleSheet.create({
     textHeader: {
         color: Colors.lightGreen,
         fontWeight: 'bold',
-        fontSize: 30
+        fontSize: wp('10.0%')
     },
 
     textFooter: {
         color: 'grey',
-        fontSize: 18
+        fontSize: wp('5.0%')
     },
 
     action: {
@@ -252,10 +252,9 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: Platform.OS === "ios" ? 0 : -12,
         paddingLeft: 10,
-        color: "#05375a"
+        color: "#05375a",
+        fontSize: wp('4.0%')
     },
-
-
     button: {
         alignItems: 'center',
         marginTop: 50
@@ -263,7 +262,7 @@ const styles = StyleSheet.create({
 
     signIn: {
         width: '100%',
-        height: 50,
+        height: hp('5.0%'),
         justifyContent: 'center',
         borderRadius:  10,
         flexDirection: 'row',
@@ -272,13 +271,13 @@ const styles = StyleSheet.create({
 
     textSign: {
         fontWeight: 'bold',
-        fontSize: 18,
+        fontSize: wp('4.0%'),
         color: Colors.lightGreen
     },
 
     signUp: {
         width: '100%',
-        height: 50,
+        height: hp('5.0%'),
         justifyContent: 'center',
         borderRadius:  10,
         flexDirection: 'row',

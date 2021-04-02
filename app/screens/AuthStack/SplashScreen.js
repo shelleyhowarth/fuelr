@@ -1,10 +1,14 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, Dimensions, Image, TouchableOpacity, StatusBar } from 'react-native';
+import { View, Text, Button, StyleSheet, Dimensions, Image, TouchableOpacity, StatusBar, ScrollView, Animated } from 'react-native';
 import { Colors } from '../../../styles/Colors';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Animatable from 'react-native-animatable';
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp
+  } from 'react-native-responsive-screen';
 
 const SplashScreen = ({navigation}) => {
     return (
@@ -22,29 +26,32 @@ const SplashScreen = ({navigation}) => {
                 />
                 <Text style={styles.textHeader}>Fuelr</Text>
             </Animatable.View>
-            <Animatable.View 
-                style={styles.footer}
+            <Animated.ScrollView 
                 animation="fadeInUpBig"
+                style={{flex:1}}
             >
-                <Text style={styles.title}>Getting the lowest price fuel for you!</Text>
-                <Text style={styles.text}>Sign in with account</Text>
-                <View style={styles.button}>
-                    <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
-                        <LinearGradient
-                            colors={[Colors.midGreen, Colors.green]}
-                            style={styles.signIn}
-                        >
-                            <Text style={styles.textSign}>Get Started</Text>
-                            <MaterialIcons
-                                name="navigate-next"
-                                color="#fff"
-                                size={20}
+                <View style={styles.footer}>
+                    <Text style={styles.title}>Getting the lowest price fuel for you!</Text>
+                    <Text style={styles.text}>Sign in with account</Text>
+                    <View style={styles.button}>
+                        <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
+                            <LinearGradient
+                                colors={[Colors.midGreen, Colors.green]}
+                                style={styles.signIn}
                             >
-                            </MaterialIcons>
-                        </LinearGradient>
-                    </TouchableOpacity>
+                                <Text style={styles.textSign}>Get Started</Text>
+                                <MaterialIcons
+                                    name="navigate-next"
+                                    color="#fff"
+                                    size={20}
+                                >
+                                </MaterialIcons>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </Animatable.View>
+
+            </Animated.ScrollView>
         </View>
     );
 };
@@ -57,17 +64,20 @@ const height_logo = height * 0.28;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.lightGreen
+        backgroundColor: 'white'
     },
 
     header: {
-        flex: 2,
+        flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+        backgroundColor: Colors.lightGreen
     },
 
     textHeader: {
-        fontSize: 50,
+        fontSize: wp('10.0%'),
         fontWeight: 'bold',
         color: Colors.green,
         marginTop: 10
@@ -75,11 +85,9 @@ const styles = StyleSheet.create({
 
     footer: {
         flex: 1,
-        backgroundColor: '#fff',
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingVertical: 50,
-        paddingHorizontal: 30
+
+        paddingVertical: wp('10.0%'),
+        paddingHorizontal: wp('10.0'),
     },
 
     logo: {
@@ -89,14 +97,14 @@ const styles = StyleSheet.create({
 
     title: {
         color: Colors.green,
-        fontSize: 30,
+        fontSize: wp('10.0%'),
         fontWeight: 'bold'
     },
 
     text: {
         color: 'grey',
         marginTop: 5,
-        fontSize: 20
+        fontSize: wp('5.0%')
     },
 
     button: {
@@ -105,8 +113,8 @@ const styles = StyleSheet.create({
     },
 
     signIn: {
-        width: 150,
-        height: 40,
+        width: wp('45.0%'),
+        height: hp('7.0%'),
         justifyContent: 'center',
         borderRadius: 20,
         flexDirection: 'row',

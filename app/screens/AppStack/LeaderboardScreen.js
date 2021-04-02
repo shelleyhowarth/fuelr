@@ -9,7 +9,10 @@ import * as firebase from 'firebase';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 import Spinner from 'react-native-loading-spinner-overlay';
-
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp
+  } from 'react-native-responsive-screen'; 
 
 const db = Firebase.firestore();
 const { width, height } = Dimensions.get("window");
@@ -121,20 +124,21 @@ const LeaderboardScreen = () => {
                     <Animatable.View style={styles.topView} animation="bounceIn">
                             <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: '5%'}}>
                                 <View style={styles.textView}>
-                                    <Text style={styles.titleText}>Forecourt</Text>
+                                    <Text style={styles.forecourtTitle}>Forecourt</Text>
                                 </View>
                                 <View style={styles.textView}>
                                     <FontAwesome
                                         name="trophy"
                                         color={Colors.green}
-                                        size={80}
+                                        size={hp('15.0%')}
                                         style={styles.icon}
                                     />
                                 </View>
                                 <View style={styles.textView}>
-                                    <Text style={styles.titleText}>Leaderboard</Text>
+                                    <Text style={styles.forecourtTitle}>Leaderboard</Text>
                                 </View>
                             </View>
+                            <Text style={{textAlign: 'center', fontSize: wp('2.5%'), color: Colors.green}}>This leaderboard is based on petrol prices.</Text>
                     </Animatable.View>
 
                 {!loadingForecourts && forecourtsFiltered ?
@@ -164,7 +168,7 @@ const LeaderboardScreen = () => {
                                     <FontAwesome
                                         name="trophy"
                                         color={Colors.green}
-                                        size={100}
+                                        size={hp('15.0%')}
                                         style={styles.icon}
                                     />
                                 </View>
@@ -178,11 +182,12 @@ const LeaderboardScreen = () => {
                     <Animatable.View style={{flex: 5}} animation="bounceInUp">
                         <Leaderboard 
                             data={users} 
-                            sortBy='points' 
+                            sortBy='points'
                             labelBy='username'
                             oddRowColor={'white'}
                             evenRowColor={'#97dba6'}
                         />
+                        <Text style={styles.noPrices}>{users.length == 0 ? "There are no users yet!" : null}</Text>
                     </Animatable.View>
                 : null}
             </View>}
@@ -217,7 +222,13 @@ const styles = StyleSheet.create({
         
     },
     titleText: {
-        fontSize: 30,
+        fontSize: wp('6.0%'),
+        fontWeight: 'bold',
+        color: Colors.green,
+        textAlign: 'center',
+    },
+    forecourtTitle: {
+        fontSize: wp('6.0%'),
         fontWeight: 'bold',
         color: Colors.green,
         textAlign: 'center',
@@ -247,7 +258,7 @@ const styles = StyleSheet.create({
         color: '#FFF'
     },
     noPrices: {
-        fontSize: 25,
+        fontSize: wp('7.0%'),
         position: 'absolute',
         alignSelf: 'center',
         paddingTop: 10

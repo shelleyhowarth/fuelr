@@ -13,6 +13,10 @@ import "firebase/firestore";
 import Geocoder from 'react-native-geocoding';
 import * as DocumentPicker from 'expo-document-picker';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp
+  } from 'react-native-responsive-screen';
 
 const SignUpScreen = ({navigation}) => {
     //Consts
@@ -561,12 +565,23 @@ const SignUpScreen = ({navigation}) => {
                     >
                         <LinearGradient
                             colors={[Colors.midGreen, Colors.green]}
-                            style={formValid ? styles.signIn : styles.signInDisabled} 
+                            style={Platform.OS === 'ios' && !formValid ? styles.signInDisabled : styles.signIn} 
+                            //style={styles.signIn} 
                         >
                             <Text style={styles.textSign}>Sign up</Text>
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('SignInScreen')}
+                >
+                    <FontAwesome
+                        name="arrow-left"
+                        color={Colors.green}
+                        size={hp('4.0%')}
+                        style={{paddingTop: hp('2.0%')}}
+                    />
+                </TouchableOpacity>
             </Animatable.View>
             </KeyboardAwareScrollView>
         </View>
@@ -585,7 +600,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-end',
         paddingHorizontal: 20,
-        paddingBottom: 50
+        paddingVertical: hp('2.0%')
     },
 
     footer: {
@@ -602,12 +617,12 @@ const styles = StyleSheet.create({
     textHeader: {
         color: Colors.lightGreen,
         fontWeight: 'bold',
-        fontSize: 30
+        fontSize: wp('10.0%')
     },
 
     textFooter: {
         color: 'grey',
-        fontSize: 18
+        fontSize: wp('5.0%')
     },
 
     action: {
@@ -622,7 +637,8 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: Platform.OS === "ios" ? 0 : -12,
         paddingLeft: 10,
-        color: "#05375a"
+        color: "#05375a", 
+        fontSize: wp('4.0%')
     },
 
     button: {
@@ -631,7 +647,7 @@ const styles = StyleSheet.create({
 
     signIn: {
         width: '100%',
-        height: 50,
+        height: 55,
         justifyContent: 'center',
         borderRadius:  10,
         flexDirection: 'row',
@@ -649,7 +665,7 @@ const styles = StyleSheet.create({
 
     textSign: {
         fontWeight: 'bold',
-        fontSize: 18,
+        fontSize: wp('5.0%'),
         color: Colors.lightGreen
     },
 

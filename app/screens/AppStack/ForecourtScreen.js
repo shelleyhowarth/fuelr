@@ -3,7 +3,7 @@ import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, A
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
 import { TextInput } from 'react-native-gesture-handler';
-import { TabView, SceneMap } from 'react-native-tab-view';
+import { TabView, TabBar } from 'react-native-tab-view';
 import moment from 'moment';
 import { Colors } from '../../../styles/Colors';
 import { LineChart } from "react-native-chart-kit";
@@ -14,7 +14,10 @@ import { FirstRoute } from './Tabs/FirstRoute';
 import { SecondRoute } from './Tabs/SecondRoute';
 import { ThirdRoute } from './Tabs/ThirdRoute';
 import { FourthRoute } from './Tabs/FourthRoute';
-
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp
+  } from 'react-native-responsive-screen'; 
 
 const ForecourtScreen = ({route, navigation}) => {
     //Consts
@@ -34,8 +37,8 @@ const ForecourtScreen = ({route, navigation}) => {
     const [rating, setRating] = useState(null);
     const [index, setIndex] = useState(0);
     const [routes] = useState([
-      { key: 'price', title: 'price' },
-      { key: 'review', title: 'review' },
+      { key: 'price', title: 'Overview' },
+      { key: 'review', title: 'Reviews' },
       //{ key: 'trends', title: 'trends'},
       //{ key: 'amenities', title: 'amenities'}
     ]);
@@ -134,6 +137,17 @@ const ForecourtScreen = ({route, navigation}) => {
             onIndexChange={setIndex}
             initialLayout={{ width: layout.width, height: layout.height }}
             style={styles.tab}
+            renderTabBar = { (props) => (
+                <TabBar
+                {...props}
+                renderLabel={({ route, color }) => (
+                  <Text style={{ color: 'white', margin: 8 }}>
+                    {route.title}
+                  </Text>
+                )}
+                style={{backgroundColor: Colors.green, paddingTop: wp('10.9%')}}
+              />
+            )}
         />
         
     )
@@ -147,8 +161,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     tab: {
-        marginTop: '10%',
-        color: Colors.lightGreen
+        
     }
 });
 
