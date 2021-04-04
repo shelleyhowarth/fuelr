@@ -62,8 +62,8 @@ const SignUpScreen = ({navigation}) => {
     let usernameSpace;
     //UseEffect
     useEffect( () => {
-
-    }, [users])
+        checkValid()
+    }, [users, formValid, data])
     //Methods
 
     const signUp = () => {
@@ -71,16 +71,10 @@ const SignUpScreen = ({navigation}) => {
     }
 
     const checkValid = () => {
-        if(data.emailError === null && data.email) {
-            if(data.usernameError === null && data.username) {
-                if(data.nameError === null && data.name) {
-                    if(data.passwordError === null && data.password) {
-                        if(data.confirmPasswordError === null && data.confirmPassword) {
-                            setFormValid(true);
-                        }
-                    }
-                }
-            }
+        console.log("checkValid")
+        if(data.emailError === null && data.email && data.usernameError === null && data.username && data.nameError === null && data.name && data.confirmPasswordError === null && data.confirmPassword) {
+            setFormValid(true);
+            console.log("Form valid")
         }
     }
 
@@ -124,9 +118,11 @@ const SignUpScreen = ({navigation}) => {
         emailCorrect = false;
         emailSpace = false;
         emailPattern(value);
+
         if(users) {
             checkEmail(value);
         }
+
         if(emailTaken) {
             setData({
                 ...data,
@@ -163,7 +159,6 @@ const SignUpScreen = ({navigation}) => {
                 emailError: "Email required"
             });
         }
-        checkValid();
     }
 
     const nameInputChange = (value) => {
@@ -183,7 +178,6 @@ const SignUpScreen = ({navigation}) => {
                 nameError: "Name required"
             });
         }
-        checkValid();
     }
 
     const usernameInputChange = (value) => {
@@ -223,7 +217,6 @@ const SignUpScreen = ({navigation}) => {
                 usernameError: "Username required"
             });
         }         
-        checkValid();
     }
 
     const handlePasswordChange = (value) => {
@@ -247,7 +240,6 @@ const SignUpScreen = ({navigation}) => {
                 passwordError: null
             });
         }
-        checkValid();
     }
 
     const handleConfirmPasswordChange = (value) => {
@@ -265,7 +257,6 @@ const SignUpScreen = ({navigation}) => {
                 confirmPasswordError: null
             });
         }
-        checkValid();
     }
 
 
@@ -313,6 +304,28 @@ const SignUpScreen = ({navigation}) => {
             uri: result.uri
         });
         setFileChosen("File: " + result.name);
+    }
+
+    const renderSignUp = () => {
+        if(Platform.OS == 'ios') {
+            return (
+                <LinearGradient
+                colors={[Colors.midGreen, Colors.green]}
+                style={!formValid ? styles.signInDisabledIos : styles.signIn} 
+                >
+                    <Text style={styles.textSign}>Sign up</Text>
+                </LinearGradient>
+            )
+        } else {
+            return (
+                <LinearGradient
+                colors={[Colors.midGreen, Colors.green]}
+                style={!formValid ? styles.signInDisabledAndroid : styles.signIn} 
+                >
+                    <Text style={styles.textSign}>Sign up</Text>
+                </LinearGradient>
+            )
+        }
     }
 
     //Return
@@ -563,13 +576,7 @@ const SignUpScreen = ({navigation}) => {
                         style={styles.signUp}
                         disabled={!formValid}
                     >
-                        <LinearGradient
-                            colors={[Colors.midGreen, Colors.green]}
-                            style={Platform.OS === 'ios' && !formValid ? styles.signInDisabled : styles.signIn} 
-                            //style={styles.signIn} 
-                        >
-                            <Text style={styles.textSign}>Sign up</Text>
-                        </LinearGradient>
+                        {renderSignUp()}
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity
@@ -653,7 +660,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center'
     },
-    signInDisabled: {
+    signInDisabledIos: {
         width: '100%',
         height: 50,
         justifyContent: 'center',
@@ -661,6 +668,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         opacity: 0.1
+    },
+    signInDisabledAndroid: {
+        width: '100%',
+        height: 50,
+        justifyContent: 'center',
+        borderRadius:  10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        opacity: 0.4
     },
 
     textSign: {
