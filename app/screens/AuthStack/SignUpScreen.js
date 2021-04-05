@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Dimensions, TextInput, StatusBar } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { CheckBox } from 'react-native-elements'
@@ -7,26 +7,38 @@ import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import * as Animatable from 'react-native-animatable';
-import { registration } from '../../firebase/FirebaseMethods';
+import { registration, checkEmails } from '../../firebase/FirebaseMethods';
 import Firebase from '../../firebase/Firebase';
 import "firebase/firestore";
 import Geocoder from 'react-native-geocoding';
-
-
+import * as DocumentPicker from 'expo-document-picker';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp
+  } from 'react-native-responsive-screen';
 
 const SignUpScreen = ({navigation}) => {
+    //Consts
     const db = Firebase.firestore();
     Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
+    let result;
 
+    //States
+    const [users, loadingUsers, errorUsers] = useCollectionData(
+        db.collection('users'),
+        {
+            snapshotListenOptions: { includeMetadataChanges: true},
+        }
+    );
     const [isSelected, setSelection] = useState(false);
-    const [usernameTaken, setUsernameTaken] = useState(false);
     const [forecourtExists, setForecourtExists] = useState(false);
-
-    const [data, setData] = React.useState({
+    const [data, setData] = useState({
         name: '',
         username: '',
         email: '',
         password: '',
+        uri: '',
         confirmPassword: '',
         handleEmailChange: false,
         handleNameChange: false,
@@ -39,16 +51,107 @@ const SignUpScreen = ({navigation}) => {
         passwordError: null,
         confirmPasswordError: null,
     });
+    const [fileChosen, setFileChosen]= useState();
+    const [formValid, setFormValid] = useState(false);
+
+    //Lets
+    let emailTaken;
+    let usernameTaken;
+    let emailCorrect;
+    let emailSpace;
+    let usernameSpace;
+    //UseEffect
+    useEffect( () => {
+        checkValid()
+    }, [users, formValid, data])
+    //Methods
+
+    const signUp = () => {
+        registration(data.email, data.password, data.name, data.username, data.uri)
+    }
+
+    const checkValid = () => {
+        console.log("checkValid")
+        if(data.emailError === null && data.email && data.usernameError === null && data.username && data.nameError === null && data.name && data.confirmPasswordError === null && data.confirmPassword) {
+            setFormValid(true);
+            console.log("Form valid")
+        }
+    }
+
+    const checkEmail = (email) => {
+        users.map((user, index) => {
+            if(user.email.toLowerCase() === email.toLowerCase()) {
+                emailTaken = true
+            }
+        })
+    }
+    
+    const emailPattern = (email) => {
+        let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        if(reg.test(email) === true) {
+            if(/\s/g.test(email) === false) {
+                emailCorrect = true;
+            } else {
+                emailSpace = true;
+            }
+        } else {
+            emailCorrect = false;
+        }
+    }
+
+    const checkUsername = (username) => {
+        users.map((user, index) => {
+            if(user.username.toLowerCase() === username.toLowerCase()) {
+                usernameTaken = true
+            }
+        })
+    }
+
+    const usernamePattern = (username) => {
+        if(/\s/g.test(username) === true) {
+            usernameSpace = true;
+        }
+    }
 
     const emailInputChange = (value) => {
-        if(value.length !== 0 ) {
+        setFormValid(false);
+        emailCorrect = false;
+        emailSpace = false;
+        emailPattern(value);
+
+        if(users) {
+            checkEmail(value);
+        }
+
+        if(emailTaken) {
+            setData({
+                ...data,
+                email: value,
+                handleEmailChange: false,
+                emailError: "Email taken"
+            });
+        } else if(emailSpace) {
+            setData({
+                ...data,
+                email: value,
+                handleEmailChange: true,
+                emailError: "Email badly formatted"
+            });
+        } else if(!emailCorrect) {
+            setData({
+                ...data,
+                email: value,
+                handleEmailChange: true,
+                emailError: "Email badly formatted"
+            });
+        } else if(value.length !== 0) {
             setData({
                 ...data,
                 email: value,
                 handleEmailChange: true,
                 emailError: null
             });
-        } else {
+        } else if(!value.length) {
             setData({
                 ...data,
                 email: value,
@@ -59,6 +162,7 @@ const SignUpScreen = ({navigation}) => {
     }
 
     const nameInputChange = (value) => {
+        setFormValid(false);
         if(value.length !== 0 ) {
             setData({
                 ...data,
@@ -77,15 +181,26 @@ const SignUpScreen = ({navigation}) => {
     }
 
     const usernameInputChange = (value) => {
-        setUsernameTaken(false);
-        checkUsernames(value);
-
-        if(usernameTaken === true) {
+        setFormValid(false);
+        usernameTaken = false;
+        usernameSpace = false;
+        usernamePattern(value);
+        checkUsername(value);
+        
+        if(usernameTaken) {
             setData({
                 ...data,
                 username: value,
                 handleUsernameChange: false,
                 usernameError: "Username taken"
+            });
+
+        } else if(usernameSpace) {
+            setData({
+                ...data,
+                username: value,
+                handleUsernameChange: true,
+                usernameError: "Username cannot contain spaces"
             });
         } else if(value.length !== 0) {
             setData({
@@ -101,10 +216,11 @@ const SignUpScreen = ({navigation}) => {
                 handleUsernameChange: false,
                 usernameError: "Username required"
             });
-        }
+        }         
     }
 
     const handlePasswordChange = (value) => {
+        setFormValid(false);
         if(value.length == 0) {
             setData({
                 ...data,
@@ -124,10 +240,10 @@ const SignUpScreen = ({navigation}) => {
                 passwordError: null
             });
         }
-
     }
 
     const handleConfirmPasswordChange = (value) => {
+        setFormValid(false);
         if(value !== data.password) {
             setData({
                 ...data,
@@ -181,21 +297,38 @@ const SignUpScreen = ({navigation}) => {
           .catch(error => console.warn(error));
     }
 
-    const checkUsernames = async (username) => {
-        try {
-            await db.collection("users").get()
-            .then(querySnapshot => {
-                querySnapshot.docs.forEach(doc => {
-                    if(doc.data().username == username) {
-                        setUsernameTaken(true);
-                    }
-                })
-            })
-        } catch(e) {
-            console.log(e);
-        }
-      }
+    const pickDoc = async() => {
+        result = await DocumentPicker.getDocumentAsync({});
+        setData({
+            ...data,
+            uri: result.uri
+        });
+        setFileChosen("File: " + result.name);
+    }
 
+    const renderSignUp = () => {
+        if(Platform.OS == 'ios') {
+            return (
+                <LinearGradient
+                colors={[Colors.midGreen, Colors.green]}
+                style={!formValid ? styles.signInDisabledIos : styles.signIn} 
+                >
+                    <Text style={styles.textSign}>Sign up</Text>
+                </LinearGradient>
+            )
+        } else {
+            return (
+                <LinearGradient
+                colors={[Colors.midGreen, Colors.green]}
+                style={!formValid ? styles.signInDisabledAndroid : styles.signIn} 
+                >
+                    <Text style={styles.textSign}>Sign up</Text>
+                </LinearGradient>
+            )
+        }
+    }
+
+    //Return
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={Colors.green} barStyle="light-content"/>
@@ -385,6 +518,7 @@ const SignUpScreen = ({navigation}) => {
                         }
                     </TouchableOpacity>
                 </View>
+                {/*
                 <View style={styles.checkbox}>
                     <Text style={styles.textFooter}>
                         Are you a forecourt owner?
@@ -414,42 +548,47 @@ const SignUpScreen = ({navigation}) => {
                                 autoCapitalize="none"
                                 onChangeText = {(value) => forecourtInputChange(value)}
                             />
-        
-                            {data.usernameError ? 
-                                <Text style={{color: 'red'}}> {data.usernameError} </Text>
-                            : null}
-        
-                            {data.handleUsernameChange ? 
-                                <Animatable.View
-                                    animation="bounceIn"
-                                >
-                                    <Feather
-                                        name="check-circle"
-                                        color="green"
-                                        size={20}
-                                    />
-                                </Animatable.View>
-                            : null}
                         </View>
+                        <View style={styles.button}>
+                            <TouchableOpacity
+                                onPress={() => pickDoc()}
+                                style={styles.signUp}
+                            >
+                                <LinearGradient
+                                    colors={[Colors.midGreen, Colors.green]}
+                                    style={styles.signIn}
+                                >
+                                    <Text style={styles.textSign}>Choose file</Text>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                        <Text>{fileChosen ? fileChosen : null}</Text>
                     </View>
 
                 : null}
+                    */}
 
                 <View style={styles.button}>
                     <TouchableOpacity
                         onPress={() => {
-                            registration(data.email, data.password, data.name, data.username);
+                           signUp();
                         }}
                         style={styles.signUp}
+                        disabled={!formValid}
                     >
-                        <LinearGradient
-                            colors={[Colors.midGreen, Colors.green]}
-                            style={styles.signIn}
-                        >
-                            <Text style={styles.textSign}>Sign up</Text>
-                        </LinearGradient>
+                        {renderSignUp()}
                     </TouchableOpacity>
                 </View>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('SignInScreen')}
+                >
+                    <FontAwesome
+                        name="arrow-left"
+                        color={Colors.green}
+                        size={hp('4.0%')}
+                        style={{paddingTop: hp('2.0%')}}
+                    />
+                </TouchableOpacity>
             </Animatable.View>
             </KeyboardAwareScrollView>
         </View>
@@ -468,7 +607,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-end',
         paddingHorizontal: 20,
-        paddingBottom: 50
+        paddingVertical: hp('2.0%')
     },
 
     footer: {
@@ -485,12 +624,12 @@ const styles = StyleSheet.create({
     textHeader: {
         color: Colors.lightGreen,
         fontWeight: 'bold',
-        fontSize: 30
+        fontSize: wp('10.0%')
     },
 
     textFooter: {
         color: 'grey',
-        fontSize: 18
+        fontSize: wp('5.0%')
     },
 
     action: {
@@ -505,26 +644,44 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: Platform.OS === "ios" ? 0 : -12,
         paddingLeft: 10,
-        color: "#05375a"
+        color: "#05375a", 
+        fontSize: wp('4.0%')
     },
 
     button: {
         alignItems: 'center',
-        marginTop: 50
     },
 
     signIn: {
         width: '100%',
-        height: 50,
+        height: 55,
         justifyContent: 'center',
         borderRadius:  10,
         flexDirection: 'row',
         alignItems: 'center'
     },
+    signInDisabledIos: {
+        width: '100%',
+        height: 50,
+        justifyContent: 'center',
+        borderRadius:  10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        opacity: 0.1
+    },
+    signInDisabledAndroid: {
+        width: '100%',
+        height: 50,
+        justifyContent: 'center',
+        borderRadius:  10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        opacity: 0.4
+    },
 
     textSign: {
         fontWeight: 'bold',
-        fontSize: 18,
+        fontSize: wp('5.0%'),
         color: Colors.lightGreen
     },
 

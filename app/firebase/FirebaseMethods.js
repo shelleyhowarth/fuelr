@@ -3,29 +3,47 @@ import "firebase/firestore";
 import {Alert} from "react-native";
 import Geocoder from 'react-native-geocoding';
 import * as firebase from 'firebase'
-import 'firebase/firestore';
 
 
 const db = Firebase.firestore();
 
-export async function registration(email, password, name, username) {
-  try {
-    const currentUser = Firebase.auth().currentUser;
-    await Firebase.auth().createUserWithEmailAndPassword(email, password);
+export async function registration(email, password, name, username, uri) {
+  await Firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(Alert.alert("Account successfully created!"))
+    .catch(e => Alert.alert(e.message));
+  const currentUser = Firebase.auth().currentUser;
 
-    db.collection("users")
-      .doc(currentUser.uid)
-      .set({
-        email: currentUser.email,
-        name: name,
-        username: username,
-        forecourtOwner: false,
-        points: 0,
-        id: currentUser.uid
-      });
-      Alert.alert("Account successfully created")
-  } catch (err) {
-    Alert.alert("An error occured", err.message);
+  await db.collection("users")
+    .doc(currentUser.uid)
+    .set({
+      email: currentUser.email,
+      name: name,
+      username: username,
+      forecourtOwner: false,
+      points: 0,
+      id: currentUser.uid
+    });
+
+    if(uri) {
+      const ref = firebase.storage().ref()
+      const response = await fetch(uri).then(console.log(response));
+      const blob = await response.blob();
+      let uploadTask = ref.child(`/ownerEvidence/${currentUser.uid}`).put(blob);
+      uploadTask.on('state_changed',
+        (snapshot) => {},
+        (error) => { Alert.alert(error.message) },
+        () => {Alert.alert("Upload complete!")}
+      );
+    }
+}
+
+export async function submitFeedback(feedback) {
+  try { 
+    await db.collection('feedback').add({
+    message: feedback
+  })
+  } catch (e) {
+    Alert.alert(e.message)
   }
 }
 
@@ -34,7 +52,6 @@ export async function signIn(email, password) {
    await Firebase
       .auth()
       .signInWithEmailAndPassword(email, password);
-      Alert.alert("Successful sign in")
   } catch (err) {
     Alert.alert("There is something wrong!", err.message);
   }
@@ -51,6 +68,12 @@ export async function signOut() {
   }
 }
 
+export async function resetPassword(email) {
+  Firebase.auth().sendPasswordResetEmail(email)
+    .then(() => Alert.alert("Password reset email has been sent!"))
+    .catch((error) => Alert.alert(error.message))
+}
+
 export async function checkUsernames(username, usernameTaken) {
   try {
       await db.collection("users").get()
@@ -63,7 +86,23 @@ export async function checkUsernames(username, usernameTaken) {
           })
       })
   } catch(e) {
-      console.log(e);
+      console.log(e.message);
+  }
+}
+
+export async function checkEmails(email, emailTaken) {
+  try {
+      await db.collection("users").get()
+      .then(querySnapshot => {
+          querySnapshot.docs.forEach(doc => {
+              if(doc.data().email == email) {
+                Alert.alert("Taken");
+                emailTaken = true;
+              }
+          })
+      })
+  } catch(e) {
+      console.log(e.message);
   }
 }
 
@@ -84,7 +123,7 @@ export async function forecourtInputChange(value)  {
             });
           });
     })
-    .catch(error => console.warn(error));
+    .catch(error => Alert.alert(error.message));
 }
 
 export async function getForecourt(lng, lat) {
@@ -102,18 +141,15 @@ export async function getForecourt(lng, lat) {
 }
 
 export async function updateForecourts() {
-  let obj = {}
   await db.collection('forecourts').get()
     .then(querySnapshot => {
       querySnapshot.docs.forEach(doc => {
-          obj = {
-            ...doc.data(),
-            id: doc.id
-          }
-          doc.ref.update(obj);
-        })
-      });
-}
+          //db.collection('forecourts').doc(doc.ref.id).update({id: doc.ref.id});
+          doc.ref.update({id: doc.ref.id}).then(console.log(doc.ref.id));
+      })
+    })
+    .catch(e => console.log(e.message));
+  }
 
 export async function updatePetrolPrice(id, priceInput) {
   const currentUser = Firebase.auth().currentUser.uid;
@@ -184,7 +220,7 @@ export async function submitReview(id, score) {
           user: username
         })
       })
-    .catch(e => console.log(e))
+    .catch(e => Alert.alert(e.message))
     .then(
       await db.collection('forecourts').doc(id).get()
         .then( querySnapshot => {

@@ -6,8 +6,10 @@ import AccountScreen from './AccountScreen';
 import ForecourtScreen from './ForecourtScreen';
 import TrendsScreen from './TrendsScreen';
 import LeaderboardScreen from './LeaderboardScreen';
-import Feather from 'react-native-vector-icons/Feather';
-import Icon from 'react-native-ionicons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -18,10 +20,54 @@ const Home = () => {
       <Tab.Screen 
         name="Home" 
         component={ MapScreen } 
+        options = {{
+          tabBarIcon: ({color, size}) => (
+            <Ionicons
+              name='map-outline'
+              size={25}
+            />
+          )
+        }}
       />
-      <Tab.Screen name="Leaderboard" component={ LeaderboardScreen } />
-      <Tab.Screen name="Trends" component={ TrendsScreen } />
-      <Tab.Screen name="Account" component={ AccountScreen } />
+      <Tab.Screen 
+        name="Leaderboard" 
+        component={ LeaderboardScreen } 
+        options = {{
+          tabBarIcon: ({color, size}) => (
+            <Ionicons 
+              name='trophy-outline'
+              size={25}
+            />
+          )
+        }}
+      />
+      {/*}
+      <Tab.Screen 
+        name="Trends" 
+        component={ TrendsScreen } 
+        options = {{
+          tabBarIcon: ({color, size}) => (
+            <Ionicons 
+              name='trending-up'
+              size={25}
+            />
+          )
+        }}
+      />
+      */}
+      
+      <Tab.Screen 
+        name="Account" 
+        component={ AccountScreen } 
+        options = {{
+          tabBarIcon: ({color, size}) => (
+            <FontAwesome 
+              name='user-o'
+              size={25}
+            />
+          )
+        }}
+      />
     </Tab.Navigator>
   );
 }

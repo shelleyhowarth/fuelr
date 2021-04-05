@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {View, StyleSheet, RefreshControl, Text, Dimensions, StatusBar, Switch} from 'react-native';
-import { signOut } from '../../firebase/FirebaseMethods';
+import { signOut, updateForecourts } from '../../firebase/FirebaseMethods';
 import Leaderboard from 'react-native-leaderboard';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
@@ -9,13 +9,17 @@ import * as firebase from 'firebase';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 import Spinner from 'react-native-loading-spinner-overlay';
-
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp
+  } from 'react-native-responsive-screen'; 
 
 const db = Firebase.firestore();
 const { width, height } = Dimensions.get("window");
 
 
 const LeaderboardScreen = () => {
+    //Consts
     const currentUser = firebase.auth().currentUser.uid;
 
     //States
@@ -34,33 +38,41 @@ const LeaderboardScreen = () => {
     const [forecourtView, setForecourtView] = useState(false);
     const [result, setResult] = useState();
     const [points, setPoints] = useState();
-    const [spinner, setSpinner] = useState(true);
+    const [forecourtsFiltered, setForecourtsFiltered] = useState([]);
 
-    const toggleSwitch = () => setForecourtView(previousState => !previousState);
+    //Vars
+    let temp = [];
 
     useEffect ( () => {
+
         if(!loadingUsers) {
             users.sort((a, b) => (a.points < b.points) ? 1 : -1);
             setResult(getPos());
             setPoints(getPoints());
-            setSpinner(false);
-
         }
 
-        if(!loadingForecourts) {
-            forecourts.forEach( obj => {
-                    obj.petrolPrice = obj.currPetrol.price;
-                    if(!obj.name.length) {
-                        obj.name += "N/A " +  obj.address.split(" ").pop();
-                    } else {
-                        obj.name += " " + obj.address.split(" ").pop();
-                    }
-            });
-            setSpinner(false);
+        if(!loadingForecourts && forecourts.length > 0) {
+            temp = forecourts;
+            temp = temp.filter((forecourt) => forecourt.currPetrol.price);
 
+            for(let i = 0; i < temp.length; i++) {
+                temp[i].petrolPrice = temp[i].currPetrol.price;
+                if(!temp[i].name.length) {
+                    temp[i].name = "FUEL STATION " + temp[i].address.split(" ").pop()
+                } else if(temp[i].name.includes(temp[i].address.split(" ").pop())) {
+                    break;
+                }
+                else {
+                    temp[i].name += " " + temp[i].address.split(" ").pop();
+                }
+            }
+            setForecourtsFiltered(temp);
         }
 
     }, [users, forecourts])
+
+    //Methods
+    const toggleSwitch = () => setForecourtView(previousState => !previousState);
 
     const getPos = () => {
         let result;
@@ -102,7 +114,7 @@ const LeaderboardScreen = () => {
         <View style={styles.container}>
             <StatusBar backgroundColor={'white'} barStyle="dark-content"/>
             <Spinner
-                visible={spinner}
+                visible={loadingUsers}
                 textContent={'Getting leaderboard data...'}
                 textStyle={styles.spinnerTextStyle}
             />
@@ -112,39 +124,41 @@ const LeaderboardScreen = () => {
                     <Animatable.View style={styles.topView} animation="bounceIn">
                             <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: '5%'}}>
                                 <View style={styles.textView}>
-                                    <Text style={styles.titleText}>Forecourt</Text>
+                                    <Text style={styles.forecourtTitle}>Forecourt</Text>
                                 </View>
                                 <View style={styles.textView}>
                                     <FontAwesome
                                         name="trophy"
                                         color={Colors.green}
-                                        size={80}
+                                        size={hp('15.0%')}
                                         style={styles.icon}
                                     />
                                 </View>
                                 <View style={styles.textView}>
-                                    <Text style={styles.titleText}>Leaderboard</Text>
+                                    <Text style={styles.forecourtTitle}>Leaderboard</Text>
                                 </View>
                             </View>
+                            <Text style={{textAlign: 'center', fontSize: wp('2.5%'), color: Colors.green}}>This leaderboard is based on petrol prices.</Text>
                     </Animatable.View>
 
-                {!loadingForecourts ?
+                {!loadingForecourts && forecourtsFiltered ?
                     <Animatable.View style={{flex: 5}} animation="bounceInUp">
                         <Leaderboard 
-                            data={forecourts} 
+                            data={forecourtsFiltered} 
                             sortBy="petrolPrice"
-                            sort={ () => forecourts.sort((a, b) => (a.petrolPrice > b.petrolPrice) ? 1 : -1)}
+                            sort={ () => forecourtsFiltered.sort((a, b) => (a.petrolPrice > b.petrolPrice) ? 1 : -1)}
                             labelBy='name'
                             oddRowColor={'white'}
                             evenRowColor={'#97dba6'}
                         />
+                        <Text style={styles.noPrices}>{forecourtsFiltered.length == 0 ? "No fuel prices have been reported yet!" : null}</Text>
                     </Animatable.View>
                 : null}
 
             </View>
             : 
             <View>
-                {! loadingUsers ? 
+                {!loadingUsers ? 
                     <Animatable.View style={styles.topView} animation="bounceIn">
                             <View style={{flexDirection:'row', justifyContent: 'space-between', marginHorizontal: '10%'}}>
                                 <View style={styles.textView}>
@@ -154,7 +168,7 @@ const LeaderboardScreen = () => {
                                     <FontAwesome
                                         name="trophy"
                                         color={Colors.green}
-                                        size={100}
+                                        size={hp('15.0%')}
                                         style={styles.icon}
                                     />
                                 </View>
@@ -168,11 +182,12 @@ const LeaderboardScreen = () => {
                     <Animatable.View style={{flex: 5}} animation="bounceInUp">
                         <Leaderboard 
                             data={users} 
-                            sortBy='points' 
+                            sortBy='points'
                             labelBy='username'
                             oddRowColor={'white'}
                             evenRowColor={'#97dba6'}
                         />
+                        <Text style={styles.noPrices}>{users.length == 0 ? "There are no users yet!" : null}</Text>
                     </Animatable.View>
                 : null}
             </View>}
@@ -207,7 +222,13 @@ const styles = StyleSheet.create({
         
     },
     titleText: {
-        fontSize: 30,
+        fontSize: wp('6.0%'),
+        fontWeight: 'bold',
+        color: Colors.green,
+        textAlign: 'center',
+    },
+    forecourtTitle: {
+        fontSize: wp('6.0%'),
         fontWeight: 'bold',
         color: Colors.green,
         textAlign: 'center',
@@ -236,6 +257,12 @@ const styles = StyleSheet.create({
     spinnerTextStyle: {
         color: '#FFF'
     },
+    noPrices: {
+        fontSize: wp('7.0%'),
+        position: 'absolute',
+        alignSelf: 'center',
+        paddingTop: 10
+    }
 });
 
 export default LeaderboardScreen;
