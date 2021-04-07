@@ -188,6 +188,14 @@ export async function updatePetrolPrice(id, priceInput) {
     .then(addPoints(10, currentUser))
 }
 
+export async function updateAmenities(id, amenitiesObj) {
+  const currentUser = Firebase.auth().currentUser.uid;
+      await db.collection('forecourts').doc(id).update({
+        amenities: amenitiesObj
+      })
+    .then(addPoints(10, currentUser))
+}
+
 export async function updateDieselPrice(id, priceInput) {
   const currentUser = Firebase.auth().currentUser.uid;
   let username;

@@ -9,24 +9,169 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Modal from 'react-native-modal';
 import { Colors } from '../../../../styles/Colors';
-
+import {
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp
+  } from 'react-native-responsive-screen'; 
+import { updateAmenities } from '../../../firebase/FirebaseMethods';
 export const FourthRoute = ({forecourt}) => {
     //States
     const [available, setAvailable] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
-
+    const [forecourtState, setForecourtState] = useState(forecourt);
+    
+    const icons = [
+        {
+            dbName: 'acceptsCard',
+            return: 
+                <View>
+                    <FontAwesome5
+                        name='credit-card'
+                        size={25}
+                        color={forecourtState.amenities.acceptsCard ? 'green' : 'grey'}  
+                    />
+                    <Text style={{color: forecourtState.amenities.acceptsCard ? 'green' : 'grey'}}>Accepts Card</Text>
+                </View>
+        },
+        {
+            dbName: 'airAndWater',
+            return: 
+                <View>
+                    <Ionicons
+                        name='water-outline'
+                        size={25}
+                        color={forecourtState.amenities.airAndWater ? 'green' : 'grey'}  
+                    />
+                    <Text style={{color: forecourtState.amenities.airAndWater ? 'green' : 'grey'}}>Air and Water</Text>
+                </View>
+        },
+        {
+            dbName: 'alcohol',
+            return: 
+                <View>
+                    <Ionicons
+                        name='wine'
+                        size={25}
+                        color={forecourtState.amenities.alcohol ? 'green' : 'grey'}  
+                    />
+                    <Text style={{color: forecourtState.amenities.alcohol ? 'green' : 'grey'}}>Alcohol</Text>
+                </View>
+        },
+        {   
+            dbName: 'atm',
+            return: 
+            <View>
+                <FontAwesome 
+                    name='euro'
+                    size={25}
+                    color={forecourtState.amenities.atm ? 'green' : 'grey'}
+                />
+                <Text style={{color: forecourtState.amenities.atm ? 'green' : 'grey'}}>ATM</Text>
+            </View>
+       
+        },
+        {
+            dbName: 'bathroom',
+            return: 
+            <View>
+                <MaterialCommunityIcons 
+                    name='toilet'
+                    size={25}
+                    color={forecourtState.amenities.bathroom ? 'green' : 'grey'}
+                />
+                <Text style={{color: forecourtState.amenities.bathroom ? 'green' : 'grey'}}>Toilet</Text>
+            </View>
+        },
+        {
+            dbName: 'carWash',
+            return: 
+            <View>
+                <MaterialCommunityIcons 
+                    name='car-wash'
+                    size={25}
+                    color={forecourtState.amenities.carWash ? 'green' : 'grey'}
+                />
+                <Text style={{color: forecourtState.amenities.carWash ? 'green' : 'grey'}}>Car Wash</Text>
+            </View>
+        },
+        {
+            dbName: 'convenienceStore',
+            return: 
+            <View>
+                <MaterialCommunityIcons 
+                    name='storefront-outline'
+                    size={25}
+                    color={forecourtState.amenities.convenienceStore ? 'green' : 'grey'}
+                />
+                <Text style={{color: forecourtState.amenities.convenienceStore ? 'green' : 'grey'}}>Convenience Store</Text>
+            </View>
+        },
+        {
+            dbName: 'deli',
+            return: 
+            <View>
+                <Ionicons
+                    name='fast-food-outline'
+                    size={25}
+                    color={forecourtState.amenities.deli ? 'green' : 'grey'}  
+                />
+                <Text style={{color: forecourtState.amenities.deli ? 'green' : 'grey'}}>Deli</Text>
+            </View>
+        },
+        {
+            dbName: 'electricCharging',
+            return: 
+            <View>
+                <FontAwesome5
+                    name='charging-station'
+                    size={25}
+                    color={forecourtState.amenities.electricCharging ? 'green' : 'grey'}  
+                />
+                <Text style={{color: forecourtState.amenities.electricCharging ? 'green' : 'grey'}}>Electric Vehicle Charging</Text>
+            </View>
+        },
+        {
+            dbName: 'payAtPump',
+            return: 
+            <View>
+                <FontAwesome5
+                    name='gas-pump'
+                    size={25}
+                    color={forecourtState.amenities.payAtPump ? 'green' : 'grey'}  
+                />
+                <Text style={{color: forecourtState.amenities.payAtPump ? 'green' : 'grey'}}>Pay At Pump</Text>
+            </View>
+        },
+        {
+            dbName: 'vacuum',
+            return: 
+            <View>
+                <MaterialIcons
+                    name='cleaning-services'
+                    size={25}
+                    color={forecourtState.amenities.vacuum ? 'green' : 'grey'}  
+                />
+                <Text style={{color: forecourtState.amenities.vacuum ? 'green' : 'grey'}}>Vacuum</Text>
+            </View>
+        },
+        {
+            dbName: 'wifi',
+            return: 
+            <View>
+                <FontAwesome5
+                    name='wifi'
+                    size={25}
+                    color={forecourtState.amenities.wifi ? 'green' : 'grey'}  
+                />
+                <Text style={{color: forecourtState.amenities.wifi ? 'green' : 'grey'}}>WiFi</Text>
+            </View> 
+        }
+    ]
 
     useEffect( () => {
-        if(forecourt) {
-            for (const [key, value] of Object.entries(forecourt.amenities)) {
-                if(value == true) {
-                    setAvailable(available => available.concat(key));
-                }
-            }
-        }
-    }, [forecourt])
+    }, [forecourtState])
 
-    if(forecourt) {
+    if(forecourtState) {
         return (
             <View style={{ flex: 1, backgroundColor: Colors.lightGreen }}>
                 <StatusBar backgroundColor={Colors.green} barStyle="dark-content"/>
@@ -40,98 +185,36 @@ export const FourthRoute = ({forecourt}) => {
                     onPress={ () => {Keyboard.dismiss()}}
                 >
                     <View style={{width: '100%', height: '100%'}}>
-                        <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <FontAwesome 
-                                name='euro'
-                                size={25}
-                            />
-                            <MaterialCommunityIcons 
-                                name='car-wash'
-                                size={25}
-                            />
-                            <MaterialCommunityIcons 
-                                name='toilet'
-                                size={25}
-                            />
+                        <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly'}}>
+                            {icons.map((obj, index) => {
+                                return (
+                                    <View style={{justifyContent: 'center', alignItems: 'center', padding: wp('2.0%')}}>
+                                        <TouchableOpacity onPress={ () => {
+                                            for (const [key, value] of Object.entries(forecourtState.amenities)) {
+                                                if(key === obj.dbName) {
+                                                    
+                                                    let amenitiesObj = {
+                                                        ...forecourtState.amenities,
+                                                        [key]: !forecourtState.amenities[key]
+                                                    }
+                                                    
+                                                    setForecourtState({
+                                                        ...forecourtState,
+                                                        amenities: amenitiesObj
+                                                    });
+                                                }
+                                            }   
+                                        }}>
+                                            {obj.return}
+                                        </TouchableOpacity>
+                                    </View>
+                                )
+                            })}
                         </View>
-                        <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <Text>ATM</Text>
-                            <Text>Car Wash</Text>
-                            <Text>Toilet</Text>
-                        </View>
-
-                        <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <MaterialCommunityIcons 
-                                name='storefront-outline'
-                                size={25}
-                            />
-
-                            <FontAwesome5
-                                name='gas-pump'
-                                size={25}
-                            />
-
-                            <Ionicons
-                                name='fast-food-outline'
-                                size={25}
-                            />
-                        </View>
-
-                        <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <Text>Convenience Store</Text>
-                            <Text>Pay at pump</Text>
-                            <Text>Deli</Text>
-                        </View>
-
-
-                        <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <FontAwesome5
-                                name='charging-station'
-                                size={25}
-                            />
-
-                            <FontAwesome5
-                                name='wifi'
-                                size={25}
-                            />
-
-                            <FontAwesome5
-                                name='credit-card'
-                                size={25}
-                            />
-
-
-                        </View>
-
-                        <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <Text>Electric vehicle charging</Text>
-                            <Text>WiFi</Text>
-                            <Text>Accepts card</Text>
-                        </View>
-
-                        <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <Ionicons
-                                    name='wine'
-                                    size={25}
-                            />
-
-                            <Ionicons
-                                name='water-outline'
-                                size={25}
-                            />
-
-                            <MaterialIcons
-                                name='cleaning-services'
-                                size={25}
-                            />
-                        </View>
-
-                        <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <Text>Alcohol</Text>
-                            <Text>Air and water</Text>
-                            <Text>Vacuum</Text>
-                        </View>
-                        <TouchableOpacity style={{flex: 3}}>
+                        <TouchableOpacity style={{flex: 3}} onPress={() => {
+                            modalVisible = false;
+                            updateAmenities(forecourtState.id, forecourtState.amenities)
+                        }}>
                             <LinearGradient
                                 colors={[Colors.midGreen, Colors.green]}
                             >
@@ -148,6 +231,18 @@ export const FourthRoute = ({forecourt}) => {
                         style={styles.petrolTitle}
                     >Available Amenities
                     </Text>
+                    <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly', width: '100%'}}>
+                        { forecourtState ? 
+                            Object.keys(forecourtState.amenities).map((key, index) => {
+                                if(forecourtState.amenities[key] === true) {
+                                    return (
+                                            icons[index].return
+                                        )
+                                }
+                            })
+                        : null}
+                    </View>
+
                     <TouchableOpacity style={{flex: 3}} onPress={() => setModalVisible(true)}>
                         <LinearGradient
                             colors={[Colors.midGreen, Colors.green]}
@@ -171,7 +266,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     middle: {
-        height: '10%',
+        height: hp('15%'),
         width: '100%',
         backgroundColor: '#fff',
         padding: 5,
@@ -204,13 +299,13 @@ const styles = StyleSheet.create({
         fontSize: 17,
     },
     modal: {
-        marginTop: '40%',
-        marginBottom: '100%',
+        marginTop: hp('20%'),
+        marginBottom: hp('40%'),
         width: '80%', 
         backgroundColor: 'white', 
         borderRadius: 5,
         alignSelf: 'center',
-        padding: 10
+        padding: 5
     },
     logoDisabled: {
         color: 'grey'
