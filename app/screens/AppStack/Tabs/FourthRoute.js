@@ -20,13 +20,11 @@ export const FourthRoute = ({forecourt}) => {
         if(forecourt) {
             for (const [key, value] of Object.entries(forecourt.amenities)) {
                 if(value == true) {
-                    console.log("matched")
                     setAvailable(available => available.concat(key));
                 }
             }
-            console.log(available);
         }
-    }, [available])
+    }, [forecourt])
 
     if(forecourt) {
         return (
@@ -137,7 +135,7 @@ export const FourthRoute = ({forecourt}) => {
                             <LinearGradient
                                 colors={[Colors.midGreen, Colors.green]}
                             >
-                                <Text style={styles.reportPrice}>Update Price</Text>
+                                <Text style={styles.reportPrice}>Update Amenities</Text>
                             </LinearGradient>
                         </TouchableOpacity>
 

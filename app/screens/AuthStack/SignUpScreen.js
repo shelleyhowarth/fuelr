@@ -518,7 +518,7 @@ const SignUpScreen = ({navigation}) => {
                         }
                     </TouchableOpacity>
                 </View>
-                {/*
+                
                 <View style={styles.checkbox}>
                     <Text style={styles.textFooter}>
                         Are you a forecourt owner?
@@ -566,7 +566,7 @@ const SignUpScreen = ({navigation}) => {
                     </View>
 
                 : null}
-                    */}
+                
 
                 <View style={styles.button}>
                     <TouchableOpacity

@@ -47,6 +47,18 @@ export async function submitFeedback(feedback) {
   }
 }
 
+export async function deleteAccount() {
+  const user = firebase.auth().currentUser;
+
+  user.delete().then(function() {
+    Alert.alert("Account deleted")
+  }).catch(function(error) {
+    Alert.alert(error.message)
+  });
+
+  await db.collection('users').doc(user.uid).delete()
+}
+
 export async function signIn(email, password) {
   try {
    await Firebase

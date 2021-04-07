@@ -1,6 +1,6 @@
 // App.js
 import React, {useState} from 'react';
-import { StyleSheet, Text, TouchableOpacityComponent, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacityComponent, View, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import AuthStackScreen from './screens/AuthStack/AuthStackScreen';
 import AppStackScreen from './screens/AppStack/AppStackScreen';
@@ -25,7 +25,6 @@ const App = () => {
       { loggedIn ? <AppStackScreen/> : <AuthStackScreen/> }
     </NavigationContainer>
   )
-  
 }
 
 

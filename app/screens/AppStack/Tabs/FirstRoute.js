@@ -177,7 +177,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                                     <Text style={styles.reportPrice}>Same Price</Text>
                                 </LinearGradient>
                             </TouchableOpacity>
-                            <View style={{flex:1}}/>
+                            <View style={styles.space}/>
                             <View style={{flex: 2, justifyContent: 'center'}}>
                                 <TextInputMask
                                     type={'money'}
@@ -229,11 +229,10 @@ export const FirstRoute = ({forecourt, navigation}) => {
                                 <Text style={styles.priceModal}>{forecourt.currDiesel.price ? forecourt.currDiesel.price : '--.-' }</Text>
                             </View>
                             <View style={styles.space}/>
-
-                            <TouchableOpacity onPress={ () => onConfirmCurrent('diesel')} style={{flex: 2, justifyContent: 'center'}}>
+                            <TouchableOpacity onPress={ () => onConfirmCurrent('petrol')} style={{flex: 3, justifyContent: 'center'}} disabled={!forecourt.currDiesel.price}>
                                 <LinearGradient
                                     colors={[Colors.midGreen, Colors.green]}
-                                    style={styles.confirm}
+                                    style={forecourt.currDiesel.price ? styles.confirm : styles.confirmDisabled}
                                 >
                                     <Text style={styles.reportPrice}>Same Price</Text>
                                 </LinearGradient>
@@ -303,8 +302,10 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     </View>
                     <View style={{flex: 3}}>
                         <Text style={styles.updated}>{petrolElapsedTime}</Text>
-                        <Text style={styles.updated}>{forecourt.currPetrol.user}</Text>
+                        <Text style={styles.updated}>{forecourt.currPetrol.user ? 'by ' + forecourt.currPetrol.user : null}</Text>
                     </View>
+
+
                     <TouchableOpacity style={{flex: 3}} onPress={() => setPetrolModalVisible(!petrolModalVisible)}>
                         <LinearGradient
                             colors={[Colors.midGreen, Colors.green]}
@@ -327,7 +328,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     </View>
                     <View style={{flex: 3}}>
                         <Text style={styles.updated}>{dieselElapsedTime}</Text>
-                        <Text style={styles.updated}>{forecourt.currDiesel.user}</Text>
+                        <Text style={styles.updated}>{forecourt.currDiesel.user ? 'by ' + forecourt.currDiesel.user : null}</Text>
                     </View>
                     <TouchableOpacity style={{flex: 3}} onPress={() => setDieselModalVisible(!dieselModalVisible)}>
                         <LinearGradient
