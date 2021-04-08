@@ -13,18 +13,30 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp
   } from 'react-native-responsive-screen'; 
+import Firebase from '../../../firebase/Firebase';
 import { updateAmenities } from '../../../firebase/FirebaseMethods';
+import { useDocumentData } from 'react-firebase-hooks/firestore';
+
 export const FourthRoute = ({forecourt}) => {
+    //Consts
+    const db = Firebase.firestore();
+
     //States
     const [available, setAvailable] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [forecourtState, setForecourtState] = useState(forecourt);
+    const [dbForecourt, loadingDbForecourt, errorDbForecourt] = useDocumentData(
+        db.collection('forecourts').doc(forecourtState.id),
+        {
+            snapshotListenOptions: { includeMetadataChanges: true},
+        }
+    );
     
     const icons = [
         {
             dbName: 'acceptsCard',
             return: 
-                <View>
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
                     <FontAwesome5
                         name='credit-card'
                         size={25}
@@ -36,7 +48,7 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'airAndWater',
             return: 
-                <View>
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
                     <Ionicons
                         name='water-outline'
                         size={25}
@@ -48,7 +60,7 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'alcohol',
             return: 
-                <View>
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
                     <Ionicons
                         name='wine'
                         size={25}
@@ -60,7 +72,7 @@ export const FourthRoute = ({forecourt}) => {
         {   
             dbName: 'atm',
             return: 
-            <View>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <FontAwesome 
                     name='euro'
                     size={25}
@@ -73,7 +85,7 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'bathroom',
             return: 
-            <View>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <MaterialCommunityIcons 
                     name='toilet'
                     size={25}
@@ -85,11 +97,12 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'carWash',
             return: 
-            <View>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <MaterialCommunityIcons 
                     name='car-wash'
                     size={25}
                     color={forecourtState.amenities.carWash ? 'green' : 'grey'}
+
                 />
                 <Text style={{color: forecourtState.amenities.carWash ? 'green' : 'grey'}}>Car Wash</Text>
             </View>
@@ -97,7 +110,7 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'convenienceStore',
             return: 
-            <View>
+            <View style={{justifyContent: 'center', alignItems: 'center', paddingHorizontal: wp('1.0%')}}>
                 <MaterialCommunityIcons 
                     name='storefront-outline'
                     size={25}
@@ -109,7 +122,7 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'deli',
             return: 
-            <View>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <Ionicons
                     name='fast-food-outline'
                     size={25}
@@ -121,7 +134,7 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'electricCharging',
             return: 
-            <View>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <FontAwesome5
                     name='charging-station'
                     size={25}
@@ -133,7 +146,7 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'payAtPump',
             return: 
-            <View>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <FontAwesome5
                     name='gas-pump'
                     size={25}
@@ -145,7 +158,7 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'vacuum',
             return: 
-            <View>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <MaterialIcons
                     name='cleaning-services'
                     size={25}
@@ -157,7 +170,7 @@ export const FourthRoute = ({forecourt}) => {
         {
             dbName: 'wifi',
             return: 
-            <View>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <FontAwesome5
                     name='wifi'
                     size={25}
@@ -169,7 +182,8 @@ export const FourthRoute = ({forecourt}) => {
     ]
 
     useEffect( () => {
-    }, [forecourtState])
+        console.log(dbForecourt);
+    }, [forecourtState, dbForecourt])
 
     if(forecourtState) {
         return (
@@ -212,7 +226,7 @@ export const FourthRoute = ({forecourt}) => {
                             })}
                         </View>
                         <TouchableOpacity style={{flex: 3}} onPress={() => {
-                            modalVisible = false;
+                            setModalVisible(false);
                             updateAmenities(forecourtState.id, forecourtState.amenities)
                         }}>
                             <LinearGradient
@@ -231,10 +245,10 @@ export const FourthRoute = ({forecourt}) => {
                         style={styles.petrolTitle}
                     >Available Amenities
                     </Text>
-                    <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly', width: '100%'}}>
-                        { forecourtState ? 
-                            Object.keys(forecourtState.amenities).map((key, index) => {
-                                if(forecourtState.amenities[key] === true) {
+                    <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '80%' }}>
+                        { dbForecourt ? 
+                            Object.keys(dbForecourt.amenities).map((key, index) => {
+                                if(dbForecourt.amenities[key] === true) {
                                     return (
                                             icons[index].return
                                         )
@@ -243,7 +257,7 @@ export const FourthRoute = ({forecourt}) => {
                         : null}
                     </View>
 
-                    <TouchableOpacity style={{flex: 3}} onPress={() => setModalVisible(true)}>
+                    <TouchableOpacity style={{flex: 3}} onPress={() => setModalVisible(true)} style={{paddingTop: hp('2.0%'), width: '50%'}}>
                         <LinearGradient
                             colors={[Colors.midGreen, Colors.green]}
                             style={styles.confirm}
@@ -266,7 +280,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     middle: {
-        height: hp('15%'),
+        height: hp('35%'),
         width: '100%',
         backgroundColor: '#fff',
         padding: 5,
@@ -276,27 +290,26 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     petrolTitle: {
-        fontSize: 30,
+        fontSize: wp('9.0%'),
         fontWeight: 'bold',
         color: Colors.green,
         alignSelf: 'center',
-        flex: 4
+        paddingVertical: hp('3.0%')
     },
     confirm: {
         width: '100%',
-        height: '100%',
+        height: hp('5.0%'),
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('5.0%'),
         justifyContent: 'center',
-        padding: 5
     },
     reportPrice: {
         fontWeight: 'bold',
         color: 'white',
         alignSelf: 'center',
-        fontSize: 17,
+        fontSize: wp('5.0%'),
     },
     modal: {
         marginTop: hp('20%'),
