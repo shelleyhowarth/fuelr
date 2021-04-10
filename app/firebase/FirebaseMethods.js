@@ -49,6 +49,8 @@ export async function submitFeedback(feedback) {
 
 export async function deleteAccount() {
   const user = firebase.auth().currentUser;
+  
+  await db.collection('users').doc(user.uid).delete()
 
   user.delete().then(function() {
     Alert.alert("Account deleted")
@@ -56,7 +58,6 @@ export async function deleteAccount() {
     Alert.alert(error.message)
   });
 
-  await db.collection('users').doc(user.uid).delete()
 }
 
 export async function signIn(email, password) {
@@ -190,10 +191,23 @@ export async function updatePetrolPrice(id, priceInput) {
 
 export async function updateAmenities(id, amenitiesObj) {
   const currentUser = Firebase.auth().currentUser.uid;
-      await db.collection('forecourts').doc(id).update({
-        amenities: amenitiesObj
-      })
-    .then(addPoints(10, currentUser))
+  let username;
+
+  await db.collection('users').doc(currentUser).get()
+    .then(querySnapshot => {
+      username = querySnapshot.data().username;
+  })
+
+  await db.collection('forecourts').doc(id).update({
+    amenities: amenitiesObj,
+    amenitiesHistory: firebase.firestore.FieldValue.arrayUnion({
+      amenities: amenitiesObj,
+      timestamp: Date.now(),
+      user: username
+    })
+
+  })
+  .then(addPoints(10, currentUser))
 }
 
 export async function updateDieselPrice(id, priceInput) {

@@ -182,7 +182,6 @@ export const FourthRoute = ({forecourt}) => {
     ]
 
     useEffect( () => {
-        console.log(dbForecourt);
     }, [forecourtState, dbForecourt])
 
     if(forecourtState) {
@@ -313,7 +312,7 @@ const styles = StyleSheet.create({
     },
     modal: {
         marginTop: hp('20%'),
-        marginBottom: hp('40%'),
+        marginBottom: hp('35%'),
         width: '80%', 
         backgroundColor: 'white', 
         borderRadius: 5,

@@ -51,14 +51,12 @@ const AccountScreen = () => {
             forecourts.forEach((forecourt) => {
                 forecourt.petrol.forEach((obj)=> {
                     if(obj.user === user.username) {
-                        console.log("matched")
                         reportCountTemp++;
                     }
                 })
     
                 forecourt.diesel.forEach((obj)=> {
                     if(obj.user === user.username) {
-                        console.log("matched")
                         reportCountTemp++;
                     }
                 })
@@ -69,14 +67,11 @@ const AccountScreen = () => {
             forecourts.forEach((forecourt) => {
                 forecourt.reviews.forEach((obj)=> {
                     if(obj.user === user.username) {
-                        console.log("matched")
                         reviewCountTemp++;
                     }
                 })
             })
-            console.log(user.username);
             setReviewCount(reviewCountTemp);
-        
     }
 
     //Return

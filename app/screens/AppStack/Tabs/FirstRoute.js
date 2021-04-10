@@ -41,29 +41,112 @@ export const FirstRoute = ({forecourt, navigation}) => {
     }, [forecourt])
 
     //Methods
+    const findReporters = () => {
+        let reporters = [];
+        let reportersPetrol = []
+        let reportersDiesel = []    
+        let reportersScores = [];
+
+        if(forecourt) {
+            //Add users
+            forecourt.petrol.map( (object, index) => {
+                reporters.push(object.user)
+            })
+    
+            forecourt.diesel.map( (object, index) => {
+                reporters.push(object.user)
+            })
+
+            //Remove duplicates
+            reporters = reporters.filter( (data,index )=> {
+                return reporters.indexOf(data) === index;
+            })
+
+            if(reporters) {
+                forecourt.petrol.map((object, index) => {
+                    let user = object.user
+
+                    //Add usernames and occurences
+                    let occurrences = forecourt.petrol.filter( (v) => (v.user === user))
+                    let obj = {};
+                    obj['name'] = user
+                    obj['points']= occurrences.length;
+                    reportersPetrol.push(obj);
+                })
+
+                forecourt.diesel.map((object, index) => {
+                    let user = object.user
+
+                    let occurrences = forecourt.diesel.filter( (v) => (v.user === user))
+                    let obj = {};
+                    obj['name'] = user
+                    obj['points']= occurrences.length;
+                    reportersDiesel.push(obj);
+                })
+
+                //Remove duplicates
+                reportersPetrol = Array.from(new Set(reportersPetrol.map(a => a.name)))
+                .map(name => {
+                    return reportersPetrol.find(a => a.name === name)
+                })
+
+                reportersDiesel = Array.from(new Set(reportersDiesel.map(a => a.name)))
+                .map(name => {
+                    return reportersDiesel.find(a => a.name === name)
+                })
+
+                reportersPetrol.map( (object, index) => {
+                    reportersDiesel.map( (object2, index2) => {
+                        if(object.name === object2.name) {
+                            let obj = {}
+                            obj['name'] = object.name;
+                            obj['reports'] = object.points + object2.points;
+                            reportersScores.push(obj);
+                        }
+                    })
+                })
+            }
+        }
+        return reportersScores;
+    }
+
     const shortenAddress = (marker) => {
         return marker.address.replace(marker.name, '');
     }
+    
     const topPetrolReporters = () => {
         let reporters = ['--', '--', '--'];
-        let first = '--', second = '--', third = '--';
 
-        if(forecourt && forecourt.petrol.length > 0) {
-            let copy = forecourt.petrol;
+        if(forecourt) {
+            let copy = findReporters();
 
-            first = mostCommon(copy);
-            copy = copy.filter( val =>  val.user !== first);
-            reporters[0] = first;
-    
             if(copy.length) {
-                second = mostCommon(copy);
-                reporters[1] = second;
-                copy = copy.filter( val =>  val.user !== second);
+                let first = copy.reduce(function (prev, current) {
+                    return (prev.reports > current.reports) ? prev : current
+                })
+                reporters[0] = first.name;
+                let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(first));
+                copy.splice(index, 1);
+
                 if(copy.length) {
-                    third = mostCommon(copy);
-                    reporters[2] = third;
+                    let second = copy.reduce(function (prev, current) {
+                        return (prev.reports > current.reports) ? prev : current
+                    })
+                    reporters[1] = second.name;
+                    let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(second));
+                    copy.splice(index, 1);
+
+                    if(copy.length) {
+                        let third = copy.reduce(function (prev, current) {
+                            return (prev.reports > current.reports) ? prev : current
+                        })
+                        reporters[2] = third.name;
+                        let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(third));
+                        copy.splice(index, 1);
+                    }
                 }
-            }    
+
+            } 
         }
         return reporters;
     }

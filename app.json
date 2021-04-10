@@ -28,6 +28,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
+      },
+      "config": {
+        "googleMaps": {"apiKey": "AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8"}
       }
     },
     "web": {
