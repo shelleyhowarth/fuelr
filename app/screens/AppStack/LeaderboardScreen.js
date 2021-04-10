@@ -252,11 +252,10 @@ const styles = StyleSheet.create({
       paddingTop: 20
     },
     placeText: {
-        fontSize: 40,
+        fontSize: wp('8.0%'),
         fontWeight: 'bold',
         color: Colors.green,
         textAlign: 'center',
-        
     },
     titleText: {
         fontSize: wp('6.0%'),

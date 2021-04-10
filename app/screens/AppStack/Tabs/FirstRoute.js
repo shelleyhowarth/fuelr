@@ -151,27 +151,6 @@ export const FirstRoute = ({forecourt, navigation}) => {
         return reporters;
     }
 
-    const mostCommon = (arr) => {
-        var maxEl = arr[0].user
-        var maxCount = 1;
-        var modeMap = {};
-
-        for(var i = 0; i < arr.length; i++) {
-            var el = arr[i].user;
-
-            if(modeMap[el] == null)
-                modeMap[el] = 1;
-            else
-                modeMap[el]++;  
-            if(modeMap[el] > maxCount)
-            {
-                maxEl = el;
-                maxCount = modeMap[el];
-            }
-        }
-        return maxEl;
-    }
-
     const onConfirmCurrent = (type) => {
         if(type === 'petrol') {
             updatePetrolPrice(forecourt.id, forecourt.currPetrol.price)
@@ -488,8 +467,8 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     modal: {
-        marginTop: hp('10%'),
-        marginBottom: hp('40%'),
+        marginTop: Platform.OS === 'ios' ? hp('20%') : hp('10%'),
+        marginBottom: Platform.OS === 'ios' ? hp('40%') : hp('10%'),
         width: '80%', 
         backgroundColor: 'white', 
         borderRadius: 5,
@@ -533,7 +512,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%')
     },
     confirm: {
         width: '100%',
@@ -541,7 +520,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%'),
         justifyContent: 'center'
     },
     confirmDisabled: {
@@ -550,7 +529,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%'),
         justifyContent: 'center',
         opacity: 0.1
     },
@@ -560,7 +539,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%'),
         justifyContent: 'center'
     },
     confirmModalDisabled: {
@@ -569,7 +548,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%'),
         justifyContent: 'center',
         opacity: 0.1
     },

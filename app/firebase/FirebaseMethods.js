@@ -199,7 +199,11 @@ export async function updateAmenities(id, amenitiesObj) {
   })
 
   await db.collection('forecourts').doc(id).update({
-    amenities: amenitiesObj,
+    amenities: {
+      amenities: amenitiesObj,
+      user: username,
+      timestamp: Date.now()
+    },
     amenitiesHistory: firebase.firestore.FieldValue.arrayUnion({
       amenities: amenitiesObj,
       timestamp: Date.now(),
