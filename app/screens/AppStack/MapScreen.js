@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {View, Text, StyleSheet, Dimensions, Image, Animated, Switch, TouchableOpacity, Platform } from 'react-native';
+import {View, Text, StyleSheet, Dimensions, Image, Animated, TouchableOpacity, Platform } from 'react-native';
 import MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
+import { Switch } from 'react-native-switch';
 import { Colors } from '../../../styles/Colors';
 import * as Location from 'expo-location';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -237,14 +238,20 @@ const MapScreen = ({navigation}) => {
                 )) : null}
 
             </Animated.ScrollView>
-            <Switch
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={diesel ? '#f5dd4b' : '#f4f3f4'}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={toggleSwitch}
-                value={diesel}
-                style={styles.switch}
-            />
+            <View style={styles.switch}>
+                <Switch
+                    activeText={'Diesel'}
+                    inActiveText={'Petrol'}
+                    backgroundActive={Colors.midGreen}
+                    backgroundInactive={Colors.green}
+                    changeValueImmediately={true}
+                    switchLeftPx={3} 
+                    switchRightPx={3}
+                    switchWidthMultiplier={3}
+                    onValueChange={toggleSwitch}
+                    value={diesel}
+                />
+            </View>
         </View>    
     )
 }

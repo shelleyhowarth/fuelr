@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {View, StyleSheet, RefreshControl, Text, Dimensions, StatusBar, Switch} from 'react-native';
+import {View, StyleSheet, RefreshControl, Text, Dimensions, StatusBar} from 'react-native';
+import { Switch } from 'react-native-switch';
+
 import { signOut, updateForecourts } from '../../firebase/FirebaseMethods';
 import Leaderboard from 'react-native-leaderboard';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -36,6 +38,7 @@ const LeaderboardScreen = () => {
         }
     );
     const [forecourtView, setForecourtView] = useState(false);
+    const [diesel, setDiesel] = useState(false)
     const [result, setResult] = useState();
     const [points, setPoints] = useState();
     const [forecourtsFiltered, setForecourtsFiltered] = useState([]);
@@ -51,7 +54,7 @@ const LeaderboardScreen = () => {
             setPoints(getPoints());
         }
 
-        if(!loadingForecourts && forecourts.length > 0) {
+        if(!loadingForecourts && forecourts.length > 0 && !diesel) {
             temp = forecourts;
             temp = temp.filter((forecourt) => forecourt.currPetrol.price);
 
@@ -67,12 +70,29 @@ const LeaderboardScreen = () => {
                 }
             }
             setForecourtsFiltered(temp);
+        } else if(!loadingForecourts && forecourts.length > 0 && diesel) {
+            temp = forecourts;
+            temp = temp.filter((forecourt) => forecourt.currDiesel.price);
+
+            for(let i = 0; i < temp.length; i++) {
+                temp[i].dieselPrice = temp[i].currDiesel.price;
+                if(!temp[i].name.length) {
+                    temp[i].name = "FUEL STATION " + temp[i].address.split(" ").pop()
+                } else if(temp[i].name.includes(temp[i].address.split(" ").pop())) {
+                    break;
+                }
+                else {
+                    temp[i].name += " " + temp[i].address.split(" ").pop();
+                }
+            }
+            setForecourtsFiltered(temp);
         }
 
-    }, [users, forecourts])
+    }, [users, forecourts, diesel])
 
     //Methods
     const toggleSwitch = () => setForecourtView(previousState => !previousState);
+    const toggleSwitch2 = () => setDiesel(previousState => !previousState);
 
     const getPos = () => {
         let result;
@@ -96,7 +116,6 @@ const LeaderboardScreen = () => {
                 result = place+fourth;
                 break;
         }
-
         return result;
     }
 
@@ -106,7 +125,6 @@ const LeaderboardScreen = () => {
         })
         obj = obj[0];
         obj = obj.points + " pts";
-
         return obj;
     }
 
@@ -138,7 +156,20 @@ const LeaderboardScreen = () => {
                                     <Text style={styles.forecourtTitle}>Leaderboard</Text>
                                 </View>
                             </View>
-                            <Text style={{textAlign: 'center', fontSize: wp('2.5%'), color: Colors.green}}>This leaderboard is based on petrol prices.</Text>
+                            <View style={styles.switchTop}>
+                                <Switch
+                                    activeText={'Diesel'}
+                                    inActiveText={'Petrol'}
+                                    backgroundActive={Colors.midGreen}
+                                    backgroundInactive={Colors.green}
+                                    changeValueImmediately={true}
+                                    switchLeftPx={3} 
+                                    switchRightPx={3}
+                                    switchWidthMultiplier={3}
+                                    onValueChange={toggleSwitch2}
+                                    value={diesel}
+                                />
+                            </View>                    
                     </Animatable.View>
 
                 {!loadingForecourts && forecourtsFiltered ?
@@ -192,14 +223,20 @@ const LeaderboardScreen = () => {
                 : null}
             </View>}
 
-            <Switch
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={forecourtView ? '#f5dd4b' : '#f4f3f4'}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={toggleSwitch}
-                value={forecourtView}
-                style={styles.switch}
-            />
+            <View style={styles.switch}>
+                <Switch
+                    activeText={'Forecourt'}
+                    inActiveText={'User'}
+                    backgroundActive={Colors.midGreen}
+                    backgroundInactive={Colors.green}
+                    changeValueImmediately={true}
+                    switchLeftPx={3} 
+                    switchRightPx={3}
+                    switchWidthMultiplier={3}
+                    onValueChange={toggleSwitch}
+                    value={forecourtView}
+                />
+            </View>
 
         </View>
 
@@ -215,11 +252,10 @@ const styles = StyleSheet.create({
       paddingTop: 20
     },
     placeText: {
-        fontSize: 40,
+        fontSize: wp('8.0%'),
         fontWeight: 'bold',
         color: Colors.green,
         textAlign: 'center',
-        
     },
     titleText: {
         fontSize: wp('6.0%'),
@@ -253,6 +289,9 @@ const styles = StyleSheet.create({
     },
     switch: {
         bottom: 50
+    },
+    switchTop: {
+        alignSelf: 'center'
     },
     spinnerTextStyle: {
         color: '#FFF'

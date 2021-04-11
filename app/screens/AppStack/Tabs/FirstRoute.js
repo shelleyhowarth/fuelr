@@ -41,52 +41,114 @@ export const FirstRoute = ({forecourt, navigation}) => {
     }, [forecourt])
 
     //Methods
+    const findReporters = () => {
+        let reporters = [];
+        let reportersPetrol = []
+        let reportersDiesel = []    
+        let reportersScores = [];
+
+        if(forecourt) {
+            //Add users
+            forecourt.petrol.map( (object, index) => {
+                reporters.push(object.user)
+            })
+    
+            forecourt.diesel.map( (object, index) => {
+                reporters.push(object.user)
+            })
+
+            //Remove duplicates
+            reporters = reporters.filter( (data,index )=> {
+                return reporters.indexOf(data) === index;
+            })
+
+            if(reporters) {
+                forecourt.petrol.map((object, index) => {
+                    let user = object.user
+
+                    //Add usernames and occurences
+                    let occurrences = forecourt.petrol.filter( (v) => (v.user === user))
+                    let obj = {};
+                    obj['name'] = user
+                    obj['points']= occurrences.length;
+                    reportersPetrol.push(obj);
+                })
+
+                forecourt.diesel.map((object, index) => {
+                    let user = object.user
+
+                    let occurrences = forecourt.diesel.filter( (v) => (v.user === user))
+                    let obj = {};
+                    obj['name'] = user
+                    obj['points']= occurrences.length;
+                    reportersDiesel.push(obj);
+                })
+
+                //Remove duplicates
+                reportersPetrol = Array.from(new Set(reportersPetrol.map(a => a.name)))
+                .map(name => {
+                    return reportersPetrol.find(a => a.name === name)
+                })
+
+                reportersDiesel = Array.from(new Set(reportersDiesel.map(a => a.name)))
+                .map(name => {
+                    return reportersDiesel.find(a => a.name === name)
+                })
+
+                reportersPetrol.map( (object, index) => {
+                    reportersDiesel.map( (object2, index2) => {
+                        if(object.name === object2.name) {
+                            let obj = {}
+                            obj['name'] = object.name;
+                            obj['reports'] = object.points + object2.points;
+                            reportersScores.push(obj);
+                        }
+                    })
+                })
+            }
+        }
+        return reportersScores;
+    }
+
     const shortenAddress = (marker) => {
         return marker.address.replace(marker.name, '');
     }
+    
     const topPetrolReporters = () => {
         let reporters = ['--', '--', '--'];
-        let first = '--', second = '--', third = '--';
 
-        if(forecourt && forecourt.petrol.length > 0) {
-            let copy = forecourt.petrol;
+        if(forecourt) {
+            let copy = findReporters();
 
-            first = mostCommon(copy);
-            copy = copy.filter( val =>  val.user !== first);
-            reporters[0] = first;
-    
             if(copy.length) {
-                second = mostCommon(copy);
-                reporters[1] = second;
-                copy = copy.filter( val =>  val.user !== second);
+                let first = copy.reduce(function (prev, current) {
+                    return (prev.reports > current.reports) ? prev : current
+                })
+                reporters[0] = first.name;
+                let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(first));
+                copy.splice(index, 1);
+
                 if(copy.length) {
-                    third = mostCommon(copy);
-                    reporters[2] = third;
+                    let second = copy.reduce(function (prev, current) {
+                        return (prev.reports > current.reports) ? prev : current
+                    })
+                    reporters[1] = second.name;
+                    let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(second));
+                    copy.splice(index, 1);
+
+                    if(copy.length) {
+                        let third = copy.reduce(function (prev, current) {
+                            return (prev.reports > current.reports) ? prev : current
+                        })
+                        reporters[2] = third.name;
+                        let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(third));
+                        copy.splice(index, 1);
+                    }
                 }
-            }    
+
+            } 
         }
         return reporters;
-    }
-
-    const mostCommon = (arr) => {
-        var maxEl = arr[0].user
-        var maxCount = 1;
-        var modeMap = {};
-
-        for(var i = 0; i < arr.length; i++) {
-            var el = arr[i].user;
-
-            if(modeMap[el] == null)
-                modeMap[el] = 1;
-            else
-                modeMap[el]++;  
-            if(modeMap[el] > maxCount)
-            {
-                maxEl = el;
-                maxCount = modeMap[el];
-            }
-        }
-        return maxEl;
     }
 
     const onConfirmCurrent = (type) => {
@@ -177,7 +239,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                                     <Text style={styles.reportPrice}>Same Price</Text>
                                 </LinearGradient>
                             </TouchableOpacity>
-                            <View style={{flex:1}}/>
+                            <View style={styles.space}/>
                             <View style={{flex: 2, justifyContent: 'center'}}>
                                 <TextInputMask
                                     type={'money'}
@@ -229,11 +291,10 @@ export const FirstRoute = ({forecourt, navigation}) => {
                                 <Text style={styles.priceModal}>{forecourt.currDiesel.price ? forecourt.currDiesel.price : '--.-' }</Text>
                             </View>
                             <View style={styles.space}/>
-
-                            <TouchableOpacity onPress={ () => onConfirmCurrent('diesel')} style={{flex: 2, justifyContent: 'center'}}>
+                            <TouchableOpacity onPress={ () => onConfirmCurrent('petrol')} style={{flex: 3, justifyContent: 'center'}} disabled={!forecourt.currDiesel.price}>
                                 <LinearGradient
                                     colors={[Colors.midGreen, Colors.green]}
-                                    style={styles.confirm}
+                                    style={forecourt.currDiesel.price ? styles.confirm : styles.confirmDisabled}
                                 >
                                     <Text style={styles.reportPrice}>Same Price</Text>
                                 </LinearGradient>
@@ -303,8 +364,10 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     </View>
                     <View style={{flex: 3}}>
                         <Text style={styles.updated}>{petrolElapsedTime}</Text>
-                        <Text style={styles.updated}>{forecourt.currPetrol.user}</Text>
+                        <Text style={styles.updated}>{forecourt.currPetrol.user ? 'by ' + forecourt.currPetrol.user : null}</Text>
                     </View>
+
+
                     <TouchableOpacity style={{flex: 3}} onPress={() => setPetrolModalVisible(!petrolModalVisible)}>
                         <LinearGradient
                             colors={[Colors.midGreen, Colors.green]}
@@ -327,7 +390,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     </View>
                     <View style={{flex: 3}}>
                         <Text style={styles.updated}>{dieselElapsedTime}</Text>
-                        <Text style={styles.updated}>{forecourt.currDiesel.user}</Text>
+                        <Text style={styles.updated}>{forecourt.currDiesel.user ? 'by ' + forecourt.currDiesel.user : null}</Text>
                     </View>
                     <TouchableOpacity style={{flex: 3}} onPress={() => setDieselModalVisible(!dieselModalVisible)}>
                         <LinearGradient
@@ -404,8 +467,8 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     modal: {
-        marginTop: hp('10%'),
-        marginBottom: hp('40%'),
+        marginTop: Platform.OS === 'ios' ? hp('20%') : hp('10%'),
+        marginBottom: Platform.OS === 'ios' ? hp('40%') : hp('10%'),
         width: '80%', 
         backgroundColor: 'white', 
         borderRadius: 5,
@@ -449,7 +512,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%')
     },
     confirm: {
         width: '100%',
@@ -457,7 +520,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%'),
         justifyContent: 'center'
     },
     confirmDisabled: {
@@ -466,7 +529,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%'),
         justifyContent: 'center',
         opacity: 0.1
     },
@@ -476,7 +539,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%'),
         justifyContent: 'center'
     },
     confirmModalDisabled: {
@@ -485,7 +548,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         borderColor: Colors.green,
-        fontSize: 30,
+        fontSize: wp('4.5%'),
         justifyContent: 'center',
         opacity: 0.1
     },

@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     middle: {
-        marginTop: hp('10.0%'),
         height: hp('30.0%'),
         width: '100%',
         backgroundColor: '#fff',

@@ -2,14 +2,12 @@ import React, { useEffect, useState } from 'react';
 import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard} from 'react-native';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
-import { TextInput } from 'react-native-gesture-handler';
 import { TabView, TabBar } from 'react-native-tab-view';
 import moment from 'moment';
 import { Colors } from '../../../styles/Colors';
 import { LineChart } from "react-native-chart-kit";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Spinner from 'react-native-loading-spinner-overlay';
-import StarRating from '../../components/StarRating';
 import { FirstRoute } from './Tabs/FirstRoute';
 import { SecondRoute } from './Tabs/SecondRoute';
 import { ThirdRoute } from './Tabs/ThirdRoute';
@@ -39,8 +37,8 @@ const ForecourtScreen = ({route, navigation}) => {
     const [routes] = useState([
       { key: 'price', title: 'Overview' },
       { key: 'review', title: 'Reviews' },
-      //{ key: 'trends', title: 'trends'},
-      //{ key: 'amenities', title: 'amenities'}
+      //{ key: 'trends', title: 'Trends'},
+      { key: 'amenities', title: 'Amenities'}
     ]);
     const [data, setData] = useState();
 

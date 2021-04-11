@@ -21,7 +21,7 @@ import {
 const SignUpScreen = ({navigation}) => {
     //Consts
     const db = Firebase.firestore();
-    Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
+    //Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
     let result;
 
     //States
@@ -276,8 +276,9 @@ const SignUpScreen = ({navigation}) => {
         });
     }
 
+    /*
     const forecourtInputChange = async(eircode) => {
-        Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
+       Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
         eircode += "+ire";
 
         await Geocoder.from(eircode)
@@ -296,7 +297,7 @@ const SignUpScreen = ({navigation}) => {
           })
           .catch(error => console.warn(error));
     }
-
+    */
     const pickDoc = async() => {
         result = await DocumentPicker.getDocumentAsync({});
         setData({
@@ -529,6 +530,7 @@ const SignUpScreen = ({navigation}) => {
                         checkedColor= {Colors.green}
                     />
                 </View>
+
                 { isSelected ?
                     <View>
                         <Text style={[styles.textFooter, {

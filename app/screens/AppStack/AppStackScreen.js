@@ -41,7 +41,8 @@ const Home = () => {
           )
         }}
       />
-      {/*}
+      
+      {/*
       <Tab.Screen 
         name="Trends" 
         component={ TrendsScreen } 

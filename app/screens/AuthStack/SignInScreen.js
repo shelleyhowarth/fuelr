@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity, Dimensions, TextInput, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity, Dimensions, TextInput, StatusBar, KeyboardAvoidingView } from 'react-native';
 import { Colors } from '../../../styles/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -68,6 +68,7 @@ const SignInScreen = ({navigation}) => {
             <View style={styles.header}>
                 <Text style={styles.textHeader}>Welcome!</Text>
             </View>
+
             <Modal
                 animationIn="slideInDown"
                 animationOut="slideOutDown"
@@ -77,6 +78,7 @@ const SignInScreen = ({navigation}) => {
                 onBackdropPress={() => setModalVisible(false)}
                 onPress={ () => {Keyboard.dismiss()}}
             >
+
                 <View style={{justifyContent: 'space-evenly', height: '100%'}}>
                     <Text style={styles.modalTitle}>Reset password</Text>
                     <View style={styles.action}>
@@ -105,7 +107,9 @@ const SignInScreen = ({navigation}) => {
                     </TouchableOpacity>
                 </View>
 
+
             </Modal>
+
             <Animatable.View 
                 style={styles.footer}
                 animation="fadeInUpBig"
@@ -288,8 +292,8 @@ const styles = StyleSheet.create({
     },
 
     modal: {
-        marginTop: hp('20%'),
-        marginBottom: hp('40%'),
+        marginTop: Platform.OS === 'ios' ? hp('20%') : hp('10%'),
+        marginBottom: Platform.OS === 'ios' ? hp('40%') : hp('20%'),
         width: '80%', 
         backgroundColor: 'white', 
         borderRadius: 5,
