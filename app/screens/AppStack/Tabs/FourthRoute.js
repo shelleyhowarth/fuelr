@@ -22,7 +22,6 @@ export const FourthRoute = ({forecourt}) => {
     const db = Firebase.firestore();
 
     //States
-    const [available, setAvailable] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [forecourtState, setForecourtState] = useState(forecourt);
     const [dbForecourt, loadingDbForecourt, errorDbForecourt] = useDocumentData(
@@ -40,9 +39,9 @@ export const FourthRoute = ({forecourt}) => {
                     <FontAwesome5
                         name='credit-card'
                         size={25}
-                        color={forecourtState.amenities.acceptsCard ? 'green' : 'grey'}  
+                        color={forecourtState.currAmenities.amenities.acceptsCard ? 'green' : 'grey'}  
                     />
-                    <Text style={{color: forecourtState.amenities.acceptsCard ? 'green' : 'grey'}}>Accepts Card</Text>
+                    <Text style={{color: forecourtState.currAmenities.amenities.acceptsCard ? 'green' : 'grey'}}>Accepts Card</Text>
                 </View>
         },
         {
@@ -52,9 +51,9 @@ export const FourthRoute = ({forecourt}) => {
                     <Ionicons
                         name='water-outline'
                         size={25}
-                        color={forecourtState.amenities.airAndWater ? 'green' : 'grey'}  
+                        color={forecourtState.currAmenities.amenities.airAndWater ? 'green' : 'grey'}  
                     />
-                    <Text style={{color: forecourtState.amenities.airAndWater ? 'green' : 'grey'}}>Air and Water</Text>
+                    <Text style={{color: forecourtState.currAmenities.amenities.airAndWater ? 'green' : 'grey'}}>Air and Water</Text>
                 </View>
         },
         {
@@ -64,9 +63,9 @@ export const FourthRoute = ({forecourt}) => {
                     <Ionicons
                         name='wine'
                         size={25}
-                        color={forecourtState.amenities.alcohol ? 'green' : 'grey'}  
+                        color={forecourtState.currAmenities.amenities.alcohol ? 'green' : 'grey'}  
                     />
-                    <Text style={{color: forecourtState.amenities.alcohol ? 'green' : 'grey'}}>Alcohol</Text>
+                    <Text style={{color: forecourtState.currAmenities.amenities.alcohol ? 'green' : 'grey'}}>Alcohol</Text>
                 </View>
         },
         {   
@@ -76,9 +75,9 @@ export const FourthRoute = ({forecourt}) => {
                 <FontAwesome 
                     name='euro'
                     size={25}
-                    color={forecourtState.amenities.atm ? 'green' : 'grey'}
+                    color={forecourtState.currAmenities.amenities.atm ? 'green' : 'grey'}
                 />
-                <Text style={{color: forecourtState.amenities.atm ? 'green' : 'grey'}}>ATM</Text>
+                <Text style={{color: forecourtState.currAmenities.amenities.atm ? 'green' : 'grey'}}>ATM</Text>
             </View>
        
         },
@@ -89,9 +88,9 @@ export const FourthRoute = ({forecourt}) => {
                 <MaterialCommunityIcons 
                     name='toilet'
                     size={25}
-                    color={forecourtState.amenities.bathroom ? 'green' : 'grey'}
+                    color={forecourtState.currAmenities.amenities.bathroom ? 'green' : 'grey'}
                 />
-                <Text style={{color: forecourtState.amenities.bathroom ? 'green' : 'grey'}}>Toilet</Text>
+                <Text style={{color: forecourtState.currAmenities.amenities.bathroom ? 'green' : 'grey'}}>Toilet</Text>
             </View>
         },
         {
@@ -101,10 +100,10 @@ export const FourthRoute = ({forecourt}) => {
                 <MaterialCommunityIcons 
                     name='car-wash'
                     size={25}
-                    color={forecourtState.amenities.carWash ? 'green' : 'grey'}
+                    color={forecourtState.currAmenities.amenities.carWash ? 'green' : 'grey'}
 
                 />
-                <Text style={{color: forecourtState.amenities.carWash ? 'green' : 'grey'}}>Car Wash</Text>
+                <Text style={{color: forecourtState.currAmenities.amenities.carWash ? 'green' : 'grey'}}>Car Wash</Text>
             </View>
         },
         {
@@ -114,9 +113,9 @@ export const FourthRoute = ({forecourt}) => {
                 <MaterialCommunityIcons 
                     name='storefront-outline'
                     size={25}
-                    color={forecourtState.amenities.convenienceStore ? 'green' : 'grey'}
+                    color={forecourtState.currAmenities.amenities.convenienceStore ? 'green' : 'grey'}
                 />
-                <Text style={{color: forecourtState.amenities.convenienceStore ? 'green' : 'grey'}}>Convenience Store</Text>
+                <Text style={{color: forecourtState.currAmenities.amenities.convenienceStore ? 'green' : 'grey'}}>Convenience Store</Text>
             </View>
         },
         {
@@ -126,9 +125,9 @@ export const FourthRoute = ({forecourt}) => {
                 <Ionicons
                     name='fast-food-outline'
                     size={25}
-                    color={forecourtState.amenities.deli ? 'green' : 'grey'}  
+                    color={forecourtState.currAmenities.amenities.deli ? 'green' : 'grey'}  
                 />
-                <Text style={{color: forecourtState.amenities.deli ? 'green' : 'grey'}}>Deli</Text>
+                <Text style={{color: forecourtState.currAmenities.amenities.deli ? 'green' : 'grey'}}>Deli</Text>
             </View>
         },
         {
@@ -138,9 +137,9 @@ export const FourthRoute = ({forecourt}) => {
                 <FontAwesome5
                     name='charging-station'
                     size={25}
-                    color={forecourtState.amenities.electricCharging ? 'green' : 'grey'}  
+                    color={forecourtState.currAmenities.amenities.electricCharging ? 'green' : 'grey'}  
                 />
-                <Text style={{color: forecourtState.amenities.electricCharging ? 'green' : 'grey'}}>Electric Vehicle Charging</Text>
+                <Text style={{color: forecourtState.currAmenities.amenities.electricCharging ? 'green' : 'grey'}}>Electric Vehicle Charging</Text>
             </View>
         },
         {
@@ -150,9 +149,9 @@ export const FourthRoute = ({forecourt}) => {
                 <FontAwesome5
                     name='gas-pump'
                     size={25}
-                    color={forecourtState.amenities.payAtPump ? 'green' : 'grey'}  
+                    color={forecourtState.currAmenities.amenities.payAtPump ? 'green' : 'grey'}  
                 />
-                <Text style={{color: forecourtState.amenities.payAtPump ? 'green' : 'grey'}}>Pay At Pump</Text>
+                <Text style={{color: forecourtState.currAmenities.amenities.payAtPump ? 'green' : 'grey'}}>Pay At Pump</Text>
             </View>
         },
         {
@@ -162,9 +161,9 @@ export const FourthRoute = ({forecourt}) => {
                 <MaterialIcons
                     name='cleaning-services'
                     size={25}
-                    color={forecourtState.amenities.vacuum ? 'green' : 'grey'}  
+                    color={forecourtState.currAmenities.amenities.vacuum ? 'green' : 'grey'}  
                 />
-                <Text style={{color: forecourtState.amenities.vacuum ? 'green' : 'grey'}}>Vacuum</Text>
+                <Text style={{color: forecourtState.currAmenities.amenities.vacuum ? 'green' : 'grey'}}>Vacuum</Text>
             </View>
         },
         {
@@ -174,14 +173,15 @@ export const FourthRoute = ({forecourt}) => {
                 <FontAwesome5
                     name='wifi'
                     size={25}
-                    color={forecourtState.amenities.wifi ? 'green' : 'grey'}  
+                    color={forecourtState.currAmenities.amenities.wifi ? 'green' : 'grey'}  
                 />
-                <Text style={{color: forecourtState.amenities.wifi ? 'green' : 'grey'}}>WiFi</Text>
+                <Text style={{color: forecourtState.currAmenities.amenities.wifi ? 'green' : 'grey'}}>WiFi</Text>
             </View> 
         }
     ]
 
     useEffect( () => {
+        console.log(forecourtState);
     }, [forecourtState, dbForecourt])
 
     if(forecourtState) {
@@ -203,17 +203,20 @@ export const FourthRoute = ({forecourt}) => {
                                 return (
                                     <View style={{justifyContent: 'center', alignItems: 'center', padding: wp('2.0%')}}>
                                         <TouchableOpacity onPress={ () => {
-                                            for (const [key, value] of Object.entries(forecourtState.amenities)) {
+                                            for (const [key, value] of Object.entries(forecourtState.currAmenities.amenities)) {
                                                 if(key === obj.dbName) {
                                                     
                                                     let amenitiesObj = {
-                                                        ...forecourtState.amenities,
+                                                        ...forecourtState.currAmenities.amenities,
                                                         [key]: !forecourtState.amenities[key]
                                                     }
                                                     
                                                     setForecourtState({
                                                         ...forecourtState,
-                                                        amenities: amenitiesObj
+                                                        currAmenities: {
+                                                            ...forecourtState.currAmenities,
+                                                            amenities: amenitiesObj
+                                                        }
                                                     });
                                                 }
                                             }   
@@ -226,7 +229,7 @@ export const FourthRoute = ({forecourt}) => {
                         </View>
                         <TouchableOpacity style={{flex: 3}} onPress={() => {
                             setModalVisible(false);
-                            updateAmenities(forecourtState.id, forecourtState.amenities)
+                            updateAmenities(forecourtState.id, forecourtState.currAmenities.amenities)
                         }}>
                             <LinearGradient
                                 colors={[Colors.midGreen, Colors.green]}
@@ -246,8 +249,8 @@ export const FourthRoute = ({forecourt}) => {
                     </Text>
                     <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '80%' }}>
                         { dbForecourt ? 
-                            Object.keys(dbForecourt.amenities).map((key, index) => {
-                                if(dbForecourt.amenities[key] === true) {
+                            Object.keys(dbForecourt.currAmenities.amenities).map((key, index) => {
+                                if(dbForecourt.currAmenities.amenities[key] === true) {
                                     return (
                                             icons[index].return
                                         )

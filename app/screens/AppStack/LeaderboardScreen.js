@@ -59,27 +59,32 @@ const LeaderboardScreen = () => {
             temp = temp.filter((forecourt) => forecourt.currPetrol.price);
 
             for(let i = 0; i < temp.length; i++) {
+                console.log(temp[i].name)
                 temp[i].petrolPrice = temp[i].currPetrol.price;
+
                 if(!temp[i].name.length) {
                     temp[i].name = "FUEL STATION " + temp[i].address.split(" ").pop()
                 } else if(temp[i].name.includes(temp[i].address.split(" ").pop())) {
-                    break;
+                    null;
                 }
                 else {
                     temp[i].name += " " + temp[i].address.split(" ").pop();
                 }
             }
+
             setForecourtsFiltered(temp);
         } else if(!loadingForecourts && forecourts.length > 0 && diesel) {
             temp = forecourts;
             temp = temp.filter((forecourt) => forecourt.currDiesel.price);
+            console.log("length" + temp.length);
 
             for(let i = 0; i < temp.length; i++) {
-                temp[i].dieselPrice = temp[i].currDiesel.price;
+
+                temp[i].petrolPrice = temp[i].currDiesel.price;
                 if(!temp[i].name.length) {
                     temp[i].name = "FUEL STATION " + temp[i].address.split(" ").pop()
                 } else if(temp[i].name.includes(temp[i].address.split(" ").pop())) {
-                    break;
+                    null;
                 }
                 else {
                     temp[i].name += " " + temp[i].address.split(" ").pop();

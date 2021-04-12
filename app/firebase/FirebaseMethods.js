@@ -7,6 +7,7 @@ import * as firebase from 'firebase'
 
 const db = Firebase.firestore();
 
+//Authentication
 export async function registration(email, password, name, username, uri) {
   await Firebase.auth().createUserWithEmailAndPassword(email, password)
     .then(Alert.alert("Account successfully created!"))
@@ -35,16 +36,6 @@ export async function registration(email, password, name, username, uri) {
         () => {Alert.alert("Upload complete!")}
       );
     }
-}
-
-export async function submitFeedback(feedback) {
-  try { 
-    await db.collection('feedback').add({
-    message: feedback
-  })
-  } catch (e) {
-    Alert.alert(e.message)
-  }
 }
 
 export async function deleteAccount() {
@@ -85,6 +76,17 @@ export async function resetPassword(email) {
   Firebase.auth().sendPasswordResetEmail(email)
     .then(() => Alert.alert("Password reset email has been sent!"))
     .catch((error) => Alert.alert(error.message))
+}
+
+//Application
+export async function submitFeedback(feedback) {
+  try { 
+    await db.collection('feedback').add({
+    message: feedback
+  })
+  } catch (e) {
+    Alert.alert(e.message)
+  }
 }
 
 export async function checkUsernames(username, usernameTaken) {
@@ -198,18 +200,15 @@ export async function updateAmenities(id, amenitiesObj) {
       username = querySnapshot.data().username;
   })
 
-  await db.collection('forecourts').doc(id).update({
-    amenities: {
-      amenities: amenitiesObj,
-      user: username,
-      timestamp: Date.now()
-    },
-    amenitiesHistory: firebase.firestore.FieldValue.arrayUnion({
-      amenities: amenitiesObj,
-      timestamp: Date.now(),
-      user: username
-    })
+  let obj = {
+    amenities: amenitiesObj,
+    user: username,
+    timestamp: Date.now()
+  }
 
+  await db.collection('forecourts').doc(id).update({
+    currAmenities: obj,
+    amenities: firebase.firestore.FieldValue.arrayUnion(obj)
   })
   .then(addPoints(10, currentUser))
 }
@@ -274,7 +273,7 @@ export async function submitReview(id, score) {
           })
         })
     )
-    .then(addPoints(15, currentUser))
+    .then(addPoints(10, currentUser))
 }
 
 export async function addPoints(points, id) {

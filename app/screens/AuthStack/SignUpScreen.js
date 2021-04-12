@@ -60,12 +60,13 @@ const SignUpScreen = ({navigation}) => {
     let emailCorrect;
     let emailSpace;
     let usernameSpace;
+
     //UseEffect
     useEffect( () => {
         checkValid()
     }, [users, formValid, data])
-    //Methods
 
+    //Methods
     const signUp = () => {
         registration(data.email, data.password, data.name, data.username, data.uri)
     }
