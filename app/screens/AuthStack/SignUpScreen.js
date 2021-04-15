@@ -354,10 +354,6 @@ const SignUpScreen = ({navigation}) => {
                         onChangeText = {(value) => nameInputChange(value)}
                     />
 
-                    {data.nameError ?
-                        <Text style={{color: 'red'}}>{data.nameError}</Text>
-                    : null}
-
                     {data.handleNameChange ? 
                         <Animatable.View
                             animation="bounceIn"
@@ -370,6 +366,9 @@ const SignUpScreen = ({navigation}) => {
                         </Animatable.View>
                     : null}
                 </View>
+                {data.nameError ?
+                        <Text style={{color: 'red'}}>{data.nameError}</Text>
+                : null}
                 <Text style={[styles.textFooter, {
                     marginTop: 30
                 }]}>Username</Text>
@@ -385,11 +384,6 @@ const SignUpScreen = ({navigation}) => {
                         autoCapitalize="none"
                         onChangeText = {(value) => value !== '' ? usernameInputChange(value) : null}
                     />
-
-                    {data.usernameError ? 
-                        <Text style={{color: 'red'}}> {data.usernameError} </Text>
-                    : null}
-
                     {data.handleUsernameChange ? 
                         <Animatable.View
                             animation="bounceIn"
@@ -402,6 +396,9 @@ const SignUpScreen = ({navigation}) => {
                         </Animatable.View>
                     : null}
                 </View>
+                {data.usernameError ? 
+                        <Text style={{color: 'red'}}> {data.usernameError} </Text>
+                : null}
                 <Text style={[styles.textFooter, {
                     marginTop: 30
                 }]}>
@@ -420,10 +417,6 @@ const SignUpScreen = ({navigation}) => {
                         onChangeText = {(value) => emailInputChange(value)}
                     />
 
-                    {data.emailError ?
-                        <Text style={{color: 'red'}}>{data.emailError}</Text>
-                    : null}
-
                     {data.handleEmailChange ? 
                         <Animatable.View
                             animation="bounceIn"
@@ -436,6 +429,9 @@ const SignUpScreen = ({navigation}) => {
                         </Animatable.View>
                     : null}
                 </View>
+                {data.emailError ?
+                        <Text style={{color: 'red'}}>{data.emailError}</Text>
+                : null}
                 <Text style={[styles.textFooter, {
                     marginTop: 30
                 }]}>
@@ -455,10 +451,6 @@ const SignUpScreen = ({navigation}) => {
                         onChangeText = {(value) => handlePasswordChange(value)}
                     />
 
-                    {data.passwordError ?
-                        <Text style={{color: 'red'}}>{data.passwordError}</Text>
-                    : null}
-
                     <TouchableOpacity
                         onPress={updateSecureTextEntry}
                     >
@@ -477,6 +469,9 @@ const SignUpScreen = ({navigation}) => {
                         }
                     </TouchableOpacity>
                 </View>
+                {data.passwordError ?
+                        <Text style={{color: 'red'}}>{data.passwordError}</Text>
+                : null}
                 <Text style={[styles.textFooter, {
                     marginTop: 30
                     }]}>
@@ -496,10 +491,6 @@ const SignUpScreen = ({navigation}) => {
                         onChangeText = {(value) => handleConfirmPasswordChange(value)}
                     />
 
-                    {data.confirmPasswordError ?
-                        <Text style={{color: 'red'}}>{data.confirmPasswordError}</Text>
-                    : null}
-
                     <TouchableOpacity
                         onPress={updateCheckSecureTextEntry}
                     >
@@ -518,6 +509,9 @@ const SignUpScreen = ({navigation}) => {
                         }
                     </TouchableOpacity>
                 </View>
+                {data.confirmPasswordError ?
+                        <Text style={{color: 'red'}}>{data.confirmPasswordError}</Text>
+                : null}
                 {/*
                 <View style={styles.checkbox}>
                     <Text style={styles.textFooter}>
