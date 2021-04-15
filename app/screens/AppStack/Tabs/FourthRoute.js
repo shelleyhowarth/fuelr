@@ -16,6 +16,7 @@ import {
 import Firebase from '../../../firebase/Firebase';
 import { updateAmenities } from '../../../firebase/FirebaseMethods';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
+import moment from 'moment';
 
 export const FourthRoute = ({forecourt}) => {
     //Consts
@@ -30,7 +31,8 @@ export const FourthRoute = ({forecourt}) => {
             snapshotListenOptions: { includeMetadataChanges: true},
         }
     );
-    
+    const [elapsedTime, setElapsedTime] = useState();
+
     const icons = [
         {
             dbName: 'acceptsCard',
@@ -181,7 +183,9 @@ export const FourthRoute = ({forecourt}) => {
     ]
 
     useEffect( () => {
-        console.log(forecourtState);
+        if(forecourtState.currAmenities.timestamp) {
+            setElapsedTime(moment.utc(forecourt.currAmenities.timestamp).local().startOf('seconds').fromNow());
+        }
     }, [forecourtState, dbForecourt])
 
     if(forecourtState) {
@@ -208,11 +212,12 @@ export const FourthRoute = ({forecourt}) => {
                                                     
                                                     let amenitiesObj = {
                                                         ...forecourtState.currAmenities.amenities,
-                                                        [key]: !forecourtState.amenities[key]
+                                                        [key]: !value
                                                     }
                                                     
                                                     setForecourtState({
                                                         ...forecourtState,
+
                                                         currAmenities: {
                                                             ...forecourtState.currAmenities,
                                                             amenities: amenitiesObj
@@ -247,6 +252,8 @@ export const FourthRoute = ({forecourt}) => {
                         style={styles.petrolTitle}
                     >Available Amenities
                     </Text>
+                    <Text style={styles.updated}>{elapsedTime}</Text>
+                    <Text style={styles.updated}>{forecourt.currAmenities.user ? 'by ' + forecourt.currAmenities.user : null}</Text>
                     <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '80%' }}>
                         { dbForecourt ? 
                             Object.keys(dbForecourt.currAmenities.amenities).map((key, index) => {
@@ -282,7 +289,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     middle: {
-        height: hp('35%'),
+        height: hp('55%'),
         width: '100%',
         backgroundColor: '#fff',
         padding: 5,
@@ -314,8 +321,8 @@ const styles = StyleSheet.create({
         fontSize: wp('5.0%'),
     },
     modal: {
-        marginTop: hp('20%'),
-        marginBottom: hp('35%'),
+        marginTop: Platform.OS === 'ios' ? hp('20%') : hp('10%'),
+        marginBottom: Platform.OS === 'ios' ? hp('35%') : hp('20%'),
         width: '80%', 
         backgroundColor: 'white', 
         borderRadius: 5,
@@ -327,5 +334,9 @@ const styles = StyleSheet.create({
     },
     logo: {
         color: Colors.shadeGreen
-    }
+    },
+    updated: {
+        color: 'grey',
+        fontSize: wp('2.5%')
+    },
 });

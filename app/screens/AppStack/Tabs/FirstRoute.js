@@ -342,7 +342,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     <View style={styles.space}></View>
 
                     <View style={{flex:2}}>
-                        <Text style={styles.stationTitle}>{forecourt.name ? forecourt.name : 'FUEL STATION'}</Text>
+                        <Text style={styles.stationTitle} numberOfLines={2}>{forecourt.name ? forecourt.name : 'FUEL STATION'}</Text>
                         <Text>{shortenAddress(forecourt)}</Text>
                         <StarRating 
                             ratings={forecourt.ratingScore} 

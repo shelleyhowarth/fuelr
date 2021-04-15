@@ -101,7 +101,7 @@ export async function checkUsernames(username, usernameTaken) {
           })
       })
   } catch(e) {
-      console.log(e.message);
+      Alert.alert(e.message)
   }
 }
 
@@ -117,7 +117,7 @@ export async function checkEmails(email, emailTaken) {
           })
       })
   } catch(e) {
-      console.log(e.message);
+      Alert.alert(e.message);
   }
 }
 
@@ -247,7 +247,6 @@ export async function submitReview(id, score) {
   await db.collection('users').doc(currentUser).get()
     .then(querySnapshot => {
       username = querySnapshot.data().username;
-      console.log(Date.now());
     })
  
   await db.collection('forecourts').doc(id).update({

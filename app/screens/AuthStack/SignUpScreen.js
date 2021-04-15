@@ -72,10 +72,8 @@ const SignUpScreen = ({navigation}) => {
     }
 
     const checkValid = () => {
-        console.log("checkValid")
         if(data.emailError === null && data.email && data.usernameError === null && data.username && data.nameError === null && data.name && data.confirmPasswordError === null && data.confirmPassword) {
             setFormValid(true);
-            console.log("Form valid")
         }
     }
 
