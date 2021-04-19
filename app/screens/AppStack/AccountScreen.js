@@ -19,6 +19,8 @@ const AccountScreen = () => {
     //States
     const [reportCount, setReportCount] = useState(0);
     const [reviewCount, setReviewCount] = useState(0);
+    const [amenityCount, setAmenityCount] = useState(0);
+
     const [forecourts, loadingForecourts, errorForecourts] = useCollectionData(
         db.collection('forecourts'),
         {
@@ -36,6 +38,7 @@ const AccountScreen = () => {
     //let feedback = "";
     let reportCountTemp = 0;
     let reviewCountTemp = 0;
+    let amenityCountTemp = 0;
 
 
     //UseEffect
@@ -44,7 +47,7 @@ const AccountScreen = () => {
             counter();
         }
 
-    }, [forecourts, user, reportCount, reviewCount])
+    }, [forecourts, user, reportCount, reviewCount, amenityCount])
 
     //Methods
     const counter = () => {
@@ -72,29 +75,21 @@ const AccountScreen = () => {
                 })
             })
             setReviewCount(reviewCountTemp);
+
+            forecourts.forEach((forecourt) => {
+                forecourt.amenities.forEach((obj)=> {
+                    if(obj.user === user.username) {
+                        amenityCountTemp++;
+                    }
+                })
+            })
+            setAmenityCount(amenityCountTemp);
     }
 
     //Return
     return (
         <View style={styles.container}>
-            {/*
-            <Text style={styles.title}>Feedback</Text>
-            <TextInput
-                style={styles.input}
-                multiline={true}
-                onChangeText={(val) => feedback = val}
-                //value={feedback}
-                //ref={textInputRef}
-            />
-            <TouchableOpacity onPress={() => submitFeedback()}>
-                <LinearGradient
-                    colors={[Colors.midGreen, Colors.green]}
-                    style={styles.confirm}
-                >
-                    <Text style={styles.reportPrice}>Submit Feedback</Text>
-                </LinearGradient>
-            </TouchableOpacity>
-            */}
+
             <View style={styles.middle}>
                 {user ? 
                     <View styles={{width: '100%', height: '100%', justifyContent: 'space-evenly'}}>
@@ -109,8 +104,8 @@ const AccountScreen = () => {
             <View style={{flexDirection: 'row'}}>
                 <View style={styles.middleHalf}>
                     {user ? 
-                        <View styles={{width: '100%', height: '100%', justifyContent: 'space-evenly'}}>
-                            <Text style={styles.title}>Reviews</Text>
+                        <View styles={{width: '80%', height: '100%', justifyContent: 'space-evenly'}}>
+                            <Text style={styles.middleTitle}>Reviews</Text>
                             <Text style={styles.titleInfo}>{reviewCount}</Text>
                         </View>
                     : null}
@@ -118,9 +113,18 @@ const AccountScreen = () => {
                 <View style={{padding: wp('2.0%')}}></View>
                 <View style={styles.middleHalf}>
                     {user ? 
-                        <View styles={{width: '100%', height: '100%', justifyContent: 'space-evenly'}}>
-                            <Text style={styles.title}>Prices</Text>
+                        <View styles={{width: '80%', height: '100%', justifyContent: 'space-evenly'}}>
+                            <Text style={styles.middleTitle}>Prices</Text>
                             <Text style={styles.titleInfo}>{reportCount}</Text>
+                        </View>
+                    : null}
+                </View>
+                <View style={{padding: wp('2.0%')}}></View>
+                <View style={styles.middleHalf}>
+                    {user ? 
+                        <View styles={{width: '80%', height: '100%', justifyContent: 'space-evenly'}}>
+                            <Text style={styles.middleTitle}>Amenities</Text>
+                            <Text style={styles.titleInfo}>{amenityCount}</Text>
                         </View>
                     : null}
                 </View>
@@ -200,6 +204,11 @@ const styles = StyleSheet.create({
         fontSize: wp('10.0%'),
         fontWeight: 'bold'
     },
+    middleTitle: {
+        color: Colors.green,
+        fontSize: wp('5.5%'),
+        fontWeight: 'bold'
+    },
     titleInfo: {
         color: 'grey',
         fontSize: wp('15.0%'),
@@ -211,9 +220,9 @@ const styles = StyleSheet.create({
         fontSize: wp('5.0%')
     },
     middle: {
+        width: '100%',
         marginTop: hp('5.0%'),
         height: hp('20.0%'),
-        width: '100%',
         backgroundColor: '#fff',
         padding: 5,
         shadowColor: 'black',
@@ -231,6 +240,7 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
         alignItems: 'center',
+        flex: 3
     },
 });
 
