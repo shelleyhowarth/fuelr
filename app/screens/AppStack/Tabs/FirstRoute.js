@@ -95,13 +95,15 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     return reportersDiesel.find(a => a.name === name)
                 })
 
-                reportersPetrol.map( (object, index) => {
-                    reportersDiesel.map( (object2, index2) => {
-                        if(object.name === object2.name) {
-                            let obj = {}
-                            obj['name'] = object.name;
-                            obj['reports'] = object.points + object2.points;
-                            reportersScores.push(obj);
+                reportersScores = reportersDiesel.concat(reportersPetrol);
+
+                //Add together points from petrol and diesel
+                reportersScores.map( (object, index) => {
+                    reportersScores.map( (object2, index2) => {
+                        //If multiple occurrences of same user, add points and delete other object
+                        if(reportersScores.indexOf(object) !== reportersScores.indexOf(object2) && object.name === object2.name) {
+                            object.points = object.points + object2.points;
+                            reportersScores.splice(reportersScores.indexOf(object2), 1);
                         }
                     })
                 })
@@ -122,7 +124,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
 
             if(copy.length) {
                 let first = copy.reduce(function (prev, current) {
-                    return (prev.reports > current.reports) ? prev : current
+                    return (prev.points > current.points) ? prev : current
                 })
                 reporters[0] = first.name;
                 let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(first));
@@ -130,7 +132,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
 
                 if(copy.length) {
                     let second = copy.reduce(function (prev, current) {
-                        return (prev.reports > current.reports) ? prev : current
+                        return (prev.points > current.points) ? prev : current
                     })
                     reporters[1] = second.name;
                     let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(second));
@@ -138,7 +140,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
 
                     if(copy.length) {
                         let third = copy.reduce(function (prev, current) {
-                            return (prev.reports > current.reports) ? prev : current
+                            return (prev.points > current.points) ? prev : current
                         })
                         reporters[2] = third.name;
                         let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(third));

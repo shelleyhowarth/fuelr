@@ -56,7 +56,6 @@ const ForecourtScreen = ({route, navigation}) => {
     }
 
     useEffect(() => {
-        console.log(forecourt);
         if(!loading) {
             forecourt.petrol.map((val, index) => {
                 petrolData.push(val.price);

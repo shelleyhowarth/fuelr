@@ -18,7 +18,6 @@ import moment from 'moment';
 import Modal from 'react-native-modal';
 import Feather from 'react-native-vector-icons/Feather';
 import Slider from '@react-native-community/slider';
-import SelectBox from 'react-native-multi-selectbox'
 import RNMultiSelect, {
     IMultiSelectDataTypes,
   } from "@freakycoder/react-native-multiple-select";
@@ -33,13 +32,13 @@ const db = Firebase.firestore();
 const MapScreen = ({navigation}) => {
     //States
     const [region, setRegion] = useState(null);
-    const [forecourts1, loading, error] = useCollectionData(
+    const [forecourtsDb, loading, error] = useCollectionData(
         db.collection('forecourts'),
         {
             snapshotListenOptions: {includeMetadataChanges: true}
         }
     );
-    const [forecourts, setForecourts] = useState(forecourts1);
+    const [forecourts, setForecourts] = useState(forecourtsDb);
     const [diesel, setDiesel] = useState(false);
     const scrollRef = useRef(null);
     const [modalVisible, setModalVisible] = useState(false);
@@ -48,7 +47,7 @@ const MapScreen = ({navigation}) => {
     const [applyingFilters, setApplyingFilters] = useState(false);
 
     //Other consts
-    const items = [
+    let items = [
         {
           id: 'acceptsCard',
           value: "Accepts Card",
@@ -113,16 +112,17 @@ const MapScreen = ({navigation}) => {
 
     useEffect( () => {
         //Getting location permission and setting inital region to user's location
+        let tempRegion;
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
             if (status !== 'granted') {
-              setErrorMsg('Permission to access location was denied');
+              Alert.alert('Permission to access location was denied');
               return;
             }
 
             let location = await Location.getCurrentPositionAsync({});
 
-            let tempRegion = {
+            tempRegion = {
                 longitude: location.coords.longitude,
                 latitude: location.coords.latitude,
                 latitudeDelta: 0.03,
@@ -136,14 +136,13 @@ const MapScreen = ({navigation}) => {
             applyFilters();
         }
     
-    }, [forecourts1])
+    }, [forecourtsDb, region])
 
     //Methods
     const applyFilters = () => {
         if(kmRadius) {
             let temp = [];
-            console.log("km radius: " + kmRadius);
-            temp = forecourts1.filter((forecourt) => {
+            temp = forecourtsDb.filter((forecourt) => {
                 let dist =  calculateDistance(region.latitude, region.longitude, forecourt.latitude, forecourt.longitude);
                 return dist <= kmRadius;
             });   
@@ -154,28 +153,26 @@ const MapScreen = ({navigation}) => {
                 forecourts.forEach((forecourt) => {
                     for (const [key, value] of Object.entries(forecourt.currAmenities.amenities)) {
                         if(value && preferredAmenities.includes(key)) {
-                            console.log(forecourt);
                             temp.push(forecourt);
                         }
                     } 
-                    //console.log(temp);
                 })
                 if(temp.length) {
                     setForecourts(temp);
                 }
             }
-            console.log('after applyFilters()')
-            console.log(forecourts);
         }
     }
 
     const onSelectedItemsChange = (selectedItems) => {
         let temp = [];
         selectedItems.forEach( (item) => {
-            if(item.isChecked) {
-                temp.push(item.id)
+            temp.push(item.id)
+            if(items.includes(item)) {
+                items[items.indexOf(item)] = item;
             }
         })
+        console.log(items);
         setPreferredAmenities(temp);
     };
 
@@ -312,6 +309,7 @@ const MapScreen = ({navigation}) => {
                         placeholder="Select amenities"
                         spinnerColor={Colors.green}
                         buttonContainerStyle={{color: Colors.green}}
+                        value={preferredAmenities}
                     />
                 </View>           
                 <TouchableOpacity

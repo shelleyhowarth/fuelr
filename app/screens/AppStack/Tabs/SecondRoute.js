@@ -42,7 +42,7 @@ export const SecondRoute = ({forecourt}) => {
         if(user) {
             checkIfReviewExists();
         }
-    }, [user])
+    }, [user, rating])
     
 
     //Return
@@ -50,22 +50,24 @@ export const SecondRoute = ({forecourt}) => {
         return (
             <View style={{ flex: 1, backgroundColor: Colors.lightGreen }}>
                 <View style={styles.middle}>
-                    <Text style={styles.title}>What would you rate this forecourt?</Text>
-                    {!rating ? 
-                        <AirbnbRating
-                            count={5}
-                            reviews={["Terrible", "Bad", "OK", "Good", "Excellent"]}
-                            defaultRating={1}
-                            onFinishRating={ (val) => {
-                                setTimeout(() => {  
-                                    setRating(val);
-                                    submitReview(forecourt.id, val); 
-                                }, 1000);
-                                
-                            }}
-                        />
+                    {!alreadyReviewed ? 
+                        <View>
+                            <Text style={styles.title}>What would you rate this forecourt?</Text>
+                            <AirbnbRating
+                                count={5}
+                                reviews={["Terrible", "Bad", "OK", "Good", "Excellent"]}
+                                defaultRating={1}
+                                onFinishRating={ (val) => {
+                                    setTimeout(() => {  
+                                        setRating(val);
+                                        submitReview(forecourt.id, val); 
+                                    }, 1000);
+                                    
+                                }}
+                            />
+                        </View>
                     : 
-                        <Text style={styles.title}>Submitted!</Text> 
+                        <Text style={styles.title}>You have already rated this forecourt.</Text> 
                     }
                 </View>
                 <StatusBar backgroundColor={Colors.green} barStyle="dark-content"/>
