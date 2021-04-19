@@ -136,8 +136,6 @@ const MapScreen = ({navigation}) => {
 
         //Filter by distance
         if(forecourts1 && region) {
-            console.log('before applyFilters()')
-            console.log(forecourts);
             applyFilters();
         }
     
@@ -145,12 +143,11 @@ const MapScreen = ({navigation}) => {
 
     //Methods
     const applyFilters = () => {
-        setForecourts(forecourts1);
-
         if(forecourts) {
             if(kmRadius) {
+                let temp = [];
                 console.log("km radius: " + kmRadius);
-                let temp = forecourts.filter((forecourt) => {
+                temp = forecourts1.filter((forecourt) => {
                     let dist =  calculateDistance(region.latitude, region.longitude, forecourt.latitude, forecourt.longitude);
                     return dist <= kmRadius;
                 });   
@@ -159,7 +156,7 @@ const MapScreen = ({navigation}) => {
     
             if(preferredAmenities) {
                 let temp = [];
-                forecourts.forEach((forecourt) => {
+                forecourts1.forEach((forecourt) => {
                     for (const [key, value] of Object.entries(forecourt.currAmenities.amenities)) {
                         if(value && preferredAmenities.includes(key)) {
                             console.log(forecourt);
