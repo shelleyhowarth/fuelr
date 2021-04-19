@@ -6,7 +6,7 @@ import { Colors } from '../../../../styles/Colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Spinner from 'react-native-loading-spinner-overlay';
-import StarRating from '../../../components/StarRating';
+import StarRatingOverall from '../../../components/StarRating';
 import Modal from 'react-native-modal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TextInputMask } from 'react-native-masked-text'
@@ -344,7 +344,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     <View style={{flex:2}}>
                         <Text style={styles.stationTitle} numberOfLines={2}>{forecourt.name ? forecourt.name : 'FUEL STATION'}</Text>
                         <Text>{shortenAddress(forecourt)}</Text>
-                        <StarRating 
+                        <StarRatingOverall 
                             ratings={forecourt.ratingScore} 
                             reviews={forecourt.reviews.length}
                         />

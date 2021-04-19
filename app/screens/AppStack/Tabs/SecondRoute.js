@@ -8,11 +8,44 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp
   } from 'react-native-responsive-screen'; 
+import Firebase from '../../../firebase/Firebase';
+import { useDocumentData } from 'react-firebase-hooks/firestore';
+
 
 export const SecondRoute = ({forecourt}) => {
+    //Consts
+    const currentUser = Firebase.auth().currentUser.uid;
+    const db = Firebase.firestore();
+
     //States
     const [rating, setRating] = useState();
+    const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+    const [user, loadingUser, errorUser] = useDocumentData(
+        db.collection('users').doc(currentUser),
+        {
+            snapshotListenOptions: { includeMetadataChanges: true},
+        }
+    );
 
+    //Methods
+    const checkIfReviewExists = () => {
+        forecourt.reviews.forEach( (review) => {
+            if(review.user === user.username) {
+                setAlreadyReviewed(true);
+            }
+        })
+        console.log("Exists");
+    }
+
+    //UseEffect
+    useEffect( () => {
+        if(user) {
+            checkIfReviewExists();
+        }
+    }, [user])
+    
+
+    //Return
     if(forecourt) {
         return (
             <View style={{ flex: 1, backgroundColor: Colors.lightGreen }}>

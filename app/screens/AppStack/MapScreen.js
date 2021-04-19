@@ -6,7 +6,7 @@ import { Switch } from 'react-native-switch';
 import { Colors } from '../../../styles/Colors';
 import * as Location from 'expo-location';
 import Spinner from 'react-native-loading-spinner-overlay';
-import StarRating from '../../components/StarRating';
+import StarRatingOverall from '../../components/StarRating';
 import Firebase from '../../firebase/Firebase';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -111,8 +111,6 @@ const MapScreen = ({navigation}) => {
         },
       ];
 
-      let tempRadius;
-
     useEffect( () => {
         //Getting location permission and setting inital region to user's location
         (async () => {
@@ -130,33 +128,30 @@ const MapScreen = ({navigation}) => {
                 latitudeDelta: 0.03,
                 longitudeDelta: 0.04,
             }
-
             setRegion(tempRegion);
         })();
 
         //Filter by distance
-        if(forecourts1 && region) {
+        if(!loading && region) {
             applyFilters();
         }
     
-    }, [forecourts1, kmRadius])
+    }, [forecourts1])
 
     //Methods
     const applyFilters = () => {
-        if(forecourts) {
-            if(kmRadius) {
-                let temp = [];
-                console.log("km radius: " + kmRadius);
-                temp = forecourts1.filter((forecourt) => {
-                    let dist =  calculateDistance(region.latitude, region.longitude, forecourt.latitude, forecourt.longitude);
-                    return dist <= kmRadius;
-                });   
-                setForecourts(temp);        
-            }
-    
+        if(kmRadius) {
+            let temp = [];
+            console.log("km radius: " + kmRadius);
+            temp = forecourts1.filter((forecourt) => {
+                let dist =  calculateDistance(region.latitude, region.longitude, forecourt.latitude, forecourt.longitude);
+                return dist <= kmRadius;
+            });   
+            setForecourts(temp);        
+        
             if(preferredAmenities) {
                 let temp = [];
-                forecourts1.forEach((forecourt) => {
+                forecourts.forEach((forecourt) => {
                     for (const [key, value] of Object.entries(forecourt.currAmenities.amenities)) {
                         if(value && preferredAmenities.includes(key)) {
                             console.log(forecourt);
@@ -172,7 +167,6 @@ const MapScreen = ({navigation}) => {
             console.log('after applyFilters()')
             console.log(forecourts);
         }
-
     }
 
     const onSelectedItemsChange = (selectedItems) => {
@@ -306,7 +300,7 @@ const MapScreen = ({navigation}) => {
                                 setKmRadius(val)}
                             }
                         />
-                        <Text>25</Text>
+                        <Text>50</Text>
                     </View>
                     <Text style={styles.action}>Amenities</Text>
 
@@ -411,7 +405,7 @@ const MapScreen = ({navigation}) => {
                                     >
                                         {shortenAddress(marker)}
                                     </Text>
-                                    <StarRating ratings={marker.ratingScore} reviews={marker.reviews.length}></StarRating>
+                                    <StarRatingOverall ratings={marker.ratingScore} reviews={marker.reviews.length}></StarRatingOverall>
                                     <Text style={{color: 'grey'}}>{kmFromMe(marker)}</Text>
                                 </View>
 
