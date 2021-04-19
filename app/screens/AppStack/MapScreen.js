@@ -136,7 +136,7 @@ const MapScreen = ({navigation}) => {
             applyFilters();
         }
     
-    }, [forecourtsDb, region])
+    }, [forecourtsDb])
 
     //Methods
     const applyFilters = () => {
