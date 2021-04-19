@@ -10,6 +10,7 @@
   "dependencies": {
     "@freakycoder/react-native-bounceable": "^0.2.4",
     "@freakycoder/react-native-multiple-select": "^0.3.0",
+    "@gregfrench/react-native-wheel-picker": "^1.2.12",
     "@react-native-community/checkbox": "^0.5.7",
     "@react-native-community/cli": "^4.14.0",
     "@react-native-community/geolocation": "^2.0.2",

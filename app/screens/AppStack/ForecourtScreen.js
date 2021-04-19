@@ -143,7 +143,7 @@ const ForecourtScreen = ({route, navigation}) => {
                     {route.title}
                   </Text>
                 )}
-                style={{backgroundColor: Colors.green, paddingTop: wp('10.9%')}}
+                style={{backgroundColor: Colors.green, paddingTop: Platform.OS === 'ios' ? hp('3.0%') : null}}
               />
             )}
         />
@@ -157,9 +157,6 @@ const styles = StyleSheet.create({
       backgroundColor: '#fff',
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    tab: {
-        
     }
 });
 

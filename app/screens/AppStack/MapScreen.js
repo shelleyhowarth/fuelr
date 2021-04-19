@@ -24,9 +24,9 @@ import RNMultiSelect, {
 
 //Styling consts
 const { width, height } = Dimensions.get("window");
-const CARD_HEIGHT = hp('26.5%')
-const CARD_WIDTH = width * 0.8;
-const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
+const CARD_HEIGHT = (Platform.OS === 'ios' ? hp('30.0%') : hp('33.0%'))
+const CARD_WIDTH = width * 0.9;
+const SPACING_FOR_CARD_INSET = width * 0.1 - 20;
 const db = Firebase.firestore();
 
 const MapScreen = ({navigation}) => {
@@ -407,18 +407,18 @@ const MapScreen = ({navigation}) => {
                                     <Text style={{color: 'grey'}}>{kmFromMe(marker)}</Text>
                                 </View>
 
-                                <View style={{flex: 1}}/>
+                                <View style={Platform.OS === 'android' ? {padding: 2} : {flex: 1}}/>
 
                                 <View style={{flex: 3}}>
                                     <View styles={styles.priceContent}>
                                         {marker.currPetrol.price ? 
-                                            <View >
+                                            <View style={{flexDirection: 'row'}}>
                                                 <Text 
                                                     numberOfLines = {1}
                                                     style={styles.priceText}>
                                                     Petrol: {marker.currPetrol.price}
                                                 </Text>
-                                                <Text style={{color: 'grey'}}>({petrolElapsedTime(marker)})</Text>
+                                                <Text style={styles.elapsedText}>({petrolElapsedTime(marker)})</Text>
                                             </View>
                                         :   <Text 
                                                 numberOfLines = {1}
@@ -428,13 +428,13 @@ const MapScreen = ({navigation}) => {
                                         }
 
                                         {marker.currDiesel.price ? 
-                                            <View>
+                                            <View style={{flexDirection: 'row'}}>
                                                 <Text 
                                                     numberOfLines = {1}
                                                     style={styles.priceText}>
                                                     Diesel: {marker.currDiesel.price}
                                                 </Text>
-                                                <Text style={{color: 'grey'}}>({dieselElapsedTime(marker)})</Text>
+                                                <Text style={styles.elapsedText}>({dieselElapsedTime(marker)})</Text>
                                             </View>
                                         :   <Text 
                                                 numberOfLines = {1}
@@ -444,7 +444,7 @@ const MapScreen = ({navigation}) => {
                                         }
                                     </View>
                                 </View>
-                                <View style={{flex:1}}/>
+                                <View style={{padding: 2}}/>
                                 <View style={{flex: 3}}>
                                     <TouchableOpacity
                                         onPress={() => navigation.navigate('ForecourtScreen', {
@@ -628,6 +628,11 @@ const styles = StyleSheet.create({
         marginTop: hp('1.0%'),
         paddingBottom: 5,
         color: 'grey'
+    },
+    elapsedText: {
+        color: 'grey', 
+        fontSize: wp('3.5%'), 
+        paddingLeft: wp('1.0%')
     }
 });
 
