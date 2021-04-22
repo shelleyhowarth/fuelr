@@ -32,6 +32,7 @@ export const FourthRoute = ({forecourt}) => {
         }
     );
     const [elapsedTime, setElapsedTime] = useState();
+    const [amenitiesPresent, setAmenitiesPresent] = useState(false);
 
     const icons = [
         {
@@ -182,12 +183,27 @@ export const FourthRoute = ({forecourt}) => {
         }
     ]
 
+    //UseEffect
     useEffect( () => {
+        if(dbForecourt) {
+            checkAmenities();
+        }
+
         if(forecourtState.currAmenities.timestamp) {
             setElapsedTime(moment.utc(forecourt.currAmenities.timestamp).local().startOf('seconds').fromNow());
         }
     }, [forecourtState, dbForecourt])
 
+    //Methods
+    const checkAmenities = () => {
+        for (const [key, value] of Object.entries(dbForecourt.currAmenities.amenities)) {
+            if(value) {
+                setAmenitiesPresent(true)
+            }
+        }
+    }
+
+    //Return
     if(forecourtState) {
         return (
             <View style={{ flex: 1, backgroundColor: Colors.lightGreen }}>
@@ -255,17 +271,22 @@ export const FourthRoute = ({forecourt}) => {
                     </Text>
                     <Text style={styles.updated}>{elapsedTime}</Text>
                     <Text style={styles.updated}>{forecourt.currAmenities.user ? 'by ' + forecourt.currAmenities.user : null}</Text>
-                    <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '80%' }}>
-                        { dbForecourt ? 
-                            Object.keys(dbForecourt.currAmenities.amenities).map((key, index) => {
-                                if(dbForecourt.currAmenities.amenities[key] === true) {
-                                    return (
-                                            icons[index].return
-                                        )
-                                }
-                            })
-                        : null}
-                    </View>
+                    {amenitiesPresent ? 
+                        <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '80%' }}>
+                            { dbForecourt ? 
+                                Object.keys(dbForecourt.currAmenities.amenities).map((key, index) => {
+                                    if(dbForecourt.currAmenities.amenities[key] === true) {
+                                        return (
+                                                icons[index].return
+                                            )
+                                    }
+                                })
+                            : null}
+                        </View>
+                    :
+                        <Text>No available amenities</Text>
+                    }
+
 
                     <TouchableOpacity style={{flex: 3}} onPress={() => setModalVisible(true)} style={{paddingTop: hp('2.0%'), width: '50%'}}>
                         <LinearGradient

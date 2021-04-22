@@ -474,7 +474,7 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
                         <MaterialIcons
                             name="directions"
                             color={Colors.green}
-                            size={60}
+                            size={65}
                         />
                     </TouchableOpacity>
                 </View>
