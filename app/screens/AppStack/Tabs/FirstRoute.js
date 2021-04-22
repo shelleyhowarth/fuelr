@@ -5,6 +5,8 @@ import moment from 'moment';
 import { Colors } from '../../../../styles/Colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import Spinner from 'react-native-loading-spinner-overlay';
 import StarRatingOverall from '../../../components/StarRating';
 import Modal from 'react-native-modal';
@@ -14,8 +16,10 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp
   } from 'react-native-responsive-screen';
+  import { OpenMapDirections } from 'react-native-navigation-directions';
 
-export const FirstRoute = ({forecourt, navigation}) => {
+
+export const FirstRoute = ({coords, forecourt, navigation}) => {
     //States
     const [petrolModalVisible, setPetrolModalVisible] = useState(false);
     const [dieselModalVisible, setDieselModalVisible] = useState(false);
@@ -41,6 +45,24 @@ export const FirstRoute = ({forecourt, navigation}) => {
     }, [forecourt])
 
     //Methods
+    const callShowDirections = () => {
+        const startPoint = {
+          longitude: coords.lng,
+          latitude: coords.lat
+        } 
+    
+        const endPoint = {
+          longitude: forecourt.longitude,
+          latitude: forecourt.latitude
+        }
+    
+        const transportPlan = 'd';
+    
+        OpenMapDirections(startPoint, endPoint, transportPlan).then(res => {
+          console.log(res)
+        });
+    }
+
     const findReporters = () => {
         let reporters = [];
         let reportersPetrol = []
@@ -350,6 +372,16 @@ export const FirstRoute = ({forecourt, navigation}) => {
                             ratings={forecourt.ratingScore} 
                             reviews={forecourt.reviews.length}
                         />
+                        <Text>Navigate to forecourt</Text>
+                        <TouchableOpacity
+                            onPress={() => callShowDirections()}
+                        >
+                            <MaterialIcons
+                                name="drive-eta"
+                                color={Colors.green}
+                                size={60}
+                            />
+                        </TouchableOpacity>
                     </View>
 
                 </View>
@@ -437,6 +469,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                         )
                     })}
                 </View>
+
                 <TouchableOpacity
                     onPress={() => navigation.navigate('Home')}
                 >

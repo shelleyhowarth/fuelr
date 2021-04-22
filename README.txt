@@ -1,9 +1,14 @@
+FUELR - A FUEL PRICE COMPARISON MOBILE APP 
+STUDENT - SHELLEY HOWARTH (17225663)
+SUPERVISOR - ANNETTE MCELLIGOTT
+COURSE - LM051 (BSC. COMPUTER SYSTEMS)
+
 Disclaimer: 
 This app should work on all devices but was predominantely tested with an iPhone 11, iPhone 6s, Google Pixel 3a and Samsung A5 (2017).
 
 How to run on iOS simulator (on Mac):
 1. Open 'Simulator'
-2. Drag the .app file on to the simulator screen.
+2. Drag the .app file on to the simulator home screen.
 3. Click on app once installed on home screen.
 
 How to run on Android emulator (on Windows):
@@ -24,9 +29,10 @@ How to create an account:
 
 Once you have been authenticated, you will be able to access the rest of the app. Here you can - 
 1. View forecourts on a map.
-2. Filter the forecourts on the map (by distance, amenities and fuel type).
-3. Update fuel prices, leave reviews and update available amenities.
-4. View user leaderboard and forecourt leaderboard.
-5. View account dashboard.
-6. Sign out.
-7. Delete account.
+2. View information of a forecourt (name, address, average rating, the top fuel reporters).
+3. Filter the forecourts on the map (by distance, amenities and fuel type).
+4. Update fuel prices, leave reviews and update available amenities.
+5. View user leaderboard and forecourt leaderboard.
+6. View account dashboard.
+7. Sign out.
+8. Delete account.

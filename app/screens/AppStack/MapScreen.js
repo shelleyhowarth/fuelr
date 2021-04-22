@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {View, Text, StyleSheet, Dimensions, Image, Animated, TouchableOpacity, Platform } from 'react-native';
+import {View, Text, StyleSheet, Dimensions, Image, Animated, TouchableOpacity, Platform, ScrollView, Keyboard } from 'react-native';
 import MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import { Switch } from 'react-native-switch';
@@ -21,6 +21,7 @@ import Slider from '@react-native-community/slider';
 import RNMultiSelect, {
     IMultiSelectDataTypes,
   } from "@freakycoder/react-native-multiple-select";
+import { TextInputMask } from 'react-native-masked-text'
 
 //Styling consts
 const { width, height } = Dimensions.get("window");
@@ -45,74 +46,89 @@ const MapScreen = ({navigation}) => {
     const [preferredAmenities, setPreferredAmenities] = useState();
     const [kmRadius, setKmRadius] = useState(5);
     const [applyingFilters, setApplyingFilters] = useState(false);
+    const [maxPrice, setMaxPrice] = useState();
+    const [items, setItems] = useState(
+        [
+            {
+              id: 'acceptsCard',
+              value: "Accepts Card",
+              isChecked: false,
+            },
+            {
+              id: 'airAndWater',
+              value: "Air and Water",
+              isChecked: false,
+            },
+            {
+              id: 'alcohol',
+              value: "Alcohol",
+              isChecked: false,
+            },
+            {
+              id: 'atm',
+              value: "ATM",
+              isChecked: false,
+            },
+            {
+              id: 'bathroom',
+              value: "Bathroom",
+              isChecked: false,
+            },
+            {
+                id: 'carWash',
+                value: "Car Wash",
+                isChecked: false,
+            },
+            {
+                id: 'convenienceStore',
+                value: "Convenience Store",
+                isChecked: false,
+            },
+            {
+                id: 'deli',
+                value: "Deli",
+                isChecked: false,
+            },
+            {
+                id: 'electricCharging',
+                value: "Electric Vehicle Charging",
+                isChecked: false,
+            },
+            {
+                id: 'payAtPump',
+                value: "Pay At Pump",
+                isChecked: false,
+            },
+            {
+                id: 'vacuum',
+                value: "Vacuum",
+                isChecked: false,
+            },
+            {
+                id: 'wifi',
+                value: "WiFi",
+                isChecked: false,
+            },
+          ])
 
-    //Other consts
-    let items = [
-        {
-          id: 'acceptsCard',
-          value: "Accepts Card",
-          isChecked: false,
-        },
-        {
-          id: 'airAndWater',
-          value: "Air and Water",
-          isChecked: false,
-        },
-        {
-          id: 'alcohol',
-          value: "Alcohol",
-          isChecked: false,
-        },
-        {
-          id: 'atm',
-          value: "ATM",
-          isChecked: false,
-        },
-        {
-          id: 'bathroom',
-          value: "Bathroom",
-          isChecked: false,
-        },
-        {
-            id: 'carWash',
-            value: "Car Wash",
-            isChecked: false,
-        },
-        {
-            id: 'convenienceStore',
-            value: "Convenience Store",
-            isChecked: false,
-        },
-        {
-            id: 'deli',
-            value: "Deli",
-            isChecked: false,
-        },
-        {
-            id: 'electricCharging',
-            value: "Electric Vehicle Charging",
-            isChecked: false,
-        },
-        {
-            id: 'payAtPump',
-            value: "Pay At Pump",
-            isChecked: false,
-        },
-        {
-            id: 'vacuum',
-            value: "Vacuum",
-            isChecked: false,
-        },
-        {
-            id: 'wifi',
-            value: "WiFi",
-            isChecked: false,
-        },
-      ];
 
     useEffect( () => {
         //Getting location permission and setting inital region to user's location
+        if(!region) {
+            getLocation();
+        }
+
+        //Filter by distance
+        if(!loading && region) {
+            applyFilters();
+        }
+    
+    }, [forecourtsDb, region, items, preferredAmenities, kmRadius, diesel])
+
+    //Methods
+    const getLocation = async () => {
         let tempRegion;
+
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
             if (status !== 'granted') {
@@ -130,49 +146,137 @@ const MapScreen = ({navigation}) => {
             }
             setRegion(tempRegion);
         })();
+    }
 
-        //Filter by distance
-        if(!loading && region) {
-            applyFilters();
-        }
-    
-    }, [forecourtsDb])
-
-    //Methods
     const applyFilters = () => {
-        if(kmRadius) {
+        let temp = [];
+        temp = forecourtsDb.filter((forecourt) => {
+            let dist =  calculateDistance(region.latitude, region.longitude, forecourt.latitude, forecourt.longitude);
+            return dist <= kmRadius;
+        });   
+        setForecourts(temp);        
+    
+        if(preferredAmenities) {
             let temp = [];
-            temp = forecourtsDb.filter((forecourt) => {
-                let dist =  calculateDistance(region.latitude, region.longitude, forecourt.latitude, forecourt.longitude);
-                return dist <= kmRadius;
-            });   
-            setForecourts(temp);        
-        
-            if(preferredAmenities) {
-                let temp = [];
-                forecourts.forEach((forecourt) => {
-                    for (const [key, value] of Object.entries(forecourt.currAmenities.amenities)) {
-                        if(value && preferredAmenities.includes(key)) {
-                            temp.push(forecourt);
-                        }
-                    } 
-                })
-                if(temp.length) {
-                    setForecourts(temp);
-                }
+            forecourts.forEach((forecourt) => {
+                for (const [key, value] of Object.entries(forecourt.currAmenities.amenities)) {
+                    if(value && preferredAmenities.includes(key)) {
+                        temp.push(forecourt);
+                    }
+                } 
+            })
+
+            if(temp.length) {
+                setForecourts(temp);
             }
         }
+
+        if(maxPrice && !diesel) {
+            let temp = [];
+            temp = forecourts.filter((forecourt) => {
+                return (forecourt.currPetrol.price <= maxPrice && forecourt.currPetrol.price !== null);
+            });   
+
+            forecourts.forEach(( forecourt, index) => {
+                console.log(maxPrice);
+                console.log(forecourt.currPetrol.price);
+            });
+
+            setForecourts(temp);
+        } else if(maxPrice && diesel) {
+            
+            let temp = [];
+            temp = forecourts.filter((forecourt) => {
+                return (forecourt.currDiesel.price <= maxPrice && forecourt.currDiesel.price !== null);
+            });   
+            setForecourts(temp);
+        }
+    }
+
+    const resetFilters = () => {
+        setPreferredAmenities([]);
+        setItems([
+            {
+              id: 'acceptsCard',
+              value: "Accepts Card",
+              isChecked: false,
+            },
+            {
+              id: 'airAndWater',
+              value: "Air and Water",
+              isChecked: false,
+            },
+            {
+              id: 'alcohol',
+              value: "Alcohol",
+              isChecked: false,
+            },
+            {
+              id: 'atm',
+              value: "ATM",
+              isChecked: false,
+            },
+            {
+              id: 'bathroom',
+              value: "Bathroom",
+              isChecked: false,
+            },
+            {
+                id: 'carWash',
+                value: "Car Wash",
+                isChecked: false,
+            },
+            {
+                id: 'convenienceStore',
+                value: "Convenience Store",
+                isChecked: false,
+            },
+            {
+                id: 'deli',
+                value: "Deli",
+                isChecked: false,
+            },
+            {
+                id: 'electricCharging',
+                value: "Electric Vehicle Charging",
+                isChecked: false,
+            },
+            {
+                id: 'payAtPump',
+                value: "Pay At Pump",
+                isChecked: false,
+            },
+            {
+                id: 'vacuum',
+                value: "Vacuum",
+                isChecked: false,
+            },
+            {
+                id: 'wifi',
+                value: "WiFi",
+                isChecked: false,
+            }
+          ])
+        setKmRadius(5);
+        setDiesel(false);
+        setMaxPrice();
     }
 
     const onSelectedItemsChange = (selectedItems) => {
         let temp = [];
-        selectedItems.forEach( (item) => {
-            temp.push(item.id)
-            if(items.includes(item)) {
-                items[items.indexOf(item)] = item;
+        let itemCopy = items;
+        if(preferredAmenities) {
+            temp = preferredAmenities
+        }
+        
+        selectedItems.forEach( (amenity) => {
+            temp.push(amenity.id)
+            if(items.includes(amenity)) {
+                itemCopy[itemCopy.indexOf(amenity)] = amenity;
             }
         })
-        console.log(items);
+
+        setItems(itemCopy);
         setPreferredAmenities(temp);
     };
 
@@ -223,7 +327,6 @@ const MapScreen = ({navigation}) => {
                 </View>
             )
         }
-
     }
 
     const shortenAddress = (marker) => {
@@ -264,7 +367,6 @@ const MapScreen = ({navigation}) => {
                 style={styles.modal}
                 coverScreen={false}
                 onBackdropPress={() => setModalVisible(false)}
-                onPress={ () => {Keyboard.dismiss()}}
             >     
                 <View style={{alignItems: 'center', flex: 7, justifyContent: 'space-between'}}>
                     <Text style={styles.action}>Fuel type</Text>
@@ -299,6 +401,41 @@ const MapScreen = ({navigation}) => {
                         />
                         <Text>50</Text>
                     </View>
+                    <Text style={[styles.action]} >Max price </Text>
+                    <View style={{flexDirection: 'row', height: '10%'}}>
+                        <TextInputMask
+                            type={'money'}
+                            options={{
+                                precision: 1,
+                                separator: '.',
+                                unit: '',
+
+                            }}
+                            style={styles.input}
+                            onChangeText={val => {
+                                let priceInput = val; 
+                                setMaxPrice(priceInput);
+                            }}
+                            keyboardType='numeric'
+                            value={maxPrice}
+                            placeholder='130.1'
+                            maxLength={5}
+                        />
+                        <View style={{flex: 1}}/>
+                        <TouchableOpacity
+                            onPress={() => {
+                                Keyboard.dismiss();
+                            }}
+                            style={{flex: 2, height: '300%'}}
+                        >
+                            <LinearGradient
+                                colors={[Colors.midGreen, Colors.green]}
+                                style={styles.applyFilters}
+                            >
+                                <Text style={styles.buttonText}>Ok</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
                     <Text style={styles.action}>Amenities</Text>
 
                     <RNMultiSelect
@@ -309,23 +446,38 @@ const MapScreen = ({navigation}) => {
                         placeholder="Select amenities"
                         spinnerColor={Colors.green}
                         buttonContainerStyle={{color: Colors.green}}
-                        value={preferredAmenities}
                     />
-                </View>           
-                <TouchableOpacity
-                    onPress={() => {
-                        applyFilters()
-                        setModalVisible(false);
-                    }}
-                    style={{flex: 1}}
-                >
-                        <LinearGradient
-                            colors={[Colors.midGreen, Colors.green]}
-                            style={styles.applyFilters}
+                    <View style={{flexDirection: 'row', }}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                setModalVisible(false);
+                                resetFilters()
+                            }}
+                            style={{width: '50%', paddingHorizontal: 5}}
                         >
-                            <Text style={styles.buttonText}>Apply filters</Text>
-                        </LinearGradient>
-                </TouchableOpacity>
+                                <LinearGradient
+                                    colors={[Colors.midGreen, Colors.green]}
+                                    style={styles.applyFilters}
+                                >
+                                    <Text style={styles.buttonText}>Reset filters</Text>
+                                </LinearGradient>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                applyFilters()
+                                setModalVisible(false);
+                            }}
+                            style={{width: '50%', paddingHorizontal: 5}}
+                        >
+                                <LinearGradient
+                                    colors={[Colors.midGreen, Colors.green]}
+                                    style={styles.applyFilters}
+                                >
+                                    <Text style={styles.buttonText}>Apply filters</Text>
+                                </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
+                </View>      
             </Modal>
 
             <MapView
@@ -448,7 +600,11 @@ const MapScreen = ({navigation}) => {
                                 <View style={{flex: 3}}>
                                     <TouchableOpacity
                                         onPress={() => navigation.navigate('ForecourtScreen', {
-                                            id: marker.id
+                                            id: marker.id,
+                                            coords: {
+                                                lat: region.latitude,
+                                                lng: region.longitude
+                                            }
                                         })}
                                     >
                                             <LinearGradient
@@ -603,10 +759,9 @@ const styles = StyleSheet.create({
 
     applyFilters: {
         width: '100%',
-        height: '100%',
+        height: '30%',
         justifyContent: 'center',
         borderRadius:  10,
-        //flexDirection: 'row',
         alignItems: 'center'
     },
 
@@ -616,7 +771,7 @@ const styles = StyleSheet.create({
         textAlign: 'center'
     },
     modal: {
-        marginTop: Platform.OS === 'ios' ? hp('20%') : hp('10%'),
+        marginTop: Platform.OS === 'ios' ? hp('5%') : hp('10%'),
         marginBottom: Platform.OS === 'ios' ? hp('10%') : hp('10%'),
         width: '80%', 
         backgroundColor: 'white', 
@@ -633,7 +788,16 @@ const styles = StyleSheet.create({
         color: 'grey', 
         fontSize: wp('3.5%'), 
         paddingLeft: wp('1.0%')
-    }
+    },
+    input: {
+        width: '100%',
+        height: '90%',
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: Colors.green,
+        fontSize: wp('4.5%'),
+        flex: 2
+    },
 });
 
 export default MapScreen;

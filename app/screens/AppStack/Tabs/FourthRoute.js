@@ -238,6 +238,7 @@ export const FourthRoute = ({forecourt}) => {
                         }}>
                             <LinearGradient
                                 colors={[Colors.midGreen, Colors.green]}
+                                style={{borderRadius: 10}}
                             >
                                 <Text style={styles.reportPrice}>Update Amenities</Text>
                             </LinearGradient>
