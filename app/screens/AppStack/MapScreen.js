@@ -22,6 +22,7 @@ import RNMultiSelect, {
     IMultiSelectDataTypes,
   } from "@freakycoder/react-native-multiple-select";
 import { TextInputMask } from 'react-native-masked-text'
+import { SafeAreaView } from 'react-native';
 
 //Styling consts
 const { width, height } = Dimensions.get("window");
@@ -368,7 +369,7 @@ const MapScreen = ({navigation}) => {
                 coverScreen={false}
                 onBackdropPress={() => setModalVisible(false)}
             >     
-                <View style={{alignItems: 'center', flex: 7, justifyContent: 'space-between'}}>
+                <ScrollView contentContainerStyle={{alignItems: 'center', flexGrow: 1}}>
                     <Text style={styles.action}>Fuel type</Text>
                     <Switch
                         activeText={'Diesel'}
@@ -395,9 +396,7 @@ const MapScreen = ({navigation}) => {
                             maximumTrackTintColor={Colors.lightGreen}
                             value={kmRadius}
                             step={1}
-                            onSlidingComplete={ (val) => {
-                                setKmRadius(val)}
-                            }
+                            onSlidingComplete={ (val) => setKmRadius(val) }
                         />
                         <Text>50</Text>
                     </View>
@@ -437,23 +436,24 @@ const MapScreen = ({navigation}) => {
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.action}>Amenities</Text>
-
-                    <RNMultiSelect
-                        disableAbsolute
-                        data={items}
-                        onSelect={(selectedItems) => onSelectedItemsChange(selectedItems)}
-                        width={'100%'}
-                        placeholder="Select amenities"
-                        spinnerColor={Colors.green}
-                        buttonContainerStyle={{color: Colors.green}}
-                    />
-                    <View style={{flexDirection: 'row', }}>
+                    <SafeAreaView>
+                        <RNMultiSelect
+                            disableAbsolute
+                            data={items}
+                            onSelect={(selectedItems) => onSelectedItemsChange(selectedItems)}
+                            width={'100%'}
+                            placeholder="Select amenities"
+                            spinnerColor={Colors.green}
+                            buttonContainerStyle={{color: Colors.green}}
+                        />
+                    </SafeAreaView>
+                    <View style={{flexDirection: 'row'}}>
                         <TouchableOpacity
                             onPress={() => {
                                 setModalVisible(false);
                                 resetFilters()
                             }}
-                            style={{width: '50%', paddingHorizontal: 5}}
+                            style={{width: '50%', paddingHorizontal: 5, height: hp('20.0%')}}
                         >
                                 <LinearGradient
                                     colors={[Colors.midGreen, Colors.green]}
@@ -467,7 +467,7 @@ const MapScreen = ({navigation}) => {
                                 applyFilters()
                                 setModalVisible(false);
                             }}
-                            style={{width: '50%', paddingHorizontal: 5}}
+                            style={{width: '50%', paddingHorizontal: 5, height: hp('20.0%')}}
                         >
                                 <LinearGradient
                                     colors={[Colors.midGreen, Colors.green]}
@@ -477,7 +477,7 @@ const MapScreen = ({navigation}) => {
                                 </LinearGradient>
                         </TouchableOpacity>
                     </View>
-                </View>      
+                </ScrollView>      
             </Modal>
 
             <MapView
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
         textAlign: 'center'
     },
     modal: {
-        marginTop: Platform.OS === 'ios' ? hp('5%') : hp('10%'),
+        marginTop: Platform.OS === 'ios' ? hp('10%') : hp('10%'),
         marginBottom: Platform.OS === 'ios' ? hp('10%') : hp('10%'),
         width: '80%', 
         backgroundColor: 'white', 

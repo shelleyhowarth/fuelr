@@ -353,7 +353,6 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
                                 <Text style={styles.reportPrice}>Update Price</Text>
                             </LinearGradient>
                         </TouchableOpacity>
-
                     </View>
                 </Modal>
                 <View style={styles.header}>
@@ -372,16 +371,6 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
                             ratings={forecourt.ratingScore} 
                             reviews={forecourt.reviews.length}
                         />
-                        <Text>Navigate to forecourt</Text>
-                        <TouchableOpacity
-                            onPress={() => callShowDirections()}
-                        >
-                            <MaterialIcons
-                                name="drive-eta"
-                                color={Colors.green}
-                                size={60}
-                            />
-                        </TouchableOpacity>
                     </View>
 
                 </View>
@@ -469,9 +458,9 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
                         )
                     })}
                 </View>
-
+                <View style={{flexDirection: 'row', justifyContent: 'space-evenly', width: '100%'}}>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate('Home')}
+                onPress={() => navigation.navigate('Home')}
                 >
                     <FontAwesome
                         name="arrow-left"
@@ -479,6 +468,16 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
                         size={60}
                     />
                 </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => callShowDirections()}
+                    >
+                        <MaterialIcons
+                            name="directions"
+                            color={Colors.green}
+                            size={60}
+                        />
+                    </TouchableOpacity>
+                </View>
             </View>
         );
     } else {
@@ -646,6 +645,6 @@ const styles = StyleSheet.create({
     logo: {
         width: '100%',
         height: '100%',
-        alignSelf: 'center',
+        alignSelf: 'center'
     }
-});
+})

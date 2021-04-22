@@ -205,13 +205,18 @@ const LeaderboardScreen = ({navigation}) => {
                             labelBy='name'
                             oddRowColor={'white'}
                             evenRowColor={'#97dba6'}
-                            onRowPress={ (item) => navigation.navigate('ForecourtScreen', {
-                                id: item.id,
-                                coords: {
-                                    lat: region.latitude,
-                                    lng: region.longitude
+                            onRowPress={ (item) => {
+                                if(region) {
+                                    navigation.navigate('ForecourtScreen', {
+                                        id: item.id,
+                                        coords: {
+                                            lat: region.latitude,
+                                            lng: region.longitude
+                                        }
+                                    })}   
                                 }
-                            })}
+
+                            }
                         />
                         <Text style={styles.noPrices}>{forecourtsFiltered.length == 0 ? "No fuel prices have been reported yet!" : null}</Text>
                     </Animatable.View>
