@@ -11,7 +11,6 @@ import {
 import Firebase from '../../../firebase/Firebase';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 
-
 export const SecondRoute = ({forecourt}) => {
     //Consts
     const currentUser = Firebase.auth().currentUser.uid;
@@ -39,6 +38,7 @@ export const SecondRoute = ({forecourt}) => {
 
     //UseEffect
     useEffect( () => {
+        //Check if user has already rated forecourt
         if(user) {
             checkIfReviewExists();
         }
@@ -92,7 +92,9 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
         alignItems: 'center',
-        justifyContent: 'space-evenly'
+        justifyContent: 'space-evenly',
+        borderRadius: 20
+
     },
     title: {
         color: Colors.green,

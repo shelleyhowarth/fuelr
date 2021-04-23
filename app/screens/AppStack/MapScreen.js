@@ -18,11 +18,13 @@ import moment from 'moment';
 import Modal from 'react-native-modal';
 import Feather from 'react-native-vector-icons/Feather';
 import Slider from '@react-native-community/slider';
-import RNMultiSelect, {
-    IMultiSelectDataTypes,
-  } from "@freakycoder/react-native-multiple-select";
 import { TextInputMask } from 'react-native-masked-text'
 import { SafeAreaView } from 'react-native';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 //Styling consts
 const { width, height } = Dimensions.get("window");
@@ -32,6 +34,7 @@ const SPACING_FOR_CARD_INSET = width * 0.1 - 20;
 const db = Firebase.firestore();
 
 const MapScreen = ({navigation}) => {
+
     //States
     const [region, setRegion] = useState(null);
     const [forecourtsDb, loading, error] = useCollectionData(
@@ -44,74 +47,172 @@ const MapScreen = ({navigation}) => {
     const [diesel, setDiesel] = useState(false);
     const scrollRef = useRef(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [preferredAmenities, setPreferredAmenities] = useState();
+    const [preferredAmenities, setPreferredAmenities] = useState({
+      'atm': false,
+      'deli': false,
+      'bathroom': false,
+      'electricCharging': false,
+      'payAtPump': false,
+      'acceptsCard': false,
+      'convenienceStore': false,
+      'carWash': false,
+      'airAndWater': false,
+      'vacuum': false,
+      'wifi': false,
+      'alcohol': false
+    });
     const [kmRadius, setKmRadius] = useState(5);
     const [applyingFilters, setApplyingFilters] = useState(false);
     const [maxPrice, setMaxPrice] = useState();
-    const [items, setItems] = useState(
-        [
-            {
-              id: 'acceptsCard',
-              value: "Accepts Card",
-              isChecked: false,
-            },
-            {
-              id: 'airAndWater',
-              value: "Air and Water",
-              isChecked: false,
-            },
-            {
-              id: 'alcohol',
-              value: "Alcohol",
-              isChecked: false,
-            },
-            {
-              id: 'atm',
-              value: "ATM",
-              isChecked: false,
-            },
-            {
-              id: 'bathroom',
-              value: "Bathroom",
-              isChecked: false,
-            },
-            {
-                id: 'carWash',
-                value: "Car Wash",
-                isChecked: false,
-            },
-            {
-                id: 'convenienceStore',
-                value: "Convenience Store",
-                isChecked: false,
-            },
-            {
-                id: 'deli',
-                value: "Deli",
-                isChecked: false,
-            },
-            {
-                id: 'electricCharging',
-                value: "Electric Vehicle Charging",
-                isChecked: false,
-            },
-            {
-                id: 'payAtPump',
-                value: "Pay At Pump",
-                isChecked: false,
-            },
-            {
-                id: 'vacuum',
-                value: "Vacuum",
-                isChecked: false,
-            },
-            {
-                id: 'wifi',
-                value: "WiFi",
-                isChecked: false,
-            },
-          ])
 
+    const icons = [
+        {
+            dbName: 'acceptsCard',
+            return: 
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <FontAwesome5
+                        name='credit-card'
+                        size={25}
+                        color={preferredAmenities.acceptsCard ? 'green' : 'grey'}  
+                    />
+                    <Text >Accepts Card</Text>
+                </View>
+        },
+        {
+            dbName: 'airAndWater',
+            return: 
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <Ionicons
+                        name='water-outline'
+                        size={25}
+                        color={preferredAmenities.airAndWater ? 'green' : 'grey'}  
+                    />
+                    <Text>Air and Water</Text>
+                </View>
+        },
+        {
+            dbName: 'alcohol',
+            return: 
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <Ionicons
+                        name='wine'
+                        size={25}
+                        color={preferredAmenities.alcohol ? 'green' : 'grey'}  
+                    />
+                    <Text >Alcohol</Text>
+                </View>
+        },
+        {   
+            dbName: 'atm',
+            return: 
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <FontAwesome 
+                    name='euro'
+                    size={25}
+                    color={preferredAmenities.atm ? 'green' : 'grey'}
+                />
+                <Text >ATM</Text>
+            </View>
+       
+        },
+        {
+            dbName: 'bathroom',
+            return: 
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <MaterialCommunityIcons 
+                    name='toilet'
+                    size={25}
+                    color={preferredAmenities.bathroom ? 'green' : 'grey'}
+                />
+                <Text >Toilet</Text>
+            </View>
+        },
+        {
+            dbName: 'carWash',
+            return: 
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <MaterialCommunityIcons 
+                    name='car-wash'
+                    size={25}
+                    color={preferredAmenities.carWash ? 'green' : 'grey'}
+
+                />
+                <Text>Car Wash</Text>
+            </View>
+        },
+        {
+            dbName: 'convenienceStore',
+            return: 
+            <View style={{justifyContent: 'center', alignItems: 'center', paddingHorizontal: wp('1.0%')}}>
+                <MaterialCommunityIcons 
+                    name='storefront-outline'
+                    size={25}
+                    color={preferredAmenities.convenienceStore ? 'green' : 'grey'}
+                />
+                <Text >Convenience Store</Text>
+            </View>
+        },
+        {
+            dbName: 'deli',
+            return: 
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <Ionicons
+                    name='fast-food-outline'
+                    size={25}
+                    color={preferredAmenities.deli ? 'green' : 'grey'}  
+                />
+                <Text >Deli</Text>
+            </View>
+        },
+        {
+            dbName: 'electricCharging',
+            return: 
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <FontAwesome5
+                    name='charging-station'
+                    size={25}
+                    color={preferredAmenities.electricCharging ? 'green' : 'grey'}  
+                />
+                <Text>Electric Vehicle Charging</Text>
+            </View>
+        },
+        {
+            dbName: 'payAtPump',
+            return: 
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <FontAwesome5
+                    name='gas-pump'
+                    size={25}
+                    color={preferredAmenities.payAtPump ? 'green' : 'grey'}  
+                />
+                <Text>Pay At Pump</Text>
+            </View>
+        },
+        {
+            dbName: 'vacuum',
+            return: 
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <MaterialIcons
+                    name='cleaning-services'
+                    size={25}
+                    color={preferredAmenities.vacuum ? 'green' : 'grey'}  
+                />
+                <Text >Vacuum</Text>
+            </View>
+        },
+        {
+            dbName: 'wifi',
+            return: 
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <FontAwesome5
+                    name='wifi'
+                    size={25}
+                    color={preferredAmenities.wifi ? 'green' : 'grey'}  
+                />
+                <Text >WiFi</Text>
+            </View> 
+        }
+    ]
 
     useEffect( () => {
         //Getting location permission and setting inital region to user's location
@@ -119,14 +220,16 @@ const MapScreen = ({navigation}) => {
             getLocation();
         }
 
-        //Filter by distance
+        //Apply filters once location has been got
         if(!loading && region) {
             applyFilters();
         }
     
-    }, [forecourtsDb, region, items, preferredAmenities, kmRadius, diesel])
+    }, [forecourtsDb, region, preferredAmenities, kmRadius, diesel])
 
     //Methods
+
+    //Get user's location
     const getLocation = async () => {
         let tempRegion;
 
@@ -149,6 +252,7 @@ const MapScreen = ({navigation}) => {
         })();
     }
 
+    //Apply filters to map
     const applyFilters = () => {
         let temp = [];
         temp = forecourtsDb.filter((forecourt) => {
@@ -157,11 +261,12 @@ const MapScreen = ({navigation}) => {
         });   
         setForecourts(temp);        
     
-        if(preferredAmenities) {
+    
+        if(preferredAmenities && forecourts) {
             let temp = [];
             forecourts.forEach((forecourt) => {
                 for (const [key, value] of Object.entries(forecourt.currAmenities.amenities)) {
-                    if(value && preferredAmenities.includes(key)) {
+                    if(value && preferredAmenities[key]) {
                         temp.push(forecourt);
                     }
                 } 
@@ -194,95 +299,31 @@ const MapScreen = ({navigation}) => {
         }
     }
 
+    //Reset filters
     const resetFilters = () => {
-        setPreferredAmenities([]);
-        setItems([
-            {
-              id: 'acceptsCard',
-              value: "Accepts Card",
-              isChecked: false,
-            },
-            {
-              id: 'airAndWater',
-              value: "Air and Water",
-              isChecked: false,
-            },
-            {
-              id: 'alcohol',
-              value: "Alcohol",
-              isChecked: false,
-            },
-            {
-              id: 'atm',
-              value: "ATM",
-              isChecked: false,
-            },
-            {
-              id: 'bathroom',
-              value: "Bathroom",
-              isChecked: false,
-            },
-            {
-                id: 'carWash',
-                value: "Car Wash",
-                isChecked: false,
-            },
-            {
-                id: 'convenienceStore',
-                value: "Convenience Store",
-                isChecked: false,
-            },
-            {
-                id: 'deli',
-                value: "Deli",
-                isChecked: false,
-            },
-            {
-                id: 'electricCharging',
-                value: "Electric Vehicle Charging",
-                isChecked: false,
-            },
-            {
-                id: 'payAtPump',
-                value: "Pay At Pump",
-                isChecked: false,
-            },
-            {
-                id: 'vacuum',
-                value: "Vacuum",
-                isChecked: false,
-            },
-            {
-                id: 'wifi',
-                value: "WiFi",
-                isChecked: false,
-            }
-          ])
+        setPreferredAmenities({      
+            'atm': false,
+            'deli': false,
+            'bathroom': false,
+            'electricCharging': false,
+            'payAtPump': false,
+            'acceptsCard': false,
+            'convenienceStore': false,
+            'carWash': false,
+            'airAndWater': false,
+            'vacuum': false,
+            'wifi': false,
+            'alcohol': false
+        });
         setKmRadius(5);
         setDiesel(false);
         setMaxPrice();
     }
 
-    const onSelectedItemsChange = (selectedItems) => {
-        let temp = [];
-        let itemCopy = items;
-        if(preferredAmenities) {
-            temp = preferredAmenities
-        }
-        
-        selectedItems.forEach( (amenity) => {
-            temp.push(amenity.id)
-            if(items.includes(amenity)) {
-                itemCopy[itemCopy.indexOf(amenity)] = amenity;
-            }
-        })
-
-        setItems(itemCopy);
-        setPreferredAmenities(temp);
-    };
-
+    //Change toggle between petrol and diesel in filter modal
     const toggleSwitch = () => setDiesel(previousState => !previousState);
 
+    //Calculate distance between 2 geopoints
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
         var p = 0.017453292519943295; 
         var c = Math.cos;
@@ -293,23 +334,27 @@ const MapScreen = ({navigation}) => {
         return 12742 * Math.asin(Math.sqrt(a)); 
     }
 
+    //Calculate distance between user and forecourt
     const kmFromMe = (forecourt) => {
         let dist = calculateDistance(region.latitude, region.longitude, forecourt.latitude, forecourt.longitude);
         return dist.toFixed(2) + " km away";
     }
 
+    //Returns time since petrol price was last updated
     const petrolElapsedTime = (forecourt) => {
         if(forecourt.currPetrol.timestamp) {
             return (moment.utc(forecourt.currPetrol.timestamp).local().startOf('seconds').fromNow());
         }
     }
-    const dieselElapsedTime = (forecourt) => {
 
+    //Returns time since petrol price was last updated
+    const dieselElapsedTime = (forecourt) => {
         if(forecourt.currDiesel.timestamp) {
             return (moment.utc(forecourt.currDiesel.timestamp).local().startOf('seconds').fromNow());
         }
     }
 
+    //Displays current prices on map markers
     const fuelPriceMarker = (marker) => {
         if(!diesel) {
             return (
@@ -330,10 +375,12 @@ const MapScreen = ({navigation}) => {
         }
     }
 
+    //Remove name from address
     const shortenAddress = (marker) => {
         return marker.address.replace(marker.name, '');
     }
 
+    //When a map marker is pressed, scroll to the relevant card
     const onMarkerPress = (e) => {
         const markerId = e._targetInst.return.key;
         let x = (markerId * CARD_WIDTH) + (markerId * 20);
@@ -369,7 +416,7 @@ const MapScreen = ({navigation}) => {
                 coverScreen={false}
                 onBackdropPress={() => setModalVisible(false)}
             >     
-                <ScrollView contentContainerStyle={{alignItems: 'center', flexGrow: 1}}>
+                <ScrollView contentContainerStyle={{alignItems: 'center', flexGrow: 1}} nestedScrollEnabled={true}>
                     <Text style={styles.action}>Fuel type</Text>
                     <Switch
                         activeText={'Diesel'}
@@ -382,6 +429,7 @@ const MapScreen = ({navigation}) => {
                         switchWidthMultiplier={3}
                         onValueChange={toggleSwitch}
                         value={diesel}
+                        useNativeDriver={true}
                     />
 
                     <Text style={styles.action}>KM radius</Text>
@@ -436,17 +484,29 @@ const MapScreen = ({navigation}) => {
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.action}>Amenities</Text>
-                    <SafeAreaView>
-                        <RNMultiSelect
-                            disableAbsolute
-                            data={items}
-                            onSelect={(selectedItems) => onSelectedItemsChange(selectedItems)}
-                            width={'100%'}
-                            placeholder="Select amenities"
-                            spinnerColor={Colors.green}
-                            buttonContainerStyle={{color: Colors.green}}
-                        />
-                    </SafeAreaView>
+                    <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly'}}>
+                        {icons.map((obj, index) => {
+                            return (
+                                <View style={{justifyContent: 'center', alignItems: 'center', padding: wp('2.0%')}}>
+                                    <TouchableOpacity onPress={ () => {
+                                        for(const [key, value] of Object.entries(preferredAmenities)) {
+                                            if(key === obj.dbName) {
+                                                let amenitiesObj = {
+                                                    ...preferredAmenities,
+                                                    [key]: !value
+                                                }
+                                                console.log(amenitiesObj);
+                                                setPreferredAmenities(amenitiesObj)  
+                                            }
+                                          
+                                        }
+                                    }}>
+                                        {obj.return}
+                                    </TouchableOpacity>
+                                </View>
+                            )
+                        })}
+                    </View>
                     <View style={{flexDirection: 'row'}}>
                         <TouchableOpacity
                             onPress={() => {
@@ -775,7 +835,7 @@ const styles = StyleSheet.create({
         marginBottom: Platform.OS === 'ios' ? hp('10%') : hp('10%'),
         width: '80%', 
         backgroundColor: 'white', 
-        borderRadius: 5,
+        borderRadius: 20,
         alignSelf: 'center',
         padding: 10
     },

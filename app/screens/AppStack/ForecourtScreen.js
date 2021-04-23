@@ -51,47 +51,15 @@ const ForecourtScreen = ({route, navigation}) => {
         barPercentage: 0.5
     }
 
+    //UseEffect
     useEffect(() => {
+        //Turn off loading screen when forecourt has loaded
         if(!loading) {
-            forecourt.petrol.map((val, index) => {
-                petrolData.push(val.price);
-                petrolTimes.push(moment(val.timestamp).format('MMM Do'));
-            });
-
-            forecourt.diesel.map((val, index) => {
-                dieselData.push(val.price);
-                dieselTimes.push(moment(val.timestamp).format('MMM Do'));
-            });
-
-            if(forecourt.petrol.length > 1) {
-                setData({
-                    labels: petrolTimes,
-                    datasets: [
-                      {
-                        data: petrolData,
-                        strokeWidth: 2 // optional
-                      }
-                    ],
-                  });
-            }
             setSpinner(false);
         }
     }, [forecourt])
 
-    const ThirdRoute = () => (
-        <View style={{ flex: 1, backgroundColor: Colors.lightGreen }}>
-            { data ? 
-                <LineChart
-                    data={data}
-                    width={layout.width}
-                    height={220}
-                    chartConfig={chartConfig}
-                />
-            : null}
-        </View>
-    );
-
-
+    //Switch case for displaying each tab screen
     const renderScene = ({route}) => {
         switch (route.key) {
             case 'price':
@@ -122,7 +90,6 @@ const ForecourtScreen = ({route, navigation}) => {
                 return null;
         };
     }
-
 
     return (
         <TabView

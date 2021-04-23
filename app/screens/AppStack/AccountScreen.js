@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import {View, TouchableOpacity, Text, StyleSheet, WebView, Alert, StatusBar} from 'react-native';
+import {View, TouchableOpacity, Text, StyleSheet, WebView, Alert, StatusBar, ScrollView} from 'react-native';
 import { signOut, listFiles, submitFeedback, deleteAccount } from '../../firebase/FirebaseMethods'
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
@@ -10,6 +10,8 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp
   } from 'react-native-responsive-screen'; 
+import AppleHeader from "react-native-apple-header";
+import ColorfulCard from "react-native-colorful-card";
 
 const AccountScreen = () => {
     //Consts
@@ -20,7 +22,6 @@ const AccountScreen = () => {
     const [reportCount, setReportCount] = useState(0);
     const [reviewCount, setReviewCount] = useState(0);
     const [amenityCount, setAmenityCount] = useState(0);
-
     const [forecourts, loadingForecourts, errorForecourts] = useCollectionData(
         db.collection('forecourts'),
         {
@@ -33,9 +34,7 @@ const AccountScreen = () => {
             snapshotListenOptions: { includeMetadataChanges: true},
         }
     );
-    //const textInputRef = useRef();
 
-    //let feedback = "";
     let reportCountTemp = 0;
     let reviewCountTemp = 0;
     let amenityCountTemp = 0;
@@ -50,6 +49,8 @@ const AccountScreen = () => {
     }, [forecourts, user, reportCount, reviewCount, amenityCount])
 
     //Methods
+
+    //Count reviews, price reports, and amenity updates
     const counter = () => {
             forecourts.forEach((forecourt) => {
                 forecourt.petrol.forEach((obj)=> {
@@ -88,81 +89,81 @@ const AccountScreen = () => {
 
     //Return
     return (
-        <View style={styles.container}>
-
-            <View style={styles.middle}>
-                {user ? 
-                    <View styles={{width: '100%', height: '100%', justifyContent: 'space-evenly'}}>
-                        <Text style={styles.title}>{user.username}</Text>
-                        <Text style={styles.info}>Name: {user.name}</Text>
-                        <Text style={styles.info}>Email: {user.email}</Text>
-                        <Text style={styles.info}>Points: {user.points}</Text>
-
-                    </View>
-                : null}
+        <ScrollView contentContainertyle={styles.container}>
+            <AppleHeader
+                dateTitle={ "DASHBOARD" }
+                largeTitle={ user ? user.name : null}
+                containerStyle={{marginTop: hp('4.5%')}}
+            />
+            <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
+                <ColorfulCard
+                    title="Reviews Left"
+                    titleTextStyle={{fontSize: wp('5.0%')}}
+                    valueTextStyle={{fontSize: wp('15.0%')}}
+                    value={reviewCount}
+                    style={{ backgroundColor: Colors.green }}
+                />
+                <ColorfulCard
+                    title="Price Reports"
+                    titleTextStyle={{fontSize: wp('5.0%')}}
+                    valueTextStyle={{fontSize: wp('15.0%')}}
+                    value={reportCount}
+                    style={{ backgroundColor: Colors.midGreen }}
+                />
             </View>
-            <View style={{flexDirection: 'row'}}>
-                <View style={styles.middleHalf}>
-                    {user ? 
-                        <View styles={{width: '80%', height: '100%', justifyContent: 'space-evenly'}}>
-                            <Text style={styles.middleTitle}>Reviews</Text>
-                            <Text style={styles.titleInfo}>{reviewCount}</Text>
-                        </View>
-                    : null}
-                </View>
-                <View style={{padding: wp('2.0%')}}></View>
-                <View style={styles.middleHalf}>
-                    {user ? 
-                        <View styles={{width: '80%', height: '100%', justifyContent: 'space-evenly'}}>
-                            <Text style={styles.middleTitle}>Prices</Text>
-                            <Text style={styles.titleInfo}>{reportCount}</Text>
-                        </View>
-                    : null}
-                </View>
-                <View style={{padding: wp('2.0%')}}></View>
-                <View style={styles.middleHalf}>
-                    {user ? 
-                        <View styles={{width: '80%', height: '100%', justifyContent: 'space-evenly'}}>
-                            <Text style={styles.middleTitle}>Amenities</Text>
-                            <Text style={styles.titleInfo}>{amenityCount}</Text>
-                        </View>
-                    : null}
-                </View>
+            <View style={{flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', paddingTop: 10}}>
+                <ColorfulCard
+                    title="Amenity Updates"
+                    titleTextStyle={{fontSize: wp('5.0%')}}
+                    valueTextStyle={{fontSize: wp('15.0%')}}
+                    value={amenityCount}
+                    style={{ backgroundColor: Colors.midGreen }}
+                />
+                <ColorfulCard
+                    title="Points Earned"
+                    titleTextStyle={{fontSize: wp('5.0%')}}
+                    valueTextStyle={{fontSize: wp('15.0%')}}
+                    value={user ? user.points : null}
+                    style={{ backgroundColor: Colors.green }}
+                />
             </View>
 
-            <TouchableOpacity onPress={() => signOut()}>
-                <LinearGradient
-                    colors={[Colors.midGreen, Colors.green]}
-                    style={styles.confirm}
-                >
-                    <Text style={styles.reportPrice}>Sign Out</Text>
-                </LinearGradient>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {
-                Alert.alert(
-                "Warning",
-                `Are you sure you want to delete your account? This action cannot be undone.`,
-                [
-                  {
-                    text: "No",
-                    onPress: () => null,
-                    style: "cancel"
-                  },
-                  { text: "Yes", onPress: () => {
-                    deleteAccount();
-                  }}
-                ]
-              )}
-              }>
-                <LinearGradient
-                    colors={['red', 'red']}
-                    style={styles.confirm}
-                >
-                    <Text style={styles.reportPrice}>Delete Account</Text>
-                </LinearGradient>
-            </TouchableOpacity>
-            <StatusBar backgroundColor={'white'} barStyle="dark-content"/>
-        </View>
+            <View style={{alignItems: 'center'}}>
+                <TouchableOpacity onPress={() => signOut()}>
+                    <LinearGradient
+                        colors={[Colors.midGreen, Colors.green]}
+                        style={styles.confirm}
+                    >
+                        <Text style={styles.reportPrice}>Sign Out</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => {
+                    Alert.alert(
+                    "Warning",
+                    `Are you sure you want to delete your account? This action cannot be undone.`,
+                    [
+                        {
+                            text: "No",
+                            onPress: () => null,
+                            style: "cancel"
+                        },
+                        { text: "Yes", onPress: () => {
+                            deleteAccount();
+                        }}
+                    ]
+                    )}
+                }>
+                    <LinearGradient
+                        colors={['red', 'red']}
+                        style={styles.confirm}
+                    >
+                        <Text style={styles.reportPrice}>Delete Account</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
+
+            <StatusBar barStyle="dark-content"/>
+        </ScrollView>
 
     )
 }
@@ -172,13 +173,12 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: Colors.lightGreen,
       alignItems: 'center',
-      //justifyContent: 'center',
     },
     confirm: {
         width: wp('90%'),
         height: hp('10.0%'),
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 20,
         borderColor: Colors.green,
         fontSize: wp('5.0%'),
         justifyContent: 'center',

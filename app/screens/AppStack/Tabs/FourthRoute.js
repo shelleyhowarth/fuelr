@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard} from 'react-native';
+import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard, ScrollView} from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -195,6 +195,8 @@ export const FourthRoute = ({forecourt}) => {
     }, [forecourtState, dbForecourt])
 
     //Methods
+    
+    //Check if there are no amenities listed
     const checkAmenities = () => {
         for (const [key, value] of Object.entries(dbForecourt.currAmenities.amenities)) {
             if(value) {
@@ -215,9 +217,8 @@ export const FourthRoute = ({forecourt}) => {
                     style={styles.modal}
                     coverScreen={false}
                     onBackdropPress={() => setModalVisible(false)}
-                    onPress={ () => {Keyboard.dismiss()}}
                 >
-                    <View style={{width: '100%', height: '100%'}}>
+                    <ScrollView contentContainerStyle={{width: '100%', height: '100%'}}>
                         <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly'}}>
                             {icons.map((obj, index) => {
                                 return (
@@ -260,7 +261,7 @@ export const FourthRoute = ({forecourt}) => {
                             </LinearGradient>
                         </TouchableOpacity>
 
-                    </View>
+                    </ScrollView>
                 </Modal>
                 
 
@@ -318,7 +319,9 @@ const styles = StyleSheet.create({
         shadowColor: 'black',
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
-        alignItems: 'center'
+        alignItems: 'center',
+        borderRadius: 20
+
     },
     petrolTitle: {
         fontSize: wp('9.0%'),
@@ -344,10 +347,10 @@ const styles = StyleSheet.create({
     },
     modal: {
         marginTop: Platform.OS === 'ios' ? hp('20%') : hp('10%'),
-        marginBottom: Platform.OS === 'ios' ? hp('35%') : hp('20%'),
+        marginBottom: Platform.OS === 'ios' ? hp('30%') : hp('20%'),
         width: '80%', 
         backgroundColor: 'white', 
-        borderRadius: 5,
+        borderRadius: 20,
         alignSelf: 'center',
         padding: 5
     },

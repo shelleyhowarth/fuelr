@@ -45,9 +45,11 @@ const LeaderboardScreen = ({navigation}) => {
     //Vars
     let temp = [];
 
+    //UseEffect
     useEffect ( () => {
-        let tempRegion;
 
+        //Get user's location
+        let tempRegion;
         (async () => {
             let { status } = await Location.requestPermissionsAsync();
             if (status !== 'granted') {
@@ -66,14 +68,14 @@ const LeaderboardScreen = ({navigation}) => {
             setRegion(tempRegion);
         })();
 
-        //When users have loaded in
+        //When users have loaded in, sort them based on descending order of points
         if(!loadingUsers) {
             users.sort((a, b) => (a.points < b.points) ? 1 : -1);
             setResult(getPos());
             setPoints(getPoints());
         }
 
-        //When forecourts have loaded in and petrol is selected
+        //When forecourts have loaded in and petrol is selected, prepare array for leaderboard
         if(!loadingForecourts && !diesel) {
             temp = forecourts;
             temp = temp.filter((forecourt) => forecourt.currPetrol.price);
@@ -92,7 +94,7 @@ const LeaderboardScreen = ({navigation}) => {
             }
             setForecourtsFiltered(temp);
 
-            //When forecourts have loaded in and diesel is selected
+        //When forecourts have loaded in and diesel is selected, prepare array for leaderboard
         } else if(!loadingForecourts && diesel) {
             temp = forecourts;
             temp = temp.filter((forecourt) => forecourt.currDiesel.price);
@@ -118,6 +120,7 @@ const LeaderboardScreen = ({navigation}) => {
     const toggleSwitch = () => setForecourtView(previousState => !previousState);
     const toggleSwitch2 = () => setDiesel(previousState => !previousState);
 
+    //Get user's position to display on leaderboard
     const getPos = () => {
         let result;
         let place = users.findIndex(obj => obj.id === currentUser)+1;
@@ -143,6 +146,7 @@ const LeaderboardScreen = ({navigation}) => {
         return result;
     }
 
+    //Get user's points to display on leaderboard
     const getPoints = () => {
         let obj = users.filter(obj => {
             return obj.id === currentUser;
@@ -321,7 +325,7 @@ const styles = StyleSheet.create({
         flex: 2, 
         backgroundColor: 'white', 
         justifyContent: 'center', 
-        width: width
+        width: width,
     },
     switch: {
         bottom: 50

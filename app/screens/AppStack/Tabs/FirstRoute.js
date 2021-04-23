@@ -16,8 +16,8 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp
   } from 'react-native-responsive-screen';
-  import { OpenMapDirections } from 'react-native-navigation-directions';
-
+import { OpenMapDirections } from 'react-native-navigation-directions';
+import { BasicModal } from "react-native-basic-modal";
 
 export const FirstRoute = ({coords, forecourt, navigation}) => {
     //States
@@ -34,17 +34,22 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
 
     //UseEffect
     useEffect(() => {
+        //Get time since petrol price update
         if(forecourt.currPetrol.timestamp) {
             setPetrolElapsedTime(moment.utc(forecourt.currPetrol.timestamp).local().startOf('seconds').fromNow());
         }
 
+        //Get time since diesel price update
         if(forecourt.currDiesel.timestamp) {
             setDieselElapsedTime(moment.utc(forecourt.currDiesel.timestamp).local().startOf('seconds').fromNow());
         }
+
         setSpinner(false);
     }, [forecourt])
 
     //Methods
+
+    //Take user to external navigation app
     const callShowDirections = () => {
         const startPoint = {
           longitude: coords.lng,
@@ -63,6 +68,7 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
         });
     }
 
+    //Find top price reporters
     const findReporters = () => {
         let reporters = [];
         let reportersPetrol = []
@@ -134,10 +140,12 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
         return reportersScores;
     }
 
+    //Remove name from address
     const shortenAddress = (marker) => {
         return marker.address.replace(marker.name, '');
     }
     
+    //Get 3 top reporters
     const topPetrolReporters = () => {
         let reporters = ['--', '--', '--'];
 
@@ -175,6 +183,7 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
         return reporters;
     }
 
+    //When user clicks 'same price' on price report modal
     const onConfirmCurrent = (type) => {
         if(type === 'petrol') {
             updatePetrolPrice(forecourt.id, forecourt.currPetrol.price)
@@ -185,6 +194,7 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
         }
     }
 
+    //Submit new petrol price
     const onPetrolSubmit = () => {
         if(Math.abs(forecourt.currPetrol.price - petrolPrice) >= 5) {
             Alert.alert(
@@ -208,6 +218,7 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
         }
     }
 
+    //Submit new diesel price
     const onDieselSubmit = () => {
         if(Math.abs(forecourt.currDiesel.price - dieselPrice) >= 5) {
             Alert.alert(
@@ -231,10 +242,43 @@ export const FirstRoute = ({coords, forecourt, navigation}) => {
         }
     }
 
-    //Views & return
+    //Return
     if(forecourt) {
         return(
             <View style={{ flex: 1, backgroundColor: Colors.lightGreen, alignItems: 'center'}} >
+                <BasicModal 
+                    title="Update Petrol Price"
+                    height={'80%'}
+                >
+                    <View style={{flex: 2, justifyContent: 'center'}}>
+                        <TextInputMask
+                            type={'money'}
+                            options={{
+                                precision: 1,
+                                separator: '.',
+                                unit: '',
+
+                            }}
+                            style={styles.input}
+                            onChangeText={val => {
+                                petrolInput = val; 
+                                setPetrolPrice(petrolInput);
+                            }}
+                            keyboardType='numeric'
+                            value={petrolPrice}
+                            placeholder='120.1'
+                            maxLength={5}
+                        />
+                </View>
+                <TouchableOpacity style={{flex: 3}} onPress={ () => onPetrolSubmit()} disabled={!petrolPrice}>
+                    <LinearGradient
+                        colors={[Colors.midGreen, Colors.green]}
+                        style={petrolPrice ? styles.confirmModal : styles.confirmModalDisabled}
+                    >
+                        <Text style={styles.reportPrice}>Update Price</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+                </BasicModal>
                 <Modal
                     animationIn="slideInDown"
                     animationOut="slideOutDown"
@@ -505,7 +549,7 @@ const styles = StyleSheet.create({
         marginBottom: Platform.OS === 'ios' ? hp('40%') : hp('10%'),
         width: '80%', 
         backgroundColor: 'white', 
-        borderRadius: 5,
+        borderRadius: 20,
         alignSelf: 'center',
         padding: 10
     },
@@ -518,7 +562,8 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
         flexDirection:'row',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        borderRadius: 20
     },
     middle: {
         height: hp('10%'),
@@ -529,7 +574,8 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        borderRadius: 20
     },
     footer: {
         height: hp('25%'),
@@ -539,6 +585,7 @@ const styles = StyleSheet.create({
         shadowColor: 'black',
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
+        borderRadius: 20
     },
     input: {
         width: '100%',
@@ -571,7 +618,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 20,
         borderColor: Colors.green,
         fontSize: wp('4.5%'),
         justifyContent: 'center'
