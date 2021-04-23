@@ -21,7 +21,6 @@ import {
 const SignUpScreen = ({navigation}) => {
     //Consts
     const db = Firebase.firestore();
-    //Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
     let result;
 
     //States
@@ -67,16 +66,20 @@ const SignUpScreen = ({navigation}) => {
     }, [users, formValid, data])
 
     //Methods
+
+    //Sign up 
     const signUp = () => {
         registration(data.email, data.password, data.name, data.username, data.uri)
     }
 
+    //Check if form is valid
     const checkValid = () => {
         if(data.emailError === null && data.email && data.usernameError === null && data.username && data.nameError === null && data.name && data.confirmPasswordError === null && data.confirmPassword) {
             setFormValid(true);
         }
     }
 
+    //Check if email is already in use
     const checkEmail = (email) => {
         users.map((user, index) => {
             if(user.email.toLowerCase() === email.toLowerCase()) {
@@ -85,6 +88,7 @@ const SignUpScreen = ({navigation}) => {
         })
     }
     
+    //Validate email against regex
     const emailPattern = (email) => {
         let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         if(reg.test(email) === true) {
@@ -98,6 +102,7 @@ const SignUpScreen = ({navigation}) => {
         }
     }
 
+    //Check if username is already in use
     const checkUsername = (username) => {
         users.map((user, index) => {
             if(user.username.toLowerCase() === username.toLowerCase()) {
@@ -106,12 +111,14 @@ const SignUpScreen = ({navigation}) => {
         })
     }
 
+    //Check that username contains no spaces
     const usernamePattern = (username) => {
         if(/\s/g.test(username) === true) {
             usernameSpace = true;
         }
     }
 
+    //Check for errors in email input
     const emailInputChange = (value) => {
         setFormValid(false);
         emailCorrect = false;
@@ -160,6 +167,7 @@ const SignUpScreen = ({navigation}) => {
         }
     }
 
+    //Check for errors in name input
     const nameInputChange = (value) => {
         setFormValid(false);
         if(value.length !== 0 ) {
@@ -179,6 +187,7 @@ const SignUpScreen = ({navigation}) => {
         }
     }
 
+    //Check for errors in username input
     const usernameInputChange = (value) => {
         setFormValid(false);
         usernameTaken = false;
@@ -218,6 +227,7 @@ const SignUpScreen = ({navigation}) => {
         }         
     }
 
+    //Check for errors in password input
     const handlePasswordChange = (value) => {
         setFormValid(false);
         if(value.length == 0) {
@@ -241,6 +251,7 @@ const SignUpScreen = ({navigation}) => {
         }
     }
 
+    //Check for errors in confirm password input
     const handleConfirmPasswordChange = (value) => {
         setFormValid(false);
         if(value !== data.password) {
@@ -258,15 +269,15 @@ const SignUpScreen = ({navigation}) => {
         }
     }
 
-
+    //Show or hide password input
     const updateSecureTextEntry = () => {
         setData({
             ...data,
             secureTextEntry: !data.secureTextEntry
-
         });
     }
 
+    //Show or hide confirm password input
     const updateCheckSecureTextEntry = () => {
         setData({
             ...data,
@@ -275,37 +286,7 @@ const SignUpScreen = ({navigation}) => {
         });
     }
 
-    /*
-    const forecourtInputChange = async(eircode) => {
-       Geocoder.init("AIzaSyAGAjEMb5VCAXaBmQistQ2kxraQm421Sq8");
-        eircode += "+ire";
-
-        await Geocoder.from(eircode)
-          .then(json => {
-              var lat = json.results[0].geometry.location.lat;
-              var lng = json.results[0].geometry.location.lng;
-      
-              db.collection('forecourts').get()
-                .then(querySnapshot => {
-                  querySnapshot.docs.forEach(doc => {
-                    if(lat === doc.data().latitude && lng === doc.data().longitude) {
-                      setForecourtExists(true);
-                    }
-                  });
-                });
-          })
-          .catch(error => console.warn(error));
-    }
-    */
-    const pickDoc = async() => {
-        result = await DocumentPicker.getDocumentAsync({});
-        setData({
-            ...data,
-            uri: result.uri
-        });
-        setFileChosen("File: " + result.name);
-    }
-
+    //Change appearance of sign up button based on if the form is valid
     const renderSignUp = () => {
         if(Platform.OS == 'ios') {
             return (
@@ -332,15 +313,19 @@ const SignUpScreen = ({navigation}) => {
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={Colors.green} barStyle="light-content"/>
+
             <View style={styles.header}>
                 <Text style={styles.textHeader}>Create an account</Text>
             </View>
+
             <KeyboardAwareScrollView>
+
             <Animatable.View 
                 style={styles.footer}
                 animation="fadeInUpBig"
             >
                 <Text style={styles.textFooter}>Full name</Text>
+
                 <View style={styles.action}>
                     <FontAwesome
                         name="user-o"
@@ -366,12 +351,15 @@ const SignUpScreen = ({navigation}) => {
                         </Animatable.View>
                     : null}
                 </View>
+
                 {data.nameError ?
                         <Text style={{color: 'red'}}>{data.nameError}</Text>
                 : null}
+
                 <Text style={[styles.textFooter, {
                     marginTop: 30
                 }]}>Username</Text>
+
                 <View style={styles.action}>
                     <FontAwesome
                         name="user-o"
@@ -396,9 +384,11 @@ const SignUpScreen = ({navigation}) => {
                         </Animatable.View>
                     : null}
                 </View>
+
                 {data.usernameError ? 
                         <Text style={{color: 'red'}}> {data.usernameError} </Text>
                 : null}
+                
                 <Text style={[styles.textFooter, {
                     marginTop: 30
                 }]}>
@@ -512,56 +502,6 @@ const SignUpScreen = ({navigation}) => {
                 {data.confirmPasswordError ?
                         <Text style={{color: 'red'}}>{data.confirmPasswordError}</Text>
                 : null}
-                {/*
-                <View style={styles.checkbox}>
-                    <Text style={styles.textFooter}>
-                        Are you a forecourt owner?
-                    </Text>
-                    <CheckBox
-                        checked={isSelected}
-                        onPress={ () => setSelection(!isSelected) }
-                        checkedColor= {Colors.green}
-                    />
-                </View>
-
-                { isSelected ?
-                    <View>
-                        <Text style={[styles.textFooter, {
-                            marginTop: 30
-                        }]}>
-                            Forecourt Eircode
-                        </Text>
-                        <View style={styles.action}>
-                            <FontAwesome
-                                name="user-o"
-                                color={Colors.green}
-                                size={20}
-                            />
-                            <TextInput
-                                placeholder="Forecourt Eircode"
-                                style={styles.textInput}
-                                autoCapitalize="none"
-                                onChangeText = {(value) => forecourtInputChange(value)}
-                            />
-                        </View>
-                        <View style={styles.button}>
-                            <TouchableOpacity
-                                onPress={() => pickDoc()}
-                                style={styles.signUp}
-                            >
-                                <LinearGradient
-                                    colors={[Colors.midGreen, Colors.green]}
-                                    style={styles.signIn}
-                                >
-                                    <Text style={styles.textSign}>Choose file</Text>
-                                </LinearGradient>
-                            </TouchableOpacity>
-                        </View>
-                        <Text>{fileChosen ? fileChosen : null}</Text>
-                    </View>
-
-                : null}
-                    */}
 
                 <View style={styles.button}>
                     <TouchableOpacity

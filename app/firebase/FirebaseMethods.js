@@ -7,7 +7,7 @@ import * as firebase from 'firebase'
 
 const db = Firebase.firestore();
 
-//Authentication
+//Sign up
 export async function registration(email, password, name, username, uri) {
   await Firebase.auth().createUserWithEmailAndPassword(email, password)
     .then(Alert.alert("Account successfully created!"))
@@ -24,20 +24,9 @@ export async function registration(email, password, name, username, uri) {
       points: 0,
       id: currentUser.uid
     });
-
-    if(uri) {
-      const ref = firebase.storage().ref()
-      const response = await fetch(uri).then(console.log(response));
-      const blob = await response.blob();
-      let uploadTask = ref.child(`/ownerEvidence/${currentUser.uid}`).put(blob);
-      uploadTask.on('state_changed',
-        (snapshot) => {},
-        (error) => { Alert.alert(error.message) },
-        () => {Alert.alert("Upload complete!")}
-      );
-    }
 }
 
+//Delete account
 export async function deleteAccount() {
   const user = firebase.auth().currentUser;
   
@@ -51,6 +40,7 @@ export async function deleteAccount() {
 
 }
 
+//Sign in
 export async function signIn(email, password) {
   try {
    await Firebase
@@ -61,6 +51,7 @@ export async function signIn(email, password) {
   }
 }
 
+//Sign out
 export async function signOut() {
   try {
     await Firebase.auth().signOut();
@@ -72,100 +63,14 @@ export async function signOut() {
   }
 }
 
+//Trigger reset password email
 export async function resetPassword(email) {
   Firebase.auth().sendPasswordResetEmail(email)
     .then(() => Alert.alert("Password reset email has been sent!"))
     .catch((error) => Alert.alert(error.message))
 }
 
-//Application
-export async function submitFeedback(feedback) {
-  try { 
-    await db.collection('feedback').add({
-    message: feedback
-  })
-  } catch (e) {
-    Alert.alert(e.message)
-  }
-}
-
-export async function checkUsernames(username, usernameTaken) {
-  try {
-      await db.collection("users").get()
-      .then(querySnapshot => {
-          querySnapshot.docs.forEach(doc => {
-              if(doc.data().username == username) {
-                  Alert.alert("Taken");
-                  usernameTaken = true;
-              }
-          })
-      })
-  } catch(e) {
-      Alert.alert(e.message)
-  }
-}
-
-export async function checkEmails(email, emailTaken) {
-  try {
-      await db.collection("users").get()
-      .then(querySnapshot => {
-          querySnapshot.docs.forEach(doc => {
-              if(doc.data().email == email) {
-                Alert.alert("Taken");
-                emailTaken = true;
-              }
-          })
-      })
-  } catch(e) {
-      Alert.alert(e.message);
-  }
-}
-
-export async function forecourtInputChange(value)  {
-  eircode += "+ire";
-
-  await Geocoder.from(eircode)
-    .then(json => {
-        var lat = json.results[0].geometry.location.lat;
-        var lng = json.results[0].geometry.location.lng;
-
-        db.collection('forecourts').get()
-          .then(querySnapshot => {
-            querySnapshot.docs.forEach(doc => {
-              if(lat === doc.data().latitude && lng === doc.data().longitude) {
-                setForecourtExists(true);
-              }
-            });
-          });
-    })
-    .catch(error => Alert.alert(error.message));
-}
-
-export async function getForecourt(lng, lat) {
-  let obj = {}
-  await db.collection('forecourts').get()
-    .then(querySnapshot => {
-      querySnapshot.docs.forEach(doc => {
-        if(lat === doc.data().latitude && lng === doc.data().longitude) {
-          obj = doc.data();
-        }
-      })
-    })
-  
-  return obj;
-}
-
-export async function updateForecourts() {
-  await db.collection('forecourts').get()
-    .then(querySnapshot => {
-      querySnapshot.docs.forEach(doc => {
-          //db.collection('forecourts').doc(doc.ref.id).update({id: doc.ref.id});
-          doc.ref.update({id: doc.ref.id}).then(console.log(doc.ref.id));
-      })
-    })
-    .catch(e => console.log(e.message));
-  }
-
+//When user submits a petrol price report
 export async function updatePetrolPrice(id, priceInput) {
   const currentUser = Firebase.auth().currentUser.uid;
   let username;
@@ -191,6 +96,7 @@ export async function updatePetrolPrice(id, priceInput) {
     .then(addPoints(10, currentUser))
 }
 
+//When a user updates amenities
 export async function updateAmenities(id, amenitiesObj) {
   const currentUser = Firebase.auth().currentUser.uid;
   let username;
@@ -213,6 +119,7 @@ export async function updateAmenities(id, amenitiesObj) {
   .then(addPoints(10, currentUser))
 }
 
+//When user submits a diesel price report
 export async function updateDieselPrice(id, priceInput) {
   const currentUser = Firebase.auth().currentUser.uid;
   let username;
@@ -238,6 +145,7 @@ export async function updateDieselPrice(id, priceInput) {
     .then(addPoints(10, currentUser))
 }
 
+//When a user submits a review
 export async function submitReview(id, score) {
   const currentUser = Firebase.auth().currentUser.uid;
   let totalScore = 0;
@@ -275,6 +183,7 @@ export async function submitReview(id, score) {
     .then(addPoints(10, currentUser))
 }
 
+//Adds points to user's profile
 export async function addPoints(points, id) {
   let currentPoints;
   await db.collection('users').doc(id).get()

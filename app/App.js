@@ -13,10 +13,8 @@ const App = () => {
   Firebase.auth().onAuthStateChanged(user => {
     if(user) {
       setLoggedIn(true);
-      console.log("logged in")
     } else {
       setLoggedIn(false);
-      console.log("logged out")
     }
   })
 

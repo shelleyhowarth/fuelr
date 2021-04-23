@@ -3,7 +3,7 @@ import { StyleSheet, View, Text } from 'react-native';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const StarRating = (props) => {
+const StarRatingOverall = (props) => {
 
     // This array will contain our star tags. We will include this
     // array between the view tag.
@@ -29,7 +29,7 @@ const StarRating = (props) => {
 	
 }
 
-export default StarRating;
+export default StarRatingOverall;
 
 const styles = StyleSheet.create({
 	container: {

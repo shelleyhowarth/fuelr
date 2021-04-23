@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard} from 'react-native';
+import {View, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard} from 'react-native';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
 import { TabView, TabBar } from 'react-native-tab-view';
 import moment from 'moment';
 import { Colors } from '../../../styles/Colors';
 import { LineChart } from "react-native-chart-kit";
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { FirstRoute } from './Tabs/FirstRoute';
 import { SecondRoute } from './Tabs/SecondRoute';
-import { ThirdRoute } from './Tabs/ThirdRoute';
 import { FourthRoute } from './Tabs/FourthRoute';
 import {
     widthPercentageToDP as wp,
@@ -29,18 +27,16 @@ const ForecourtScreen = ({route, navigation}) => {
     const currentUser = Firebase.auth().currentUser;
     const layout = useWindowDimensions();
 
-
     //States
     const [spinner, setSpinner] = useState(true);
-    const [rating, setRating] = useState(null);
     const [index, setIndex] = useState(0);
     const [routes] = useState([
       { key: 'price', title: 'Overview' },
       { key: 'review', title: 'Reviews' },
-      //{ key: 'trends', title: 'Trends'},
       { key: 'amenities', title: 'Amenities'}
     ]);
     const [data, setData] = useState();
+    const [coords, setCoords] = useState(route.params.coords);
 
     //Other variables
     let petrolData = [];
@@ -55,53 +51,20 @@ const ForecourtScreen = ({route, navigation}) => {
         barPercentage: 0.5
     }
 
+    //UseEffect
     useEffect(() => {
-        console.log(forecourt);
+        //Turn off loading screen when forecourt has loaded
         if(!loading) {
-            forecourt.petrol.map((val, index) => {
-                petrolData.push(val.price);
-                petrolTimes.push(moment(val.timestamp).format('MMM Do'));
-            });
-
-            forecourt.diesel.map((val, index) => {
-                dieselData.push(val.price);
-                dieselTimes.push(moment(val.timestamp).format('MMM Do'));
-            });
-
-            if(forecourt.petrol.length > 1) {
-                setData({
-                    labels: petrolTimes,
-                    datasets: [
-                      {
-                        data: petrolData,
-                        strokeWidth: 2 // optional
-                      }
-                    ],
-                  });
-            }
             setSpinner(false);
         }
     }, [forecourt])
 
-    const ThirdRoute = () => (
-        <View style={{ flex: 1, backgroundColor: Colors.lightGreen }}>
-            { data ? 
-                <LineChart
-                    data={data}
-                    width={layout.width}
-                    height={220}
-                    chartConfig={chartConfig}
-                />
-            : null}
-        </View>
-    );
-
-
+    //Switch case for displaying each tab screen
     const renderScene = ({route}) => {
         switch (route.key) {
             case 'price':
                 if(forecourt) {
-                    return <FirstRoute forecourt={forecourt} navigation={navigation}/>;
+                    return <FirstRoute coords={coords} forecourt={forecourt} navigation={navigation}/>;
                 } else {
                     return <Spinner
                                 visible={spinner}
@@ -128,7 +91,6 @@ const ForecourtScreen = ({route, navigation}) => {
         };
     }
 
-
     return (
         <TabView
             navigationState={{ index, routes }}
@@ -144,7 +106,7 @@ const ForecourtScreen = ({route, navigation}) => {
                     {route.title}
                   </Text>
                 )}
-                style={{backgroundColor: Colors.green, paddingTop: wp('10.9%')}}
+                style={{backgroundColor: Colors.green, paddingTop: Platform.OS === 'ios' ? hp('3.0%') : null}}
               />
             )}
         />
@@ -158,9 +120,6 @@ const styles = StyleSheet.create({
       backgroundColor: '#fff',
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    tab: {
-        
     }
 });
 

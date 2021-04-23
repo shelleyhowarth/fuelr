@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard} from 'react-native';
+import {View, TouchableOpacity, Text, StyleSheet, useWindowDimensions, Switch, Alert, StatusBar, Image, Keyboard, ScrollView} from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -32,6 +32,7 @@ export const FourthRoute = ({forecourt}) => {
         }
     );
     const [elapsedTime, setElapsedTime] = useState();
+    const [amenitiesPresent, setAmenitiesPresent] = useState(false);
 
     const icons = [
         {
@@ -182,12 +183,29 @@ export const FourthRoute = ({forecourt}) => {
         }
     ]
 
+    //UseEffect
     useEffect( () => {
+        if(dbForecourt) {
+            checkAmenities();
+        }
+
         if(forecourtState.currAmenities.timestamp) {
             setElapsedTime(moment.utc(forecourt.currAmenities.timestamp).local().startOf('seconds').fromNow());
         }
     }, [forecourtState, dbForecourt])
 
+    //Methods
+    
+    //Check if there are no amenities listed
+    const checkAmenities = () => {
+        for (const [key, value] of Object.entries(dbForecourt.currAmenities.amenities)) {
+            if(value) {
+                setAmenitiesPresent(true)
+            }
+        }
+    }
+
+    //Return
     if(forecourtState) {
         return (
             <View style={{ flex: 1, backgroundColor: Colors.lightGreen }}>
@@ -199,9 +217,8 @@ export const FourthRoute = ({forecourt}) => {
                     style={styles.modal}
                     coverScreen={false}
                     onBackdropPress={() => setModalVisible(false)}
-                    onPress={ () => {Keyboard.dismiss()}}
                 >
-                    <View style={{width: '100%', height: '100%'}}>
+                    <ScrollView contentContainerStyle={{width: '100%', height: '100%'}}>
                         <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly'}}>
                             {icons.map((obj, index) => {
                                 return (
@@ -238,12 +255,13 @@ export const FourthRoute = ({forecourt}) => {
                         }}>
                             <LinearGradient
                                 colors={[Colors.midGreen, Colors.green]}
+                                style={{borderRadius: 10}}
                             >
                                 <Text style={styles.reportPrice}>Update Amenities</Text>
                             </LinearGradient>
                         </TouchableOpacity>
 
-                    </View>
+                    </ScrollView>
                 </Modal>
                 
 
@@ -254,17 +272,22 @@ export const FourthRoute = ({forecourt}) => {
                     </Text>
                     <Text style={styles.updated}>{elapsedTime}</Text>
                     <Text style={styles.updated}>{forecourt.currAmenities.user ? 'by ' + forecourt.currAmenities.user : null}</Text>
-                    <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '80%' }}>
-                        { dbForecourt ? 
-                            Object.keys(dbForecourt.currAmenities.amenities).map((key, index) => {
-                                if(dbForecourt.currAmenities.amenities[key] === true) {
-                                    return (
-                                            icons[index].return
-                                        )
-                                }
-                            })
-                        : null}
-                    </View>
+                    {amenitiesPresent ? 
+                        <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '80%' }}>
+                            { dbForecourt ? 
+                                Object.keys(dbForecourt.currAmenities.amenities).map((key, index) => {
+                                    if(dbForecourt.currAmenities.amenities[key] === true) {
+                                        return (
+                                                icons[index].return
+                                            )
+                                    }
+                                })
+                            : null}
+                        </View>
+                    :
+                        <Text>No available amenities</Text>
+                    }
+
 
                     <TouchableOpacity style={{flex: 3}} onPress={() => setModalVisible(true)} style={{paddingTop: hp('2.0%'), width: '50%'}}>
                         <LinearGradient
@@ -296,7 +319,9 @@ const styles = StyleSheet.create({
         shadowColor: 'black',
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
-        alignItems: 'center'
+        alignItems: 'center',
+        borderRadius: 20
+
     },
     petrolTitle: {
         fontSize: wp('9.0%'),
@@ -322,10 +347,10 @@ const styles = StyleSheet.create({
     },
     modal: {
         marginTop: Platform.OS === 'ios' ? hp('20%') : hp('10%'),
-        marginBottom: Platform.OS === 'ios' ? hp('35%') : hp('20%'),
+        marginBottom: Platform.OS === 'ios' ? hp('30%') : hp('20%'),
         width: '80%', 
         backgroundColor: 'white', 
-        borderRadius: 5,
+        borderRadius: 20,
         alignSelf: 'center',
         padding: 5
     },

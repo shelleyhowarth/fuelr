@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {View, StyleSheet, RefreshControl, Text, Dimensions, StatusBar} from 'react-native';
+import {View, StyleSheet, Text, Dimensions, StatusBar} from 'react-native';
 import { Switch } from 'react-native-switch';
-
-import { signOut, updateForecourts } from '../../firebase/FirebaseMethods';
 import Leaderboard from 'react-native-leaderboard';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import Firebase from '../../firebase/Firebase';
@@ -15,12 +13,12 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp
   } from 'react-native-responsive-screen'; 
-
+import * as Location from 'expo-location';
 const db = Firebase.firestore();
 const { width, height } = Dimensions.get("window");
 
 
-const LeaderboardScreen = () => {
+const LeaderboardScreen = ({navigation}) => {
     //Consts
     const currentUser = firebase.auth().currentUser.uid;
 
@@ -42,19 +40,43 @@ const LeaderboardScreen = () => {
     const [result, setResult] = useState();
     const [points, setPoints] = useState();
     const [forecourtsFiltered, setForecourtsFiltered] = useState([]);
+    const [region, setRegion] = useState();
 
     //Vars
     let temp = [];
 
+    //UseEffect
     useEffect ( () => {
 
+        //Get user's location
+        let tempRegion;
+        (async () => {
+            let { status } = await Location.requestPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permission to access location was denied');
+              return;
+            }
+
+            let location = await Location.getCurrentPositionAsync({});
+
+            tempRegion = {
+                longitude: location.coords.longitude,
+                latitude: location.coords.latitude,
+                latitudeDelta: 0.03,
+                longitudeDelta: 0.04,
+            }
+            setRegion(tempRegion);
+        })();
+
+        //When users have loaded in, sort them based on descending order of points
         if(!loadingUsers) {
             users.sort((a, b) => (a.points < b.points) ? 1 : -1);
             setResult(getPos());
             setPoints(getPoints());
         }
 
-        if(!loadingForecourts && forecourts.length > 0 && !diesel) {
+        //When forecourts have loaded in and petrol is selected, prepare array for leaderboard
+        if(!loadingForecourts && !diesel) {
             temp = forecourts;
             temp = temp.filter((forecourt) => forecourt.currPetrol.price);
 
@@ -70,9 +92,10 @@ const LeaderboardScreen = () => {
                     temp[i].name += " " + temp[i].address.split(" ").pop();
                 }
             }
-
             setForecourtsFiltered(temp);
-        } else if(!loadingForecourts && forecourts.length > 0 && diesel) {
+
+        //When forecourts have loaded in and diesel is selected, prepare array for leaderboard
+        } else if(!loadingForecourts && diesel) {
             temp = forecourts;
             temp = temp.filter((forecourt) => forecourt.currDiesel.price);
 
@@ -91,12 +114,13 @@ const LeaderboardScreen = () => {
             setForecourtsFiltered(temp);
         }
 
-    }, [users, forecourts, diesel])
+    }, [users, forecourts, diesel, region])
 
     //Methods
     const toggleSwitch = () => setForecourtView(previousState => !previousState);
     const toggleSwitch2 = () => setDiesel(previousState => !previousState);
 
+    //Get user's position to display on leaderboard
     const getPos = () => {
         let result;
         let place = users.findIndex(obj => obj.id === currentUser)+1;
@@ -122,6 +146,7 @@ const LeaderboardScreen = () => {
         return result;
     }
 
+    //Get user's points to display on leaderboard
     const getPoints = () => {
         let obj = users.filter(obj => {
             return obj.id === currentUser;
@@ -184,6 +209,18 @@ const LeaderboardScreen = () => {
                             labelBy='name'
                             oddRowColor={'white'}
                             evenRowColor={'#97dba6'}
+                            onRowPress={ (item) => {
+                                if(region) {
+                                    navigation.navigate('ForecourtScreen', {
+                                        id: item.id,
+                                        coords: {
+                                            lat: region.latitude,
+                                            lng: region.longitude
+                                        }
+                                    })}   
+                                }
+
+                            }
                         />
                         <Text style={styles.noPrices}>{forecourtsFiltered.length == 0 ? "No fuel prices have been reported yet!" : null}</Text>
                     </Animatable.View>
@@ -288,7 +325,7 @@ const styles = StyleSheet.create({
         flex: 2, 
         backgroundColor: 'white', 
         justifyContent: 'center', 
-        width: width
+        width: width,
     },
     switch: {
         bottom: 50

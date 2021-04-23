@@ -5,8 +5,10 @@ import moment from 'moment';
 import { Colors } from '../../../../styles/Colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import Spinner from 'react-native-loading-spinner-overlay';
-import StarRating from '../../../components/StarRating';
+import StarRatingOverall from '../../../components/StarRating';
 import Modal from 'react-native-modal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TextInputMask } from 'react-native-masked-text'
@@ -14,8 +16,10 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp
   } from 'react-native-responsive-screen';
+import { OpenMapDirections } from 'react-native-navigation-directions';
+import { BasicModal } from "react-native-basic-modal";
 
-export const FirstRoute = ({forecourt, navigation}) => {
+export const FirstRoute = ({coords, forecourt, navigation}) => {
     //States
     const [petrolModalVisible, setPetrolModalVisible] = useState(false);
     const [dieselModalVisible, setDieselModalVisible] = useState(false);
@@ -30,17 +34,41 @@ export const FirstRoute = ({forecourt, navigation}) => {
 
     //UseEffect
     useEffect(() => {
+        //Get time since petrol price update
         if(forecourt.currPetrol.timestamp) {
             setPetrolElapsedTime(moment.utc(forecourt.currPetrol.timestamp).local().startOf('seconds').fromNow());
         }
 
+        //Get time since diesel price update
         if(forecourt.currDiesel.timestamp) {
             setDieselElapsedTime(moment.utc(forecourt.currDiesel.timestamp).local().startOf('seconds').fromNow());
         }
+
         setSpinner(false);
     }, [forecourt])
 
     //Methods
+
+    //Take user to external navigation app
+    const callShowDirections = () => {
+        const startPoint = {
+          longitude: coords.lng,
+          latitude: coords.lat
+        } 
+    
+        const endPoint = {
+          longitude: forecourt.longitude,
+          latitude: forecourt.latitude
+        }
+    
+        const transportPlan = 'd';
+    
+        OpenMapDirections(startPoint, endPoint, transportPlan).then(res => {
+          console.log(res)
+        });
+    }
+
+    //Find top price reporters
     const findReporters = () => {
         let reporters = [];
         let reportersPetrol = []
@@ -95,13 +123,15 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     return reportersDiesel.find(a => a.name === name)
                 })
 
-                reportersPetrol.map( (object, index) => {
-                    reportersDiesel.map( (object2, index2) => {
-                        if(object.name === object2.name) {
-                            let obj = {}
-                            obj['name'] = object.name;
-                            obj['reports'] = object.points + object2.points;
-                            reportersScores.push(obj);
+                reportersScores = reportersDiesel.concat(reportersPetrol);
+
+                //Add together points from petrol and diesel
+                reportersScores.map( (object, index) => {
+                    reportersScores.map( (object2, index2) => {
+                        //If multiple occurrences of same user, add points and delete other object
+                        if(reportersScores.indexOf(object) !== reportersScores.indexOf(object2) && object.name === object2.name) {
+                            object.points = object.points + object2.points;
+                            reportersScores.splice(reportersScores.indexOf(object2), 1);
                         }
                     })
                 })
@@ -110,10 +140,12 @@ export const FirstRoute = ({forecourt, navigation}) => {
         return reportersScores;
     }
 
+    //Remove name from address
     const shortenAddress = (marker) => {
         return marker.address.replace(marker.name, '');
     }
     
+    //Get 3 top reporters
     const topPetrolReporters = () => {
         let reporters = ['--', '--', '--'];
 
@@ -122,7 +154,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
 
             if(copy.length) {
                 let first = copy.reduce(function (prev, current) {
-                    return (prev.reports > current.reports) ? prev : current
+                    return (prev.points > current.points) ? prev : current
                 })
                 reporters[0] = first.name;
                 let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(first));
@@ -130,7 +162,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
 
                 if(copy.length) {
                     let second = copy.reduce(function (prev, current) {
-                        return (prev.reports > current.reports) ? prev : current
+                        return (prev.points > current.points) ? prev : current
                     })
                     reporters[1] = second.name;
                     let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(second));
@@ -138,7 +170,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
 
                     if(copy.length) {
                         let third = copy.reduce(function (prev, current) {
-                            return (prev.reports > current.reports) ? prev : current
+                            return (prev.points > current.points) ? prev : current
                         })
                         reporters[2] = third.name;
                         let index = copy.findIndex(x => JSON.stringify(x) === JSON.stringify(third));
@@ -151,6 +183,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
         return reporters;
     }
 
+    //When user clicks 'same price' on price report modal
     const onConfirmCurrent = (type) => {
         if(type === 'petrol') {
             updatePetrolPrice(forecourt.id, forecourt.currPetrol.price)
@@ -161,6 +194,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
         }
     }
 
+    //Submit new petrol price
     const onPetrolSubmit = () => {
         if(Math.abs(forecourt.currPetrol.price - petrolPrice) >= 5) {
             Alert.alert(
@@ -184,6 +218,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
         }
     }
 
+    //Submit new diesel price
     const onDieselSubmit = () => {
         if(Math.abs(forecourt.currDiesel.price - dieselPrice) >= 5) {
             Alert.alert(
@@ -207,10 +242,43 @@ export const FirstRoute = ({forecourt, navigation}) => {
         }
     }
 
-    //Views & return
+    //Return
     if(forecourt) {
         return(
             <View style={{ flex: 1, backgroundColor: Colors.lightGreen, alignItems: 'center'}} >
+                <BasicModal 
+                    title="Update Petrol Price"
+                    height={'80%'}
+                >
+                    <View style={{flex: 2, justifyContent: 'center'}}>
+                        <TextInputMask
+                            type={'money'}
+                            options={{
+                                precision: 1,
+                                separator: '.',
+                                unit: '',
+
+                            }}
+                            style={styles.input}
+                            onChangeText={val => {
+                                petrolInput = val; 
+                                setPetrolPrice(petrolInput);
+                            }}
+                            keyboardType='numeric'
+                            value={petrolPrice}
+                            placeholder='120.1'
+                            maxLength={5}
+                        />
+                </View>
+                <TouchableOpacity style={{flex: 3}} onPress={ () => onPetrolSubmit()} disabled={!petrolPrice}>
+                    <LinearGradient
+                        colors={[Colors.midGreen, Colors.green]}
+                        style={petrolPrice ? styles.confirmModal : styles.confirmModalDisabled}
+                    >
+                        <Text style={styles.reportPrice}>Update Price</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+                </BasicModal>
                 <Modal
                     animationIn="slideInDown"
                     animationOut="slideOutDown"
@@ -329,7 +397,6 @@ export const FirstRoute = ({forecourt, navigation}) => {
                                 <Text style={styles.reportPrice}>Update Price</Text>
                             </LinearGradient>
                         </TouchableOpacity>
-
                     </View>
                 </Modal>
                 <View style={styles.header}>
@@ -344,7 +411,7 @@ export const FirstRoute = ({forecourt, navigation}) => {
                     <View style={{flex:2}}>
                         <Text style={styles.stationTitle} numberOfLines={2}>{forecourt.name ? forecourt.name : 'FUEL STATION'}</Text>
                         <Text>{shortenAddress(forecourt)}</Text>
-                        <StarRating 
+                        <StarRatingOverall 
                             ratings={forecourt.ratingScore} 
                             reviews={forecourt.reviews.length}
                         />
@@ -435,8 +502,9 @@ export const FirstRoute = ({forecourt, navigation}) => {
                         )
                     })}
                 </View>
+                <View style={{flexDirection: 'row', justifyContent: 'space-evenly', width: '100%'}}>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate('Home')}
+                onPress={() => navigation.navigate('Home')}
                 >
                     <FontAwesome
                         name="arrow-left"
@@ -444,6 +512,16 @@ export const FirstRoute = ({forecourt, navigation}) => {
                         size={60}
                     />
                 </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => callShowDirections()}
+                    >
+                        <MaterialIcons
+                            name="directions"
+                            color={Colors.green}
+                            size={65}
+                        />
+                    </TouchableOpacity>
+                </View>
             </View>
         );
     } else {
@@ -471,7 +549,7 @@ const styles = StyleSheet.create({
         marginBottom: Platform.OS === 'ios' ? hp('40%') : hp('10%'),
         width: '80%', 
         backgroundColor: 'white', 
-        borderRadius: 5,
+        borderRadius: 20,
         alignSelf: 'center',
         padding: 10
     },
@@ -484,7 +562,8 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
         flexDirection:'row',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        borderRadius: 20
     },
     middle: {
         height: hp('10%'),
@@ -495,7 +574,8 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        borderRadius: 20
     },
     footer: {
         height: hp('25%'),
@@ -505,6 +585,7 @@ const styles = StyleSheet.create({
         shadowColor: 'black',
         shadowOffset: {width: 1, height: 4},
         shadowOpacity: 0.2,
+        borderRadius: 20
     },
     input: {
         width: '100%',
@@ -537,7 +618,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 20,
         borderColor: Colors.green,
         fontSize: wp('4.5%'),
         justifyContent: 'center'
@@ -611,6 +692,6 @@ const styles = StyleSheet.create({
     logo: {
         width: '100%',
         height: '100%',
-        alignSelf: 'center',
+        alignSelf: 'center'
     }
-});
+})

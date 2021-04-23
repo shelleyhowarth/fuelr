@@ -31,6 +31,7 @@ const SignInScreen = ({navigation}) => {
         }
     }
 
+    //Check if email has been input
     const textInputChange = (value) => {
         if(value.length !== 0 ) {
             setData({
@@ -47,6 +48,7 @@ const SignInScreen = ({navigation}) => {
         }
     }
 
+    //Check if password has been input
     const handlePasswordChange = (value) => {
         setData({
             ...data,
@@ -54,6 +56,7 @@ const SignInScreen = ({navigation}) => {
         });
     }
 
+    //View password input 
     const updateSecureTextEntry = () => {
         setData({
             ...data,
@@ -296,7 +299,7 @@ const styles = StyleSheet.create({
         marginBottom: Platform.OS === 'ios' ? hp('40%') : hp('20%'),
         width: '80%', 
         backgroundColor: 'white', 
-        borderRadius: 5,
+        borderRadius: 20,
         alignSelf: 'center',
         padding: 10
     },
